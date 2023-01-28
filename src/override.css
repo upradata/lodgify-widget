@@ -1,0 +1,18 @@
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected.CalendarDay__blocked_minimum_nights.CalendarDay__blocked_calendar.CalendarDay__selected_end,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected.CalendarDay__blocked_minimum_nights.CalendarDay__blocked_calendar.CalendarDay__selected_start,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected:active,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected:hover {
+    color: white;
+}
+
+
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__blocked_calendar,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__blocked_calendar:hover,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__default:hover.CalendarDay__blocked_calendar,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__default:hover.CalendarDay__blocked_calendar:hover {
+    background: #dd6969;
+    color: white;
+}
+
+

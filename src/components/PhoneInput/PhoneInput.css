@@ -1,0 +1,226 @@
+.ui.form .ui.input .PhoneInput,
+.ui.input .PhoneInput {
+    background: #f7f7f7;
+    border: 1px solid transparent;
+    width: 100%
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+    {
+    display: flex
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container {
+    cursor: pointer;
+    flex-basis: 60px;
+    flex-shrink: 0;
+    min-width: 0
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #aaa;
+    padding: .78571429rem
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown input.search,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown input.search {
+    padding: 0;
+    width: 0
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text {
+    cursor: pointer
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .flag,
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon,
+.ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .flag,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon {
+    margin: 0;
+    transform: translateY(2px)
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .flag,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .flag {
+    opacity: 1
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon {
+    margin-top: -2px
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown>.icon,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown>.icon {
+    padding-right: 0;
+    right: 0
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .visible.menu,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .visible.menu {
+    width: 200px
+}
+
+.ui.form .ui.input .PhoneInput
+/* .PhoneInput__row */
+.PhoneInput__input.PhoneInput__phone,
+.ui.input .PhoneInput
+
+/* .PhoneInput__row */
+.PhoneInput__input.PhoneInput__phone {
+    background: transparent;
+    border: none;
+    flex-grow: 1;
+    outline: none;
+    padding: 0;
+    width: 100%
+}
+
+.ui.form .ui.input .PhoneInput.PhoneInput--focus,
+.ui.input .PhoneInput.PhoneInput--focus {
+    border-color: #333;
+    background: #fdfdfd;
+    color: #333
+}
+
+.ui.form .ui.input .PhoneInput.PhoneInput--focus
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown,
+.ui.input .PhoneInput.PhoneInput--focus
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown {
+    color: #333
+}
+
+.ui.form .ui.input .PhoneInput.PhoneInput--focus
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon,
+.ui.input .PhoneInput.PhoneInput--focus
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon {
+    color: #333;
+    opacity: 1
+}
+
+.ui.form .ui.input.error .PhoneInput,
+.ui.input.error .PhoneInput {
+    background: #fdfdfd;
+    border-color: #d0021b
+}
+
+
+.ui.form .ui.input:hover:not(.error):not(.valid):not(.dirty):not(.focus) .PhoneInput:not(.PhoneInput--focus),
+.ui.input:hover:not(.error):not(.valid):not(.dirty):not(.focus) .PhoneInput:not(.PhoneInput--focus) {
+    background: #fdfdfd;
+    border-color: #e2e2e2
+}
+
+
+.ui.form .ui.input.dirty:not(.error):not(.valid) .PhoneInput,
+.ui.input.dirty:not(.error):not(.valid) .PhoneInput {
+    background: #fdfdfd;
+    border-color: #333
+}
+
+.ui.form .ui.input.dirty:not(.error):not(.valid) .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown,
+.ui.input.dirty:not(.error):not(.valid) .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown {
+    color: #333
+}
+
+.ui.form .ui.input.dirty:not(.error):not(.valid) .PhoneInput
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon,
+.ui.input.dirty:not(.error):not(.valid) .PhoneInput
+
+/* .PhoneInput__row */
+.dropdown-container .ui.search.selection.dropdown .text .icon {
+    color: #333;
+    opacity: 1
+}
+
+.ui.form .ui.input.valid .PhoneInput,
+.ui.input.valid .PhoneInput {
+    background: #fdfdfd;
+    border-color: #3adf35
+}
+
+.ui.form input[type=tel].PhoneInputInput {
+    border: none
+}
+
+/* Override */
+.ui.form .PhoneInput input[type=tel]:focus {
+    color: inherit;
+    border-color: inherit;
+    border-radius: inherit;
+    background: inherit;
+    box-shadow: inherit;
+    border: none;
+}

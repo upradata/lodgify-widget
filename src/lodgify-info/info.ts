@@ -1,0 +1,62 @@
+import moment, { Moment } from 'moment';
+import * as requests from '../lodgify-requests';
+import { DailyRates, LodgifyDate } from '../lodgify-requests';
+import { RoomData, roomsData, RoomValues } from '../rooms.data';
+import { Range } from '../types';
+import { round } from '../util';
+
+
+type _Requests = typeof requests;
+export type Requests = {
+    [ K in keyof _Requests ]: _Requests[ K ] extends Function ? _Requests[ K ] : never;
+};
+
+export type RequestNames = keyof Requests;
+
+export type LodgifyInfoOption<T> = T | ((roomData: RoomData) => T);
+export type RequestOption<R extends RequestNames> = Parameters<Requests[ R ]>[ 0 ];
+export type RequestReturn<R extends RequestNames> = ReturnType<Requests[ R ]>;
+
+export const getLodgifyInfo = <R extends RequestNames>(roomValue: RoomValues, request: R, options: LodgifyInfoOption<RequestOption<R>>): RequestReturn<R> => {
+    const roomData = roomsData.find(l => l.value === roomValue);
+
+    if (!roomData)
+        return Promise.resolve({ type: 'error', error: new Error(`There is no room with value "${roomValue}"`) } as requests.RequestError) as any;
+
+    return requests[ request ]((typeof options === 'function' ? options(roomData) : options) as any) as any;
+};
+
+
+// const r = getLodgifyInfo('room-1', 'getAvailability', { propertyId: 1, start: '2023-01-01', end: '2023-01-01' });
+
+
+export const lodgifyDateToMoment = (date: Moment | string): Moment => date ? (typeof date === 'string' ? moment(date, 'YYYY-MM-DD') : date) : null;
+export const momentToLodgifyDate = (date: Moment | string): LodgifyDate => {
+    if (!!date)
+        return typeof date === 'string' ? date as LodgifyDate : date.format('YYYY-MM-DD') as LodgifyDate;
+
+    return null;
+};
+
+export const getPeriodsNonAvailable = (availibities: requests.Availibity) => availibities.periods.filter(p => !p.available).map(p => ({
+    start: lodgifyDateToMoment(p.start),
+    end: lodgifyDateToMoment(p.end)
+}));
+
+
+
+
+export const getReservationPrice = (rates: DailyRates, dateRange: Range<Moment>) => {
+    const { start, end } = dateRange;
+    const nbOfNights = moment.duration(end.startOf('day').diff(start.startOf('day'))).asDays();
+
+    const totalPrice = rates.calendar_items.reduce((price, item) => {
+        if (item.is_default)
+            return price;
+
+        const dayPrice = item.prices.find(p => p.min_stay <= nbOfNights && (p.max_stay === 0 || nbOfNights <= p.max_stay));
+        return price + dayPrice.price_per_day;
+    }, 0);
+
+    return round(totalPrice, 2);
+};
