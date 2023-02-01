@@ -25,6 +25,7 @@ import './PhoneInput.css';
 import type { Labels, Metadata, Props as _ReactPhoneNumberProps } from 'react-phone-number-input';
 import { InputControllerProps } from '@lodgify/ui';
 import { usePrevious } from '../../util';
+import { useCallback } from 'react';
 // const metadata = new Metadata(phoneMetadata as MetadataJson);
 // const ReactPhoneNumberInput = createPhoneInput(metadata);
 type ReactPhoneNumberProps = _ReactPhoneNumberProps<{}> & {
@@ -71,10 +72,10 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
     /* const parsedNumber = parsePhoneNumber(state.value || '', state.countryISO);
     console.log(parsedNumber); */
 
-    const handleChange: PhoneIputProps[ 'onChange' ] = (name, value) => {
+    const handleChange: PhoneIputProps[ 'onChange' ] = useCallback((name, value) => {
         setState(prev => ({ ...prev, value }));
         // console.log(reactPhoneInputNumberRef.current);
-    };
+    }, []);
 
 
     useEffect(() => {
@@ -86,7 +87,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
     useEffect(() => {
         if (previousStateValue !== state.value)
             props.onChange?.(props.name, state.value);
-    }, [ state.value, previousStateValue ]);
+    }, [ state.value, previousStateValue, props ]);
 
 
     const { error, isValid, label, name, onChange: _o, value: _v, ...reactPhoneInputProps } = props;
@@ -114,7 +115,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         onBlur: () => { },
         onCountryChange: (countryISO: CountryCode) => {
             setState(prev => ({ ...prev, countryISO }));
-            props.onCountryChange?.(countryISO)
+            props.onCountryChange?.(countryISO);
         },
         ...reactPhoneInputProps,
         // flagComponent: Flag(phoneMetadata as MetadataJson),

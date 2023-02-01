@@ -1,35 +1,43 @@
 import { CountryCode, isValidPhoneNumber, PhoneNumber } from 'libphonenumber-js';
 import moment, { Moment } from 'moment';
-import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import {
     Button,
-    DateRange,
     DateRangePicker,
     Dropdown,
     Form,
     FormProps,
+    FormState,
     InputGroup,
     LocationOptions,
     Modal,
-    ModalProps,
     NumberInput,
     Paragraph,
     ShowOn,
     TextInput
 } from '@lodgify/ui';
+import { getEmptyRequiredInputs } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyRequiredInputs';
+import { getValidationWithDefaults } from "@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults";
+import { size } from '@lodgify/ui/lib/es/utils/size';
+import { forEach } from '@lodgify/ui/lib/es/utils/for-each';
+import { ModalProps } from '../../@types/@lodgify/ui/types';
 import { lodgifyDateToMoment } from '../../lodgify-info/info';
 import { LodgifyDate } from '../../lodgify-requests';
 import { RoomValues } from '../../rooms.data';
-import { PhoneInput } from '../PhoneInput';
+import { fragments, partition } from '../../util';
+import { DateRange, PropsWithStyleBase } from '../../util.types';
 import { MediaQuery } from '../MediaQuery';
+import { BreakPoint } from '../MediaQuery/BreakPoint';
+import { PhoneInput } from '../PhoneInput';
 
 
 export type BookingRegisrationDate = DateRange<LodgifyDate | Moment>;
 
-const validation = (props: { country: CountryCode; }): FormProps[ 'validation' ] => ({
+
+const validation = (props: { country: CountryCode; }) => ({
     email: {
         isRequired: true,
-        getIsValid: (value: string) => /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value),
+        getIsValid: (value: string) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value),
         invalidMessage: `Invalid email`,
         isRequiredMessage: `Required`
     },
@@ -63,21 +71,23 @@ const validation = (props: { country: CountryCode; }): FormProps[ 'validation' ]
         isRequired: true,
         isRequiredMessage: `Required`
     }
-});
+} satisfies FormProps[ 'validation' ]);
 
 
-type BookingFormProps = {
-    guests: {
-        min?: number;
-        max?: number;
-        value: number;
+type Validation = ReturnType<typeof validation>;
+
+class BookingFormProps extends PropsWithStyleBase {
+    guests = {
+        min: undefined as number,
+        max: undefined as number,
+        value: undefined as number
     };
-    location: {
-        options: LocationOptions[];
-        value: RoomValues;
+    location = {
+        options: undefined as LocationOptions[],
+        value: undefined as RoomValues
     };
     price: number;
-    dates: BookingRegisrationDate;
+    dates = new DateRange<LodgifyDate | Moment>() as BookingRegisrationDate;
 };
 
 
@@ -85,9 +95,32 @@ const BookingForm: React.FunctionComponent<BookingFormProps> = ({
     price, location, dates, guests
 }) => {
     const [ country, setCountry ] = useState<CountryCode>('SK');
+    const ref = useRef<React.Component<FormProps, FormState>>();
+
+    useEffect(() => {
+        const initValues: Partial<Record<keyof Validation, unknown>> = {
+            guests: guests.value,
+            room: location.value,
+            dateRange: dates
+        };
+
+        const formInstance = ref.current;
+        const inputsValidation = validation({ country });
+
+        Object.entries(initValues).forEach(([ inputName, value ]) => {
+            const inputValidation = getValidationWithDefaults(inputsValidation[ inputName ]) as FormProps[ 'validation' ][ string ];
+
+            if (!inputValidation.getIsEmpty(value)) {
+                if (inputValidation.getIsValid(value))
+                    formInstance.setState({ [ inputName ]: { value } });
+                else
+                    formInstance.setState({ [ inputName ]: { error: inputValidation.invalidMessage } });
+            }
+        });
+    }, []);
 
     return <div className="BookingForm">
-        <Form headingText="Booking form" submitButtonText="Submit" validation={validation({ country })}>
+        <Form ref={ref} headingText="Booking form" submitButtonText="Submit" validation={validation({ country })}>
 
             <Paragraph>
                 Fill in the form to validate the booking. At the end of the process, you will receive a confirmation email.
@@ -120,18 +153,20 @@ const BookingForm: React.FunctionComponent<BookingFormProps> = ({
 
 BookingForm.displayName = 'BookingForm';
 
-type BookingModalProps = Pick<ModalProps, 'onClose' | 'isOpen' | 'isFullscreen' | 'size'> & BookingFormProps;
+type BookingModalProps = Partial<Pick<ModalProps, 'onClose' | 'isOpen' | 'isFullscreen' | 'size'>> & BookingFormProps & { content?: string; };
 
-const BookingModal: React.FunctionComponent<BookingModalProps & { content?: string; }> = (props) => {
-    const {
+const BookingModal: React.FunctionComponent<BookingModalProps> = props => {
+    const [ modalProps, bookingProps, { content } ] = fragments(props, ModalProps, BookingFormProps, [ 'content' ] as const);
+
+    /* const {
         isFullscreen = false, size, onClose, isOpen = false, content, ...bookingProps
-    } = props;
+    } = props; */
 
-    return <div>{content}</div>;
-    /* return <Modal onClose={onClose} isOpen={isOpen} isFullscreen={isFullscreen} size={size}>
+    /* return <div>{content}</div>; */
+    return <Modal {...modalProps} /* onClose={onClose} isOpen={isOpen} isFullscreen={isFullscreen} size={size} */>
         <BookingForm {...bookingProps} />
         {content}
-    </Modal>; */
+    </Modal>;
 };
 
 
@@ -148,9 +183,8 @@ const _BookingRegistration: React.ForwardRefRenderFunction<BookingRegistrationIm
     const { isOpen, ...formProps } = props;
 
     const [ isEnabled, setIsEnabled ] = useState(isOpen);
-    const [ isActive, setIsActive ] = useState<Record<string, boolean>>({});
 
-    useEffect(() => { setIsEnabled(isOpen); }, [ isOpen ]);
+    // useEffect(() => { setIsEnabled(isOpen); }, [ isOpen ]);
 
     useImperativeHandle(ref, () => ({
         open: () => { setIsEnabled(true); },
@@ -164,30 +198,9 @@ const _BookingRegistration: React.ForwardRefRenderFunction<BookingRegistrationIm
         ...formProps
     };
 
-    const onMediaQuery = (media: string, isActive: boolean) => setIsActive(prev => ({ ...prev, [ media ]: isActive }));
-
-    const breakpoints = useMemo(() => [
-        {
-            max: 1200,
-            className: '1200',
-            children: ({ isEnabled, isActive }) => <BookingModal {...bookingModalProps} content="1200" size="large" isFullscreen isOpen={isEnabled && isActive[ '1200' ]} />,
-            onActive: () => onMediaQuery('1200', true),
-            onInactive: () => onMediaQuery('1200', false),
-        },
-        {
-            min: 1201,
-            className: '1201',
-            children: ({ isEnabled, isActive }) => <BookingModal {...bookingModalProps} content="1201" isFullscreen isOpen={isEnabled && isActive[ '1201' ]} />,
-            onActive: () => onMediaQuery('1201', true),
-            onInactive: () => onMediaQuery('1201', false),
-        }
-    ], []);
-
     return <React.Fragment>
-        <MediaQuery
-            parentProps={{ isEnabled, isActive }}
-            breakpoints={breakpoints}
-        />
+        <BreakPoint max={1200}><BookingModal {...bookingModalProps} isFullscreen isOpen={isEnabled} /></BreakPoint>
+        <BreakPoint min={1201}><BookingModal {...bookingModalProps} isOpen={isEnabled} /></BreakPoint>
 
         {/* <ShowOn parentProps={{ className: 'BIG' }} computer widescreen><BookingModal {...bookingModalProps} /></ShowOn>
         <ShowOn parentProps={{ className: 'SMALL' }} mobile tablet><BookingModal {...bookingModalProps} isFullscreen /></ShowOn> */}

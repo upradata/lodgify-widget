@@ -1,6 +1,6 @@
 import type { Moment } from 'moment';
 import type { PropertyInfoPrice } from './lodgify-requests/types';
-import type { KebabCase } from './useful-types';
+import type { KebabCase } from './util.types';
 
 export type RoomInfo = {
     periodsNonAvailable?: { start: Moment; end: Moment; }[];

@@ -2,7 +2,7 @@ import classnames from 'classnames';
 import isEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import { Button, DateRange, HorizontalGutters, LocationOptions, PropsWithStyle, VerticalGutters, SearchFieldsProps } from '@lodgify/ui';
+import { Button, DateRange, HorizontalGutters, LocationOptions, VerticalGutters, SearchFieldsProps } from '@lodgify/ui';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
 import { getWillLocationDropdownOpenAbove } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/utils/getWillLocationDropdownOpenAbove';
@@ -19,6 +19,7 @@ import { BreakPoint } from '../MediaQuery/BreakPoint';
 import './SearchBar.scss';
 // import { SearchModal } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchModal';
 import { SearchModal } from './SearchModal';
+import { PropsWithStyle, PropsWithStyleBase } from '../../util.types';
 
 export type SearchBarFields<Location extends string = string> = {
     dates: DateRange;
@@ -27,8 +28,8 @@ export type SearchBarFields<Location extends string = string> = {
     // willLocationDropdownOpenAbove: boolean;
 };
 
-export type SearchBarProps<Location extends string = string> = PropsWithStyle<{
-    className?: string;
+
+export class SearchBarProps<Location extends string = string> extends PropsWithStyleBase {
     dateRangePickerLocaleCode?: string;
     datesCheckInLabel?: string;
     datesCheckOutLabel?: string;
@@ -61,7 +62,7 @@ export type SearchBarProps<Location extends string = string> = PropsWithStyle<{
     isModalFullScreen?: boolean;
     summaryElement?: React.ReactNode;
     willLocationDropdownOpenAbove?: boolean;
-}>;
+};
 
 
 export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
@@ -82,11 +83,11 @@ export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
             props.onChangeInput?.(newState);
             return newState;
         });
-    }, []);
+    }, [ props.onChangeInput ]);
 
-    const handleSubmit = useCallback(() => { props.onSubmit?.(state); }, [ state ]);
+    const handleSubmit = useCallback(() => { props.onSubmit?.(state); }, [ state, props.onSubmit ]);
 
-    const contentProps: Omit<SearchBarContentProps, 'size'> = useMemo(() => ({
+    const contentProps: Omit<SearchBarContentProps, 'size'> = {
         datesInputValue: state.dates,
         guestsInputValue: state.guests,
         locationInputValue: state.location,
@@ -94,7 +95,7 @@ export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
         willLocationDropdownOpenAbove: props.willLocationDropdownOpenAbove,
         onInputChange: persistInputChange,
         onSubmit: handleSubmit
-    }), [ state, props ]);
+    };
 
 
 
@@ -129,14 +130,7 @@ export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
     // const breakpoints = useMemo(() => [ { min: 0, max: 1300, className: 'small' }, { min: 1301, className: 'large' } ]/* [ 600, 800, 1000, 1200 ] */, []);
 
     if (props.isDisplayedAsModal) {
-        return <SearchModal {...props}
-            datesInputValue={state.dates}
-            guestsInputValue={state.guests}
-            locationInputValue={state.location}
-            onInputChange={persistInputChange}
-            onSubmit={handleSubmit}
-            willLocationDropdownOpenAbove={props.willLocationDropdownOpenAbove}
-            isFullscreen={props.isModalFullScreen} />;
+        return <SearchModal {...contentProps} />;
     }
 
     if (!props.isFixed)

@@ -2,7 +2,7 @@ import classnames from 'classnames';
 import isEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import { Button, DateRange, HorizontalGutters, LocationOptions, PropsWithStyle, ShowOn } from '@lodgify/ui';
+import { Button, DateRange, HorizontalGutters, LocationOptions, ShowOn } from '@lodgify/ui';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
 import { getWillLocationDropdownOpenAbove } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/utils/getWillLocationDropdownOpenAbove';
@@ -15,6 +15,7 @@ import {
     SEARCH
 } from '@lodgify/ui/lib/es/utils/default-strings';
 import { usePrevious } from '../../util';
+import { PropsWithStyle } from '../../util.types';
 // import { SearchModal } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchModal';
 import { SearchModal } from './SearchModal';
 

@@ -1,8 +1,13 @@
 declare module '@lodgify/ui' {
-    import React from 'react';
-    import { Moment } from 'moment';
+    import type React from 'react';
+    import type { Moment } from 'moment';
+    // import type { PropsWithStyle } from '../../../util.types';
+    // import { ModalProps as ModalPropsClass } from './types';
+    export type PropsWithStyle<P = {}> = P & {
+        style?: React.CSSProperties;
+        className?: string;
+    };
 
-    type PropsWithStyle<P = {}> = P & { style?: React.CSSProperties; };
     export type LocationOptions = {
         content?: React.ReactNode;
         imageSizes?: string;
@@ -17,7 +22,6 @@ declare module '@lodgify/ui' {
     export type DateRange<D = Moment> = { startDate: D; endDate: D; };
 
     export type SearchBarProps<Location extends string = string> = PropsWithStyle<{
-        className?: string;
         dateRangePickerLocaleCode?: string;
         datesCheckInLabel?: string;
         datesCheckOutLabel?: string;
@@ -25,7 +29,7 @@ declare module '@lodgify/ui' {
         datesInputOnFocusChange?: Function;
         datesInputValue?: DateRange;
         getIsDayBlocked?: Function;
-        guestsInputValue?: string;
+        guestsInputValue?: number;
         isDateRangePickerLoading?: boolean;
         onChangeInput?: (data: {
             dates: DateRange;
@@ -152,14 +156,18 @@ declare module '@lodgify/ui' {
             isRequired?: boolean;
             isRequiredMessage?: string;
         }>;
+        // ref?: React.MutableRefObject<typeof Form>;
     };
 
-    export const Form: React.ComponentType<FormProps>;
+    export type FormState = { [ InputName: string ]: { isBlurred?: boolean; value?: any; error?: string; }; };
+    export const Form: ForwardRefExoticComponent<PropsWithoutRef<FormProps> & RefAttributes<{}>>;
+    // React.ComponentType<FormProps>;
+    //  export const Form: React.ComponentClass<FormProps, { [ InputName: string ]: { isBlurred?: boolean; value?: any; error?: boolean; }; }>;
     export const InputGroup: React.ComponentType<{ [ K: string ]: any; }>;
 
+    // export type ModalProps = ModalPropsClass;
     export type ModalProps = PropsWithStyle<{
         children: React.ReactNode;
-        className?: string;
         closeIcon?: React.ReactNode;
         hasCloseIcon?: boolean;
         hasPadding?: boolean;
@@ -172,6 +180,22 @@ declare module '@lodgify/ui' {
         size?: 'mini' | 'tiny' | 'small' | 'large';
         trigger?: React.ReactNode;
     }>;
+    /*   export class ModalProps {
+          style?: React.CSSProperties;
+          className?: string;
+          children: React.ReactNode;
+          closeIcon?: React.ReactNode;
+          hasCloseIcon?: boolean;
+          hasPadding?: boolean;
+          hasRoundedCorners?: boolean;
+          header?: React.ReactNode;
+          isClosingOnDimmerClick?: boolean;
+          isFullscreen?: boolean;
+          isOpen?: boolean;
+          onClose?: Function;
+          size?: 'mini' | 'tiny' | 'small' | 'large';
+          trigger?: React.ReactNode;
+      }; */
 
     export const Modal: React.ComponentType<ModalProps>;
     export const NumberInput: React.ComponentType<{ [ K: string ]: any; }>;

@@ -75,7 +75,7 @@ export const MediaQuery: React.FunctionComponent<MediaQueryProps> = props => {
         return () => {
             mediaQueries.forEach(m => { m.mediaQuery.removeEventListener('change', m.handleMatchMedia); });
         };
-    }, [ /* props.breakpoints, ...props.breakpoints */ ]);
+    }, [ props /* props.breakpoints, ...props.breakpoints */ ]);
 
     const activeBreakPoints = getValues(breakpoints).filter(Boolean);
 

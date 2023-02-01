@@ -1,3 +1,4 @@
+import { ClassType } from 'react';
 
 type TrimStart<S> = S extends `${infer Char}${infer Rest}`
     ? Char extends ' ' ? TrimStart<Rest> : S :
@@ -11,3 +12,24 @@ export type KebabCase<S, R extends string = ''> = S extends `${infer Char}${infe
     // 2 cases: 1) rest=ab... 2) we have rest=Ab....
     Rest extends Uncapitalize<Rest> ? KebabCase<Rest, `${R}${Uncapitalize<Char>}`> : KebabCase<Rest, `${R}${Uncapitalize<Char>}-`>
     : R;
+
+
+export type PropsWithStyle<P = {}> = P & {
+    style?: React.CSSProperties;
+    className?: string;
+};
+
+export class PropsWithStyleBase {
+    style?: React.CSSProperties;
+    className?: string;
+};
+
+
+export class DateRange<T = string>{
+    startDate: T;
+    endDate: T;
+}
+
+export type Typify<T> = {
+    [ K in keyof T ]: T[ K ]
+};

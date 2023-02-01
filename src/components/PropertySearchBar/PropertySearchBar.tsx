@@ -1,17 +1,20 @@
 import React from 'react';
-import { ShowOn, Summary, SummaryProps/* , SearchBar */ } from '@lodgify/ui';
+import { /* ShowOn, */ Summary, SummaryProps } from '@lodgify/ui';
+import { partition } from '../../util';
+import type { Typify } from '../../util.types';
 import { SearchBar, SearchBarProps } from '../SearchBar';
 import './PropertySearchBar.scss';
 
 
-export type RoomSearchProps = {
+/* export type RoomSearchProps = {
     summary: SummaryProps;
     search: SearchBarProps;
-};
+}; */
 
+export type RoomSearchProps = SummaryProps & Typify<SearchBarProps>;
 
 export const PropertySearchBar: React.FunctionComponent<RoomSearchProps> = props => {
-    const SummaryElement = () => <Summary {...props.summary} />;
+    const [ searchBarProps, summaryProps ] = partition(props, SearchBarProps);
 
     return <div className="property-page-searchbar">
         {/* <ShowOn computer widescreen>
@@ -25,7 +28,7 @@ export const PropertySearchBar: React.FunctionComponent<RoomSearchProps> = props
                 modalSummaryElement={props.search.modalSummaryElement || SummaryElement()}
             />
         </ShowOn> */}
-        <SearchBar {...props.search} summaryElement={props.search.summaryElement || SummaryElement()} />
+        <SearchBar {...searchBarProps} summaryElement={searchBarProps.summaryElement || <Summary {...summaryProps} />} />
     </div>;
 };
 
