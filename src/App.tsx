@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { Profiler, useMemo, useState } from 'react';
 import { Viewport } from '@lodgify/ui';
 import './App.css';
 import { RoomsSearch } from './components/RoomsSearch';
@@ -18,8 +18,8 @@ const App: React.FunctionComponent = () => {
         return prev + 1;
     }), 1000); */
     /*  setInterval(() => setCount(count+1), 1000); */
-
-    return <div className="App">
+    {/* <Profiler id="App" onRender={console.log}> */ }
+    return <Profiler id="App" onRender={console.log}><div className="App">
         {/* <MediaQuery
             onActive={bp => console.log('isAcitve', bp)}
             onInactive={bp => console.log('isInacitve', bp)}
@@ -82,7 +82,7 @@ const App: React.FunctionComponent = () => {
         <Viewport>
             <RoomsSearch />
         </Viewport>
-    </div >;
+    </div> </Profiler>;
 };
 
 App.displayName = 'App';

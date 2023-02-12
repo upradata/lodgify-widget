@@ -1,0 +1,54 @@
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected.CalendarDay__blocked_minimum_nights.CalendarDay__blocked_calendar.CalendarDay__selected_end,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected.CalendarDay__blocked_minimum_nights.CalendarDay__blocked_calendar.CalendarDay__selected_start,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected:active,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__selected:hover {
+    color: white;
+}
+
+
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__blocked_calendar,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__blocked_calendar:hover,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__default:hover.CalendarDay__blocked_calendar,
+.CalendarMonth table.CalendarMonth_table td.CalendarDay.CalendarDay__default:hover.CalendarDay__blocked_calendar:hover {
+    background: #dd6969;
+    color: white;
+}
+
+
+
+i.icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+
+
+body .ui.inverted::-webkit-scrollbar-track {
+    /*  background: hsla(0, 0%, 100%, .1) */
+    background: rgba(0, 0, 0, .1);
+}
+
+body .ui.inverted::-webkit-scrollbar-thumb {
+    /*  background: hsla(0, 0%, 100%, .25) */
+    background: rgba(0, 0, 0, .25);
+}
+
+body .ui.inverted::-webkit-scrollbar-thumb:window-inactive {
+    /* background: hsla(0, 0%, 100%, .15) */
+    background: rgba(0, 0, 0, .15);
+}
+
+body .ui.inverted::-webkit-scrollbar-thumb:hover {
+    /* background: hsla(0, 0%, 100%, .35) */
+    background: rgba(128, 135, 139, .8);
+}
+
+
+.modals.dimmer .ui.scrolling.modal:not(.fullscreen) {
+    margin: 1rem auto !important;
+}
+
+.ui.modal {
+    position: unset;
+}

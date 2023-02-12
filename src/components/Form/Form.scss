@@ -1,0 +1,49 @@
+/* .BookingForm__header {
+    padding: 10px;
+} */
+:root {
+    --PhoneInputFlag--shadow: 1px 1px 4px 0 rgb(0 0 0 / 27%);
+}
+
+.Form.ui.form {
+    .ui.dropdown .menu > .item .image,
+    .ui.dropdown .menu > .item img,
+    .ui.dropdown > .text > .image,
+    .ui.dropdown > .text > img {
+        /* box-shadow: 0 2px 7px 0 rgb(0 0 0 / 27%); */
+        box-shadow: var(--PhoneInputFlag--shadow, 1px 1px 4px 0 rgb(0 0 0 / 27%));
+        margin-left: 0;
+        height: 1em;
+        max-height: none;
+        min-width: auto;
+        aspect-ratio: 3 / 2;
+    }
+
+    @media only screen and (max-width: 599px) {
+        .ui.search.dropdown .menu,
+        .ui.selection.dropdown .menu {
+            max-height: 18rem;
+        }
+    }
+
+    @media only screen and (min-width: 600px) {
+        .ui.search.dropdown .menu,
+        .ui.selection.dropdown .menu {
+            max-height: 21rem;
+        }
+    }
+
+    @media only screen and (min-width: 1000px) {
+        .ui.search.dropdown .menu,
+        .ui.selection.dropdown .menu {
+            max-height: 21rem;
+        }
+    }
+
+    @media only screen and (min-width: 1920px) {
+        .ui.search.dropdown .menu,
+        .ui.selection.dropdown .menu {
+            max-height: 21rem;
+        }
+    }
+}

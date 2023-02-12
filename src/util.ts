@@ -1,5 +1,5 @@
 import moment, { Moment } from 'moment';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const isInRange = (min: number, max: number) => (v: number) => min <= v && v <= max;
 
@@ -14,8 +14,8 @@ export const isDateInRange = (min: Moment, max: Moment) => (date: Moment) => {
 export const getNbOfNights = (start: Moment, end: Moment) => moment.duration(end.startOf('day').diff(start.startOf('day'))).asDays();
 
 
-export function usePrevious<T>(value: T): T {
-    const ref = useRef<T>();
+export function usePrevious<T>(value: T, init: T = null): T | null {
+    const ref = useRef<T>(init);
 
     useEffect(() => {
         ref.current = value;
@@ -24,6 +24,25 @@ export function usePrevious<T>(value: T): T {
     return ref.current;
 }
 
+export type NewValueListener<T> = (prevValue: T, newValue: T) => void;
+
+export function usePreviousListener<T>(value: T) {
+    const [ prevValue, setPrevValue ] = useState(value);
+    let listeners: NewValueListener<T>[] = [];
+
+    if (prevValue !== value) {
+        setPrevValue(value);
+        listeners.forEach(listener => listener(prevValue, value));
+    }
+
+    useEffect(() => { listeners = []; }, []);
+
+    return {
+        addListener: (listener: NewValueListener<T>) => { listeners = [ ...listeners, listener ]; },
+        removeListener: (listener: NewValueListener<T>) => { listeners = listeners.filter(l => l !== listener); },
+        removeAll: () => { listeners = []; }
+    };
+}
 
 // apparently the fastest and correct for rounding with 0.5
 export const round = (num = 0, precision = 2) => +(Math.round(+`${num}e${precision}`) + `e-${precision}`);
@@ -59,7 +78,9 @@ const isClass = (v: any): v is new (...args: any) => any => {
 };
 
 export const fragments = <O extends {}, P extends unknown[]>(obj: O, ...parts: P): Fragments<O, P> => {
-    const keys = (part: any): (string | number | symbol)[] => {
+    type Part = (string | number | symbol)[];
+
+    const keys = (part: any): Part => {
         if (Array.isArray(part))
             return part as string[];
 
@@ -69,8 +90,10 @@ export const fragments = <O extends {}, P extends unknown[]>(obj: O, ...parts: P
         return Reflect.ownKeys(part);
     };
 
+    const filter = (part: Part) => part.reduce((o, k) => k in obj ? { ...o, [ k ]: obj[ k ] } : o, {});
+
     const fragments = parts.reduce<unknown[]>((arr, part) => {
-        const fragment = Object.fromEntries(keys(part).map(key => [ key, obj[ key ] ]));
+        const fragment = filter(keys(part));
         return [ ...arr, fragment ];
     }, []);
 
@@ -111,3 +134,32 @@ export const partition = <O, P>(o: O, p: P): Fragments<O, [ P, ComplementaryKeys
 
 
 // const [ a, b ] = partition({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 } as const, [ 'a', 'c' ] as const);
+// const [ a, b ] = partition({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 } as const, class { a; c; });
+
+export const debounce = <Fn extends Function>(fn: Fn, wait: number = 0, immediate: boolean = false): Fn & { cancel: () => void; } => {
+    let timeout: number;
+
+    function debouncedFn(...args: unknown[]) {
+        const context = null; // this;
+
+        const later = () => {
+            timeout = null;
+            if (!immediate)
+                fn.apply(context, args);
+        };
+
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = window.setTimeout(later, wait);
+
+        if (callNow) {
+            return fn.apply(context, args);
+        }
+    };
+
+    debouncedFn.cancel = () => {
+        clearTimeout(timeout);
+    };
+
+    return debouncedFn as any;
+};
