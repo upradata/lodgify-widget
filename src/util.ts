@@ -28,19 +28,20 @@ export type NewValueListener<T> = (prevValue: T, newValue: T) => void;
 
 export function usePreviousListener<T>(value: T) {
     const [ prevValue, setPrevValue ] = useState(value);
-    let listeners: NewValueListener<T>[] = [];
+    // const [ listeners, setListeners ] = useState<NewValueListener<T>[]>([]);
+    let listeners = useRef<NewValueListener<T>[]>([]);
 
     if (prevValue !== value) {
         setPrevValue(value);
-        listeners.forEach(listener => listener(prevValue, value));
+        listeners.current.forEach(listener => listener(prevValue, value));
     }
 
-    useEffect(() => { listeners = []; }, []);
+    // useEffect(() => { listeners = []; }, []);
 
     return {
-        addListener: (listener: NewValueListener<T>) => { listeners = [ ...listeners, listener ]; },
-        removeListener: (listener: NewValueListener<T>) => { listeners = listeners.filter(l => l !== listener); },
-        removeAll: () => { listeners = []; }
+        addListener: (listener: NewValueListener<T>) => { listeners.current = [ ...listeners.current, listener ]; },
+        removeListener: (listener: NewValueListener<T>) => { listeners.current = listeners.current.filter(l => l !== listener); },
+        removeAll: () => { listeners.current = []; }
     };
 }
 

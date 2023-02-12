@@ -97,7 +97,6 @@ const useForm = (props: UseFormProps) => {
         phoneNumber: {
             isRequired: true,
             getIsValid: (value: string) => isValidPhoneNumber(value, formState.phoneCountry),
-            getIsEmpty: (value: string) => !value,
             invalidMessage: `Invalid phone number`,
             isRequiredMessage: `Required`,
             type: 'phone'

@@ -161,10 +161,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
     const { addListener: addStateValueListener } = usePreviousListener(state.value);
     // const previousStateValue = usePrevious(state.value);
 
-    addPropsValueListener((prevValue, newValue) => {
-        if (getIsInputValueReset(prevValue, newValue))
-            setState(state => ({ ...state, value: newValue }));
-    });
+
     /* if (props.value !== prevValue) {
         setPrevValue(props.value);
 
@@ -184,12 +181,19 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         if (getIsInputValueReset(previousPropsValue, props.value))
             setState(prev => ({ ...prev, value: props.value }));
     }, [ props.value ]); */
+    useEffect(() => {
+        addPropsValueListener((prevValue, newValue) => {
+            if (getIsInputValueReset(prevValue, newValue))
+                setState(state => ({ ...state, value: newValue }));
+        });
+    }, []);
 
-
-    addStateValueListener((prevValue, newValue) => {
-        if (prevValue !== newValue)
-            props.onChange?.(props.name, newValue);
-    });
+    useEffect(() => {
+        addStateValueListener((prevValue, newValue) => {
+            if (prevValue !== newValue)
+                props.onChange?.(props.name, newValue);
+        });
+    }, []);
     // useEffect(() => {
     //     if (previousStateValue !== state.value)
     //         props.onChange?.(props.name, state.value);
