@@ -1,23 +1,26 @@
-import { Heading, Paragraph } from '@lodgify/ui';
+import classnames from 'classnames';
 import React from 'react';
 // import Card from 'semantic-ui-react/dist/es/views/Card/Card.js';
 import { Card as SemanticCard, Image } from 'semantic-ui-react';
+import { Heading, Paragraph } from '@lodgify/ui';
 import { PropsWithStyleBase } from '../../util.types';
-import './CardForm.scss';
+import './Card.scss';
 
-class CardProps extends PropsWithStyleBase {
+
+export class CardProps extends PropsWithStyleBase {
     imageUrl?: string;
     header?: React.ReactNode;
     subHeader?: React.ReactNode;
     description?: React.ReactNode;
 }
 
+
 export const Card: React.FunctionComponent<CardProps> = props => {
 
-    const { imageUrl, header, subHeader, description, children } = props;
+    const { imageUrl, header, subHeader, description, children, className } = props;
 
     return (
-        <SemanticCard className="has-form" fluid>
+        <SemanticCard className={classnames(className, "has-form")} fluid>
             {imageUrl && <Image src={imageUrl} wrapped ui={false} />}
 
             <SemanticCard.Content>

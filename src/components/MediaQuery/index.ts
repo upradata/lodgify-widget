@@ -1,1 +1,3 @@
-export * from './MediaQuery';
+export * from './BreakPoint';
+export * from './BreakPoints';
+// export * from './MediaQuery';

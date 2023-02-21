@@ -1,6 +1,7 @@
 import moment, { Moment } from 'moment';
 import { useEffect, useRef, useState } from 'react';
 
+
 export const isInRange = (min: number, max: number) => (v: number) => min <= v && v <= max;
 
 export const isDateInRange = (min: Moment, max: Moment) => (date: Moment) => {
@@ -56,6 +57,27 @@ export const localizedPrice = (price: number) => new Intl.NumberFormat('fr', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
 }).format(price);
+
+
+const localeData = moment.localeData();
+
+export const localizedDate = (date: Moment, options: { longDateFormat?: moment.LongDateFormatKey; defaultFormat?: string; } = {}) => {
+    const format = localeData.longDateFormat(options.longDateFormat || 'L');
+    /* 
+    For 'fr', we have
+    longDateFormat : {
+        LT : 'HH:mm',
+        LTS : 'HH:mm:ss',
+        L : 'DD/MM/YYYY',
+        LL : 'D MMMM YYYY',
+        LLL : 'D MMMM YYYY HH:mm',
+        LLLL : 'dddd D MMMM YYYY HH:mm'
+    } */
+    // + ' ' + localeData.longDateFormat('LT');
+
+    return moment(date, format).format(options.defaultFormat || 'YYYY/MM/DD');
+};
+
 
 
 

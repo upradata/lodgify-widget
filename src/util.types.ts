@@ -1,5 +1,6 @@
 import { ClassType } from 'react';
 
+
 type TrimStart<S> = S extends `${infer Char}${infer Rest}`
     ? Char extends ' ' ? TrimStart<Rest> : S :
     S;

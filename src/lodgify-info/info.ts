@@ -1,7 +1,7 @@
 import moment, { Moment } from 'moment';
 import * as requests from '../lodgify-requests';
-import { DailyRates, LodgifyDate } from '../lodgify-requests';
-import { RoomData, roomsData, RoomValues } from '../rooms.data';
+import { LodgifyDate, DailyRates } from '../lodgify-requests';
+import { RoomData, roomsData } from '../rooms.data';
 import { Range } from '../types';
 import { round } from '../util';
 
@@ -17,7 +17,7 @@ export type LodgifyInfoOption<T> = T | ((roomData: RoomData) => T);
 export type RequestOption<R extends RequestNames> = Parameters<Requests[ R ]>[ 0 ];
 export type RequestReturn<R extends RequestNames> = ReturnType<Requests[ R ]>;
 
-export const getLodgifyInfo = <R extends RequestNames>(roomValue: RoomValues, request: R, options: LodgifyInfoOption<RequestOption<R>>): RequestReturn<R> => {
+export const getLodgifyInfo = <R extends RequestNames>(roomValue: string, request: R, options: LodgifyInfoOption<RequestOption<R>>): RequestReturn<R> => {
     const roomData = roomsData.find(l => l.value === roomValue);
 
     if (!roomData)

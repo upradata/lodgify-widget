@@ -1,19 +1,20 @@
-import React, { useMemo } from 'react';
-import { BreakPoint } from './BreakPoint';
+import React, { memo, useMemo } from 'react';
+import { BreakPoint, BreakPointChildren, getChild } from './BreakPoint';
+
 
 type Children = React.ReactNode | React.ReactNode[];
 
 export type BreakpointNb = number;
-export type BreakpointRange = { min?: number; max?: number; className?: string; };
+export type BreakpointRange<T = unknown> = { min?: number; max?: number; className?: string; data?: T; };
 export type Breakpoint = BreakpointNb | BreakpointRange;
 
-export type BreakPointsProps<P = unknown> = {
+export type BreakPointsProps<P extends {} = {}, Data = unknown> = {
     mode?: 'min' | 'max' | 'range';
     breakpoints: Breakpoint[];
-    onActive?: (breakpoint: BreakpointRange) => void;
-    onInactive?: (breakpoint: BreakpointRange) => void;
-    children?: Children | ((breakpoint?: BreakpointRange, parentProps?: P) => Children);
-    parentProps?: P;
+    onActive?: (breakpoint: BreakpointRange<Data>) => void;
+    onInactive?: (breakpoint: BreakpointRange<Data>) => void;
+    children?: BreakPointChildren<BreakpointRange<Data> & P>;
+    childrenProps?: P;
     classNameBase?: string;
     // className?: (breakpoint: BreakpointRange) => string;
     destroyWhenNotMatched?: boolean;
@@ -29,7 +30,7 @@ const getClassName = (classNameBase: string, bp: BreakpointRange) => {
     return [ classNameBase, bp.min ? `min:${bp.min}` : '', bp.max ? `-max:${bp.max}` : '' ].filter(Boolean).join('-');
 };
 
-export const BreakPoints: React.FunctionComponent<BreakPointsProps> = props => {
+export const _BreakPoints: React.FunctionComponent<BreakPointsProps> = props => {
     const { mode, breakpoints, onActive, onInactive, classNameBase, children, ...breakpointProps } = props;
 
     const breakpointRanges: BreakpointRange[] = useMemo(() => {
@@ -81,17 +82,26 @@ export const BreakPoints: React.FunctionComponent<BreakPointsProps> = props => {
                 className={className || getClassName(classNameBase, bp)}
                 onActive={onActive ? () => onActive(breakpoint) : undefined}
                 onInactive={onInactive ? () => onInactive?.(breakpoint) : undefined}
+                childrenProps={{ ...bp, ...props.childrenProps }}
             >
-                {typeof children === 'function' ? (parentProps: unknown) => children(bp, parentProps) : children}
+                {/* {getChild(children as any, { ...bp })} */}
+                {children}
+                {/* typeof children === 'function' ? (parentProps: unknown) => {
+                    console.log('CACA');
+                    return children(bp, parentProps);
+                } : children */}
             </BreakPoint>;
         })}
     </React.Fragment>;
 };
 
-BreakPoints.displayName = 'BreakPoints';
+_BreakPoints.displayName = 'BreakPoints';
 
-BreakPoints.defaultProps = {
+_BreakPoints.defaultProps = {
     destroyWhenNotMatched: true,
     mode: 'range',
-    classNameBase: 'breakpoint'
+    classNameBase: 'breakpoint',
+    childrenProps: {}
 };
+
+export const BreakPoints = memo(_BreakPoints);

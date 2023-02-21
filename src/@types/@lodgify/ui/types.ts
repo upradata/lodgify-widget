@@ -1,6 +1,7 @@
-export class ModalProps {
-    style?: React.CSSProperties;
-    className?: string;
+import { PropsWithStyleBase } from '../../../util.types';
+
+
+export class ModalProps extends PropsWithStyleBase {
     children: React.ReactNode;
     closeIcon?: React.ReactNode;
     hasCloseIcon?: boolean;
@@ -13,4 +14,16 @@ export class ModalProps {
     onClose?: Function;
     size?: 'mini' | 'tiny' | 'small' | 'large';
     trigger?: React.ReactNode;
+};
+
+
+export class SummaryProps extends PropsWithStyleBase {
+    propertyName: string;
+    locationName: string;
+    areOnlyNightPriceAndRatingDisplayed?: boolean;
+    isShowingPlaceholder?: boolean;
+    periodText?: string;
+    pricePerPeriod?: string;
+    pricePerPeriodPrefix?: string;
+    ratingNumber?: number;
 };

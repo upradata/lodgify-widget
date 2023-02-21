@@ -1,6 +1,7 @@
+import { Range } from '../types';
 import { map } from './map';
 import { Availibity, DailyRates, LodgifyDate, PropertyInfo } from './types';
-import { Range } from '../types';
+
 
 const corsProxy = `http://localhost:8080`;
 const lodgiftV2 = `https://api.lodgify.com/v2`;

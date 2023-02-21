@@ -1,1 +1,1 @@
-export * from './CardForm';
+export * from './Card';

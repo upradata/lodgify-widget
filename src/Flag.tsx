@@ -1,6 +1,7 @@
 import { CountryCode, MetadataJson } from 'libphonenumber-js';
 import React from 'react';
 
+
 export type FlagProps = {
     country: CountryCode,
     // Will be HTML `title` attribute of the `<img/>`.

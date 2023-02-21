@@ -1,8 +1,10 @@
-import React, { Profiler, useMemo, useState } from 'react';
-import { Viewport } from '@lodgify/ui';
-import './App.css';
-import { RoomsSearch } from './components/RoomsSearch';
+import React, { Profiler, useState } from 'react';
+import { LocationOptions, Viewport } from '@lodgify/ui';
+import { Booking } from './components/Booking';
 import { BreakPoints } from './components/MediaQuery/BreakPoints';
+import { roomsData } from './rooms.data';
+import './App.css';
+
 
 
 // window.global = { process: { env: {} } as any } as any; // NodeJS.ProcessEnv
@@ -80,7 +82,7 @@ const App: React.FunctionComponent = () => {
         </BreakPoints> */}
 
         <Viewport>
-            <RoomsSearch />
+            <Booking rooms={roomsData} />
         </Viewport>
     </div> </Profiler>;
 };

@@ -94,7 +94,7 @@ declare module '@lodgify/ui' {
     export const Summary: React.ComponentType<SummaryProps>;
 
     export type ButtonProps = PropsWithStyle<{
-        children: React.ReactNode;
+        // 
         hasShadow?: boolean;
         icon?: string;
         isCompact?: boolean;
@@ -117,6 +117,15 @@ declare module '@lodgify/ui' {
 
     export const HorizontalGutters: React.ComponentType<{ [ K: string ]: any; }>;
     export const VerticalGutters: React.ComponentType<{ [ K: string ]: any; }>;
+
+
+    export type IconProps = PropsWithStyle<{
+        labelText?: string;
+        name?: string;
+        path?: string;
+    }>;
+
+    export const Icon: React.ComponentType<IconProps>;
 
     export type SearchFieldsProps = {
         dateRangePickerLocaleCode?: string;
@@ -165,13 +174,15 @@ declare module '@lodgify/ui' {
         // ref?: React.MutableRefObject<typeof Form>;
     };
 
-    export type FormState = {
-        [ InputName: string ]: {
-            isBlurred?: boolean;
-            value?: any;
-            isValid?: boolean;
-            error?: boolean | string;
-        };
+    export type FormValue<V = unknown> = {
+        isBlurred?: boolean;
+        value?: V;
+        isValid?: boolean;
+        error?: boolean | string;
+    };
+
+    export type FormValues<Names extends string = string, V = unknown> = {
+        [ InputName: Names ]: FormValue<V>;
     };
 
     export const Form: ForwardRefExoticComponent<PropsWithoutRef<FormProps> & RefAttributes<{}>>;
@@ -183,6 +194,7 @@ declare module '@lodgify/ui' {
         name?: string;
         onBlur?: (event: FocusEvent) => any;
         onChange?: (name: string, value: V) => any;
+        width?: string;
     };
 
     export type DropdownProps = PropsWithStyle<{
@@ -210,6 +222,7 @@ declare module '@lodgify/ui' {
         }[];
         value?: boolean | number | string;
         willOpenAbove?: boolean;
+        ref?: Dropdown;
     }> & InputProps;
 
     export const Dropdown: React.ComponentType<DropdownProps>;
@@ -241,9 +254,9 @@ declare module '@lodgify/ui' {
     }> & InputProps;
 
     export const TextArea: TextArea.ComponentType<TextAreaProps>;
+    
     export type InputControllerProps = {
         adaptOnChangeEvent?: Function;
-        children: React.ReactNode;
         error?: boolean | string;
         icon?: React.ReactNode;
         inputOnChangeFunctionName?: string;
@@ -260,7 +273,6 @@ declare module '@lodgify/ui' {
 
     // export type ModalProps = ModalPropsClass;
     export type ModalProps = PropsWithStyle<{
-        children: React.ReactNode;
         closeIcon?: React.ReactNode;
         hasCloseIcon?: boolean;
         hasPadding?: boolean;
@@ -276,7 +288,7 @@ declare module '@lodgify/ui' {
     /*   export class ModalProps {
           style?: React.CSSProperties;
           className?: string;
-          children: React.ReactNode;
+          
           closeIcon?: React.ReactNode;
           hasCloseIcon?: boolean;
           hasPadding?: boolean;

@@ -1,11 +1,8 @@
-import classnames from 'classnames';
 import isEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import { Button, DateRange, HorizontalGutters, LocationOptions, VerticalGutters, SearchFieldsProps } from '@lodgify/ui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Button, DateRange } from '@lodgify/ui';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
-import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
-import { getWillLocationDropdownOpenAbove } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/utils/getWillLocationDropdownOpenAbove';
+// import { getWillLocationDropdownOpenAbove } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/utils/getWillLocationDropdownOpenAbove';
 import {
     CHECK_IN,
     CHECK_OUR_AVAILABILITY,
@@ -14,55 +11,48 @@ import {
     LOCATION,
     SEARCH
 } from '@lodgify/ui/lib/es/utils/default-strings';
-import { usePrevious } from '../../util';
+import { fragments, usePrevious } from '../../util';
 import { BreakPoint } from '../MediaQuery/BreakPoint';
 import './SearchBar.scss';
+import { SearchBarContainer, SearchBarContentainerProps } from './SearchBarContentainer';
+import { PropertySearchForm, PropertySearchFormProps } from './SearchBarForm';
 // import { SearchModal } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchModal';
-import { SearchModal } from './SearchModal';
-import { PropsWithStyle, PropsWithStyleBase } from '../../util.types';
+import { SearchModal, SearchModalProps } from './SearchModal';
 
-export type SearchBarFields<Location extends string = string> = {
+
+class SearchBarContentProps extends PropertySearchFormProps {
+    summaryElement?: React.ReactNode;
+};
+
+
+const SearchBarContent: React.FunctionComponent<SearchBarContentProps> = ({ summaryElement, ...formProps }) => {
+    return (
+        <React.Fragment>
+            {summaryElement}
+            <PropertySearchForm {...formProps} />;
+        </React.Fragment>
+    );
+};
+
+SearchBarContent.displayName = 'SearchBarContent';
+
+
+export type ChangeInputData<Location extends string = string> = {
     dates: DateRange;
     guests: number;
     location: Location;
-    // willLocationDropdownOpenAbove: boolean;
+    // willLocationDropdownOpenAbove?: boolean;
 };
 
-
-export class SearchBarProps<Location extends string = string> extends PropsWithStyleBase {
-    dateRangePickerLocaleCode?: string;
-    datesCheckInLabel?: string;
-    datesCheckOutLabel?: string;
-    datesInputFocusedInput?: null | 'startDate' | 'endDate';
-    datesInputOnFocusChange?: Function;
-    datesInputValue?: DateRange;
-    getIsDayBlocked?: Function;
-    guestsInputValue?: number;
-    isDateRangePickerLoading?: boolean;
-    onChangeInput?: (data: SearchBarFields<Location>) => void | Promise<void>;
-    onSubmit?: Function;
-    searchBarDatesCheckInLabel?: string;
-    searchBarDatesCheckOutLabel?: string;
-    searchBarGuestsInputLabel?: string;
-    searchBarMaximumGuestsInputValue?: number;
-    searchButton?: React.ReactNode;
-    guestsInputLabel?: string;
-    guestsPopupId?: string;
-    isCalendarIconDisplayed?: boolean;
-    isFixed?: boolean;
-    isStackable?: boolean;
-    locationInputLabel?: string;
-    locationInputValue?: string;
-    locationOptions?: LocationOptions[];
-    maximumGuestsInputValue?: number;
-    isDisplayedAsModal?: boolean;
-    isModalOpen?: boolean;
-    modalHeadingText?: string;
-    modalSummaryElement?: React.ReactNode;
-    isModalFullScreen?: boolean;
-    summaryElement?: React.ReactNode;
-    willLocationDropdownOpenAbove?: boolean;
-};
+export type SearchBarProps<Location extends string = string> =
+    Omit<SearchBarContentainerProps, 'className'> &
+    Omit<SearchBarContentProps, 'onInputChange' | 'onSubmit'> &
+    Omit<SearchModalProps, 'onSubmit'> & {
+        onChangeInput?: (data: ChangeInputData<Location>) => void | Promise<void>;
+        onSubmit?: Function;
+        isDisplayedAsModal?: boolean;
+        isModalFullScreen?: boolean;
+    };
 
 
 export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
@@ -86,17 +76,6 @@ export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
     }, [ props.onChangeInput ]);
 
     const handleSubmit = useCallback(() => { props.onSubmit?.(state); }, [ state, props.onSubmit ]);
-
-    const contentProps: Omit<SearchBarContentProps, 'size'> = {
-        datesInputValue: state.dates,
-        guestsInputValue: state.guests,
-        locationInputValue: state.location,
-        ...props,
-        willLocationDropdownOpenAbove: props.willLocationDropdownOpenAbove,
-        onInputChange: persistInputChange,
-        onSubmit: handleSubmit
-    };
-
 
 
     const previousProps = usePrevious(props);
@@ -128,13 +107,30 @@ export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
 
 
     // const breakpoints = useMemo(() => [ { min: 0, max: 1300, className: 'small' }, { min: 1301, className: 'large' } ]/* [ 600, 800, 1000, 1200 ] */, []);
+    const formProps: PropertySearchFormProps = {
+        datesInputValue: state.dates,
+        guestsInputValue: state.guests,
+        locationInputValue: state.location,
+        ...props,
+        willLocationDropdownOpenAbove: props.willLocationDropdownOpenAbove,
+        onInputChange: persistInputChange,
+        onSubmit: handleSubmit
+    };
 
     if (props.isDisplayedAsModal) {
-        return <SearchModal {...contentProps} />;
+        const [ searchModalProps ] = fragments(formProps, SearchModalProps) as [ SearchModalProps ];
+
+        return <SearchModal {...searchModalProps}
+            modalSummaryElement={searchModalProps.modalSummaryElement || props.summaryElement}
+            isFullscreen={props.isModalFullScreen} />;
     }
 
+    const [ contentProps ] /* : Omit<SearchBarContentProps, 'size'> */ = fragments(formProps, SearchBarContentProps);
+
+    const content = <SearchBarContent {...contentProps} />;
+
     if (!props.isFixed)
-        return <SearchBarContent size="large" isFixed  {...contentProps} />;
+        return <SearchBarContainer size={props.size || "large"} isFixed={false} isStackable={props.isStackable}>{content}</SearchBarContainer>;
 
 
     return <React.Fragment>
@@ -160,11 +156,11 @@ export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
                 {...props}></FixContent>;
         </BreakPoint> */}
         <BreakPoint max={1200}>
-            <SearchBarContent size="small" isFixed  {...contentProps} />
+            <SearchBarContainer size={props.size || "small"} isFixed isStackable={props.isStackable}>{content}</SearchBarContainer>
         </BreakPoint>
 
         <BreakPoint min={1201}>
-            <SearchBarContent size="large" isFixed  {...contentProps} />
+            <SearchBarContainer size={props.size || "large"} isFixed isStackable={props.isStackable}>{content}</SearchBarContainer>
         </BreakPoint>
     </React.Fragment>;
 
@@ -178,72 +174,7 @@ export const SearchBar: React.FunctionComponent<SearchBarProps> = props => {
     </BreakPoints>; */}
 };
 
-type Size = 'small' | 'large';
 
-type SearchBarContentProps = {
-    size: Size;
-    className?: string;
-    summaryElement?: React.ReactNode;
-    onSubmit: () => void;
-    isFixed?: boolean;
-    isStackable?: boolean;
-} & SearchFieldsProps;
-
-
-const Container: React.FunctionComponent<{ size: Size; }> = ({ size, children }) => {
-    if (size === 'large')
-        return <HorizontalGutters>{children}</HorizontalGutters>;
-
-    return <VerticalGutters><HorizontalGutters>{children}</HorizontalGutters></VerticalGutters>;
-};
-
-const SearchBarContent: React.FunctionComponent<SearchBarContentProps> = props => {
-    const { size, className, isFixed, isStackable, summaryElement, ...formProps } = props;
-
-    /*  useEffect(() => {
-       console.log('refffff2', ref.current);
-       setRef(ref.current);
-       // ref.current = ref2.current;
-   }, [ ref.current ]); */
-
-    return <div className={classnames(className, 'search-bar', { 'is-fixed': isFixed }, size, { 'is-stackable': isStackable ?? size === 'small' })}>
-        <Container size={size}>
-            {summaryElement}
-            <SearchBarForm {...formProps} />
-        </Container>
-    </div>;
-};
-
-SearchBarContent.displayName = 'SearchBarForm';
-SearchBarContent.defaultProps = {
-    isFixed: false,
-    className: ''
-};
-
-const SearchBarForm: React.FunctionComponent<SearchFieldsProps & { onSubmit: () => void; }> = ({ willLocationDropdownOpenAbove, onSubmit, ...props }) => {
-    // const [ isDropdownOpenAbove, setDropdownOpenAbove ] = useState(willLocationDropdownOpenAbove);
-
-    /* const ref = useRef<HTMLDivElement>();
-
-    const handleScroll = useCallback(() => {
-        setDropdownOpenAbove(getWillLocationDropdownOpenAbove(ref.current, isDropdownOpenAbove));
-    }, [ ref.current, willLocationDropdownOpenAbove ]);
-
-    useEffect(() => {
-        global.document.addEventListener('scroll', handleScroll);
-        handleScroll();
-
-        return () => {
-            global.document.removeEventListener('scroll', handleScroll);
-        };
-    }, []); */
-
-    return <Form /* ref={ref}  */ onSubmit={onSubmit}>
-        <SearchFields  {...props} willLocationDropdownOpenAbove={true /* || isDropdownOpenAbove */} />
-    </Form>;
-};
-
-SearchBarForm.displayName = 'SearchBarForm';
 
 
 SearchBar.displayName = 'SearchBar';

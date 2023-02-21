@@ -1,5 +1,6 @@
 import { Range } from '../types';
 
+
 export interface Availibity {
     user_id: number;
     property_id: number;

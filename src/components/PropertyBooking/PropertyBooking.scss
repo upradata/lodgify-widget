@@ -1,0 +1,67 @@
+.PropertyBooking {
+    .Bar .ui.container {
+        padding: 0 15px;
+    }
+}
+
+.is-fixed .PropertyBookingForm {
+    /* height: 85px; */
+
+    .ui.segments > .ui.segments {
+        margin: 0;
+    }
+}
+
+.small .PropertyBookingForm {
+    margin-top: 35px;
+}
+
+.BookingHeader,
+.BookingSubHeader,
+.BookingHeader__dates {
+    display: flex;
+}
+
+.BookingHeader {
+    align-items: baseline;
+}
+
+.BookingHeader,
+.BookingSubHeader {
+    &.vertical-center,
+    .vertical-center {
+        display: flex;
+        align-items: center;
+    }
+
+    &.vertical-end,
+    .vertical-end {
+        display: flex;
+        align-items: flex-end;
+    }
+
+    &.vertical-baseline,
+    .vertical-baseline {
+        display: flex;
+        align-items: baseline;
+    }
+}
+
+.BookingHeader__dates {
+    font-size: 0.7em;
+    font-weight: 300;
+    margin-left: 20px;
+}
+
+.BookingSubHeader {
+    text-transform: none;
+}
+
+.BookingSubHeader__price {
+    padding: 4px 15px;
+    border-radius: 40px;
+    background: var(--lodgify-ui-action-color, #4b4b4b);
+    color: white;
+    font-size: 1.1em;
+    font-weight: 600;
+}

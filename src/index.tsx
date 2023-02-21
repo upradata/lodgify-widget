@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import '@lodgify/ui/lib/styles/lodgify-ui.css';
 // import './override.css';
 import App from './App';
+import './index.css';
+
+
 // import reportWebVitals from './reportWebVitals';
 
 

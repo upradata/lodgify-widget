@@ -1,18 +1,18 @@
 import classnames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 
 
-type Children = React.ReactNode | React.ReactNode[];
+type ChildrenNode = React.ReactNode | React.ReactNode[];
+export type BreakPointChildren<P extends {} = {}> = ChildrenNode | React.ElementType | ((childrenProps: P) => ChildrenNode);
 
-export type BreakPointProps<P = unknown> = {
+export type BreakPointProps<P extends {} = {}> = {
     min?: number;
     max?: number;
-    breakpoints?: number[];
     mediaQuery?: string;
     onActive?: () => void;
     onInactive?: () => void;
-    children?: Children | ((parentProps?: P) => Children);
-    parentProps?: P;
+    children?: BreakPointChildren<P>;
+    childrenProps?: P;
     className?: string;
     destroyWhenNotMatched?: boolean;
 };
@@ -25,7 +25,25 @@ const makeCssMatchMedia = (bp: Pick<BreakPointProps, 'min' | 'max'>) => {
     return [ 'only screen', min, max ].filter(Boolean).join(' and ');
 };
 
-export const BreakPoint: React.FunctionComponent<BreakPointProps> = props => {
+export const getChild = (children: BreakPointChildren, props: any) => {
+
+    if (!children)
+        return children;
+
+    if (typeof children === 'function') {
+        try {
+            const Child = children as React.ElementType;
+            return <Child {...props} />;
+        } catch {
+            const child = children as ((props: any) => React.ReactNode);
+            return child(props);
+        }
+    }
+
+    return children;
+};
+
+const _BreakPoint: React.FunctionComponent<BreakPointProps> = props => {
     const [ isActive, setIsActive ] = useState(false);
 
     useEffect(() => {
@@ -51,16 +69,28 @@ export const BreakPoint: React.FunctionComponent<BreakPointProps> = props => {
         };
     }, [ props ]);
 
-    const children = props.destroyWhenNotMatched ? isActive && props.children : props.children;
-    const Container = props.className ? ({ children }) => <div className={classnames({ [ props.className ]: isActive })}>{children}</div> : React.Fragment;
 
-    return <Container /* className={classnames({ [ props.className ]: isActive })} */>
-        {children && (typeof children === 'function' ? children(props.parentProps) : children)}
+    const children = props.destroyWhenNotMatched ? isActive && props.children : props.children;
+    const child = useMemo(() => getChild(children, props.childrenProps), [ /* children, */ Object.values(props.childrenProps) ]);
+
+
+    return <Container className={props.className} isActive={isActive}>
+        {
+            /* children && (typeof children === 'function' ?  children(props.parentProps) : children) */
+            child
+        }
     </Container>;
 };
 
-BreakPoint.displayName = 'BreakPoint';
-
-BreakPoint.defaultProps = {
-    destroyWhenNotMatched: true,
+const Container: React.FunctionComponent<{ className: string; isActive: boolean; }> = ({ className, isActive, children }) => {
+    return className ? <div className={classnames({ [ className ]: isActive })}>{children}</div> : <React.Fragment>{children}</React.Fragment>;
 };
+
+_BreakPoint.displayName = 'BreakPoint';
+
+_BreakPoint.defaultProps = {
+    destroyWhenNotMatched: true,
+    childrenProps: {}
+};
+
+export const BreakPoint = memo(_BreakPoint);

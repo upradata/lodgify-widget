@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { getLodgifyInfo, getPeriodsNonAvailable, momentToLodgifyDate, RequestOption } from './lodgify-info/info';
-import { roomsData, RoomsData, RoomData, RoomValues } from './rooms.data';
+import { useCallback, useState } from 'react';
+import { getLodgifyInfo, getPeriodsNonAvailable, RequestOption } from './lodgify-info/info';
 import { PropertyInfoPrice } from './lodgify-requests/types';
+import { RoomData, RoomsData, RoomValues } from './rooms.data';
 
-export const initialRooms = roomsData.reduce((o, room) => {
+
+export const roomsDataAsObject = (rooms: RoomData[]) => rooms.reduce((o, room) => {
     return { ...o, [ room.value ]: room };
 }, {} as RoomsData);
 
@@ -27,8 +28,9 @@ export type UpdateRoomAction = |
     type: 'request-property-price'; payload: { roomValue: RoomValues; } & Omit<RequestOption<'getDailyRates'>, 'propertyId'>;
 };
 
-export const useRoomState = () => {
-    const [ rooms, _setRooms ] = useState(initialRooms);
+
+export const useRoomState = (roomsList: RoomData[]) => {
+    const [ rooms, _setRooms ] = useState(roomsDataAsObject(roomsList));
 
     const updateRoom = async (action: UpdateRoomAction) => {
         switch (action.type) {
@@ -46,8 +48,8 @@ export const useRoomState = () => {
                 });
 
                 if (perdiods) {
-                    _setRooms(previousRooms => setRoom({
-                        rooms: previousRooms,
+                    _setRooms(rooms => setRoom({
+                        rooms,
                         roomValue,
                         room: {
                             periodsNonAvailable: perdiods
@@ -73,8 +75,8 @@ export const useRoomState = () => {
                 });
 
                 if (propertyInfo) {
-                    _setRooms(previousRooms => setRoom({
-                        rooms: previousRooms,
+                    _setRooms(rooms => setRoom({
+                        rooms,
                         roomValue,
                         room: {
                             price: Object.entries(propertyInfo).reduce((o, [ k, v ]) => {
@@ -92,5 +94,9 @@ export const useRoomState = () => {
         }
     };
 
-    return { rooms, setRoom: updateRoom };
+    return {
+        rooms,
+        setRoom: updateRoom,
+        getRoom: useCallback((roomValue: RoomValues) => rooms[ roomValue ], [ rooms ])
+    };
 };

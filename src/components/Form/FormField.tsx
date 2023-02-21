@@ -1,7 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import SemanticForm from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import { FormState, InputControllerProps, InputGroup, InputProps } from '@lodgify/ui';
+import { FormValue, FormValues, InputControllerProps, InputGroup, InputProps } from '@lodgify/ui';
 import { getInputWidth } from '@lodgify/ui/lib/es/components/collections/Form/utils/getInputWidth';
+import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
+import { FormProps } from './Form.state';
 
 
 const Field = React.memo(SemanticForm.Field);
@@ -10,8 +12,9 @@ type InputElement = React.ReactElement<InputControllerProps & { onBlur?: InputPr
 export type ParentImperativeApi = {
     handleInputChange: (name: string, value: unknown) => void;
     handleInputBlur: (name: string) => void;
-    state: FormState;
-    // setState: React.Dispatch<React.SetStateAction<FormState>>;
+    setInputState: (inputName: string, inputState: FormValue) => void;
+    state: FormValues;
+    validation: FormProps[ 'validation' ];
 };
 
 export const getFormField = (child: React.ReactChild | boolean, parent: ParentImperativeApi) => {
@@ -36,7 +39,7 @@ export const getFormField = (child: React.ReactChild | boolean, parent: ParentIm
 
 export const InputField: React.FunctionComponent<{
     input: InputElement;
-    inputState: FormState[ string ];
+    inputState: FormValues;
     parent: Omit<ParentImperativeApi, 'state'>;
 }> = ({ input, inputState, parent }) => {
 
@@ -51,6 +54,22 @@ export const InputField: React.FunctionComponent<{
         ...inputState
     }), [ name, onChange, parent.handleInputBlur, parent.handleInputChange, inputState ]);
 
+
+    useEffect(() => {
+        const { value } = input.props;
+
+        if (!value)
+            return;
+
+        const inputValidation = getValidationWithDefaults(parent.validation[ name ]) as FormProps[ 'validation' ][ string ];
+
+        if (!inputValidation.getIsEmpty(value)) {
+            if (inputValidation.getIsValid(value))
+                parent.setInputState(name, { value, isValid: true });
+            else
+                parent.setInputState(name, { value, error: inputValidation.invalidMessage });
+        }
+    }, []);
 
     return <Field children={children} width={getInputWidth(input)} />;
 };

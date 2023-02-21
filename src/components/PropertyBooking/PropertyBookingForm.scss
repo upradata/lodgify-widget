@@ -1,0 +1,199 @@
+.PropertyBookingForm {
+    flex-grow: 1;
+
+    .inputs-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+
+        .input-container {
+            padding-right: 0.71428571rem;
+        }
+
+        .input-container.location-input-container {
+            max-width: 400px;
+            min-width: 220px;
+            flex-grow: 1;
+
+            .dropdown-container .ui.selection.dropdown {
+                max-width: none;
+            }
+
+            .ui.selection.dropdown {
+                height: 100%;
+            }
+
+            .ui.selection.dropdown .default.text {
+                display: flex;
+                align-items: center;
+            }
+        }
+
+        .input-container.guests-input-container {
+            min-width: 150px;
+        }
+
+        .input-container > * {
+            max-width: none !important;
+        }
+
+        /* .dates-input-container {
+            flex-basis: 300px;
+        } */
+
+        .button-container .ui.button {
+            height: 100%;
+        }
+
+        .button-container > * {
+            margin: 0;
+            width: 100% !important;
+        }
+    }
+}
+
+.is-stackable .PropertyBookingForm {
+    @media only screen and (max-width: 560px), only screen and (min-width: 561px) and (max-width: 1240px) {
+        .inputs-container {
+            flex-wrap: wrap;
+
+            .input-container {
+                width: 100%;
+                min-width: none;
+                max-width: none;
+                padding-bottom: 0.71428571rem;
+                padding-right: 0;
+            }
+
+            .dropdown-container .ui.selection.dropdown {
+                max-width: none !important;
+            }
+
+            .button-container,
+            .dates-input-container {
+                // flex-basis: 100%;
+            }
+        }
+    }
+
+    /* @media only screen and (min-width: 561px) and (max-width: 1240px) {
+        .inputs-container {
+            .location-input-container {
+                width: 50%;
+                max-width: 50%;
+                min-width: 50%;
+                order: -2;
+                padding-right: 0.71428571rem;
+            }
+
+            .guests-input-container {
+                width: 50%;
+                order: -1;
+                flex-grow: 1;
+            }
+        }
+    } */
+}
+
+.PropertyBookingForm {
+    /* @media only screen and (min-width: 1001px) and (max-width: 1101px) {
+        .ui.segments > .ui.segments .ui.segment.is-rating {
+            display: unset;
+        }
+    } */
+
+    /* @media only screen and (min-width: 1001px) and (max-width: 1101px) {
+        .ui.segments > .ui.segments .ui.segment.is-rating {
+            display: none;
+        }
+    } */
+    @media only screen and (min-width: 1001px) {
+        .button {
+            height: 42px;
+            white-space: nowrap;
+        }
+    }
+
+    @media only screen and (max-width: 600px) {
+        .ui.segments > .ui.segment {
+            padding: 0;
+        }
+        .ui.grid > .row > .column:first-child {
+            padding-right: 0;
+        }
+    }
+
+    .search__price {
+        font-weight: 600;
+    }
+
+    .search__price--placeholder-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.4em;
+        width: 30px;
+        margin-left: 0.5em;
+    }
+
+    .search__price--placeholder-wrapper .placeholder {
+        opacity: 0.5;
+    }
+}
+
+.is-fixed .PropertyBookingForm {
+    &.small {
+        .inputs-container {
+            margin-top: 40px;
+            row-gap: 10px;
+            column-gap: 10px;
+        }
+
+        /*  .inputs-container {
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        .input-container.dates-input-container {
+            flex-basis: auto;
+        } */
+    }
+
+    &.large {
+    }
+}
+
+.is-fixed.is-stackable .PropertyBookingForm {
+    @media only screen and (min-width: 561px) and (max-width: 1240px) {
+        .inputs-container {
+            .location-input-container {
+                // order: 0;
+                width: 100%;
+                // max-width: 100%;
+                min-width: 100%;
+                padding-right: 0;
+            }
+
+            .dates-input-container {
+                // order: 1;
+                // flex-basis: auto;
+                flex-grow: 1;
+                width: auto;
+                min-width: 150px;
+            }
+
+            .guests-input-container {
+                // order: 2;
+                flex-grow: 1;
+                width: auto;
+            }
+
+            .button-container {
+                // order: 3;
+                width: 100%;
+                flex-grow: 1;
+            }
+        }
+    }
+}
