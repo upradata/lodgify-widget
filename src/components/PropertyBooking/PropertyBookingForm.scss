@@ -1,6 +1,11 @@
 .PropertyBookingForm {
     flex-grow: 1;
 
+    .ui.form .field {
+        clear: none;
+        margin: unset;
+    }
+
     .inputs-container {
         display: flex;
         justify-content: flex-end;

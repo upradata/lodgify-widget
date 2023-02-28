@@ -25,20 +25,24 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
         const context = useMemo(() => ({
             getRoom,
             rooms
-        }), [ rooms ]);
+        }), [ rooms, getRoom ]);
 
         const onReservationChange: BookingProps[ 'onReservationChange' ] = useCallback(data => {
             Object.entries(data).forEach(([ name, value ]) => setReservation(name as keyof BookingData, value));
-        }, []);
+        }, [ setReservation ]);
 
         const onReservationDetailsChange: BookingProps[ 'onReservationDetailsChange' ] = useCallback(data => {
             setDetails(state => ({ ...state, ...data }));
-        }, []);
+        }, [ setDetails ]);
 
 
-        const onSubmit: BookingProps[ 'onSubmit' ] = useCallback(() => {
+        const onSubmit: BookingProps[ 'onSubmit' ] = useCallback((a, b) => {
+            console.log(a, b);
             console.log(reservation, details);
-        }, []);
+        }, [ reservation, details ]);
+        /*  useCallback(() => {
+            console.log(reservation, details);
+        }, []); */
 
 
         return (

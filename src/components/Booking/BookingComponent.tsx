@@ -21,7 +21,7 @@ export class BookingDetails {
 export type BookingProps = Reservation & {
     onReservationChange?: (data: Partial<BookingData>) => void;
     onReservationDetailsChange?: (data: Partial<BookingDetails>) => void;
-    onSubmit?: () => void;
+    onSubmit?: (bookingData: BookingData, details: BookingDetails) => void;
 };
 
 

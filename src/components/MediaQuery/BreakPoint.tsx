@@ -67,11 +67,11 @@ const _BreakPoint: React.FunctionComponent<BreakPointProps> = props => {
         return () => {
             mediaQuery.removeEventListener('change', handleMatchMedia);
         };
-    }, [ props ]);
+    }, [ props.onActive, props.onInactive, setIsActive ]);
 
 
     const children = props.destroyWhenNotMatched ? isActive && props.children : props.children;
-    const child = useMemo(() => getChild(children, props.childrenProps), [ /* children, */ Object.values(props.childrenProps) ]);
+    const child = useMemo(() => getChild(children, props.childrenProps), [ children, props.childrenProps ]);
 
 
     return <Container className={props.className} isActive={isActive}>

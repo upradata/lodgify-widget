@@ -1,15 +1,19 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Modal as LodgifyModal, ModalProps as LodgifyModalProps } from '@lodgify/ui';
+import { partition } from '../../util';
 import { BreakpointRange, BreakPoints } from '../MediaQuery';
 import './Modal.scss';
+import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
 
 
-export type ModalProps = LodgifyModalProps & {
+class _ModalProps {
     isOpen?: boolean;
     onOpen?: () => void;
     onClose?: () => void;
     onOpenChange?: (isOpen: boolean) => void;
 };
+
+export type ModalProps = LodgifyModalProps & _ModalProps;
 
 
 export type ModalPropsImperativeAPI = {
@@ -18,25 +22,25 @@ export type ModalPropsImperativeAPI = {
 };
 
 
-const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps> = (props, ref) => {
-    const { children, isOpen, onOpen, onClose, onOpenChange, ...modalProps } = props;
+const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps> = ({ children, ...props }, ref) => {
+    const [ _props, modalProps ] = partition(props, _ModalProps);
 
-    const [ isEnabled, setIsEnabled ] = useState(isOpen);
+    const [ isEnabled, setIsEnabled ] = useState(_props.isOpen);
 
-    const _setIsEnabled = (isEnabled: boolean) => {
-        isEnabled ? onOpen?.() : onClose?.();
-        onOpenChange?.(isEnabled);
+    const _setIsEnabled = useCallback((isEnabled: boolean) => {
+        isEnabled ? _props.onOpen?.() : _props.onClose?.();
+        _props.onOpenChange?.(isEnabled);
         setIsEnabled(isEnabled);
-    };
+    }, [ _props, setIsEnabled ]);
 
-    useEffect(() => { _setIsEnabled(isOpen); }, [ isOpen ]);
+    useEffect(() => { _setIsEnabled(_props.isOpen); }, [ _props, _setIsEnabled ]);
 
     useImperativeHandle(ref, () => ({
         open: () => { _setIsEnabled(true); },
         close: () => { _setIsEnabled(false); }
-    }));
+    }), [ _setIsEnabled ]);
 
-    const onModalClose = useCallback(() => { _setIsEnabled(false); }, [ /* setIsEnabled */ ]);
+    const onModalClose = useCallback(() => { _setIsEnabled(false); }, [ _setIsEnabled ]);
 
     const lodgifyModalProps: LodgifyModalProps = {
         ...modalProps,
@@ -44,24 +48,27 @@ const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps
         isOpen: isEnabled
     };
 
-    {/* <React.Fragment>
-        <BreakPoint max={1200}><LodgifyModal {...bookingModalProps} isFullscreen >{children}</LodgifyModal></BreakPoint>
-        <BreakPoint min={1201}><LodgifyModal {...bookingModalProps} size="small" >{children}</LodgifyModal></BreakPoint>
-    </React.Fragment> */}
-    type BP = BreakpointRange<{ size: 'small' | 'large'; }>;
-    const breakpoints = useMemo<BP[]>(() => [ { max: 1200, data: { size: 'small' } }, { min: 1201, data: { size: 'large' } } ], []);
+
+    // type BP = BreakpointRange<{ size: 'small' | 'large'; }>;
+    type BP = BreakPoint<never, { size: 'small' | 'large'; }>;
+    const breakpoints = useMemo<BP[]>(() => [ { max: 1200, size: 'small' }, { min: 1201, size: 'large' } ], []);
 
     const [ bp, setBp ] = useState<BP>(null);
 
     return (
-        <BreakPoints breakpoints={breakpoints} onActive={bp => setBp(bp as BP)} /* childrenProps={props} */>
-            {bp && <LodgifyModal {...lodgifyModalProps} isFullscreen={bp.data.size === 'small'} size="small">
+        <MediaQuery breakpoints={breakpoints} onActive={bp => setBp(bp as BP)}>
+            {bp && <LodgifyModal {...lodgifyModalProps} isFullscreen={bp.size === 'small'} size="small">
                 {children}
             </LodgifyModal>}
-        </BreakPoints>
+        </MediaQuery>
     );
 };
 
+{/* <BreakPoints breakpoints={breakpoints} onActive={bp => setBp(bp as BP)}>
+            {bp && <LodgifyModal {...lodgifyModalProps} isFullscreen={bp.data.size === 'small'} size="small">
+                {children}
+            </LodgifyModal>}
+        </BreakPoints> */}
 
 _Modal.displayName = 'Modal';
 

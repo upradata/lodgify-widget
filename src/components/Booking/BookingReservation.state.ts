@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { getLodgifyInfo, getReservationPrice, lodgifyDateToMoment, momentToLodgifyDate } from '../../lodgify-info/info';
 import { RoomData } from '../../rooms.data';
 import { getNbOfNights } from '../../util';
@@ -103,12 +103,12 @@ const reservationReducer: React.Reducer<Reservation, { type: ReservationReducerT
 export const useReservation = (room: RoomData) => {
     const [ reservation, setReservation ] = useState<Reservation>({ ...new Reservation(), nbGuests: 1, roomValue: room.value, isLoading: false });
 
-    const updateReservation = (name: keyof BookingData, value: BookingData[ keyof BookingData ]) => {
+    const updateReservation = useCallback((name: keyof BookingData, value: BookingData[ keyof BookingData ]) => {
         setReservation(reservation => {
             const newReservation = reservationReducer(reservation, { type: 'change-input', name, value });
             return reservationReducer(newReservation, { type: 'request-info', room, previousReservation: reservation, setReservation });
         });
-    };
+    }, [ reservation, setReservation ]);
 
     return { setReservation: updateReservation, reservation };
 };

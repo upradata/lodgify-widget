@@ -1,7 +1,6 @@
 import React, { Profiler, useState } from 'react';
-import { LocationOptions, Viewport } from '@lodgify/ui';
+import { Viewport } from '@lodgify/ui';
 import { Booking } from './components/Booking';
-import { BreakPoints } from './components/MediaQuery/BreakPoints';
 import { roomsData } from './rooms.data';
 import './App.css';
 
@@ -14,15 +13,18 @@ import './App.css';
 // import('@lodgify/websites-service-client').then(({ getAvailability }) => {
 
 const App: React.FunctionComponent = () => {
-    const [ count, setCount ] = useState(0);
-    /* setInterval(() => setCount(prev => {
-        console.log({ prev });
-        return prev + 1;
-    }), 1000); */
-    /*  setInterval(() => setCount(count+1), 1000); */
-    {/* <Profiler id="App" onRender={console.log}> */ }
     return <Profiler id="App" onRender={console.log}><div className="App">
-        {/* <MediaQuery
+        <Viewport>
+            <Booking rooms={roomsData} />
+        </Viewport>
+    </div> </Profiler>;
+};
+
+App.displayName = 'App';
+
+export default App;
+
+{/* <MediaQuery
             onActive={bp => console.log('isAcitve', bp)}
             onInactive={bp => console.log('isInacitve', bp)}
             breakpoints={[
@@ -76,17 +78,7 @@ const App: React.FunctionComponent = () => {
         <BreakPoint min={1201} className="class-1201>" onActive={() => { console.log('isAcitve 1201>'); }} onInactive={() => { console.log('isInacitve 1201>'); }}>
             <div>{'51201> is active'}</div>
         </BreakPoint> */}
-        {/*  <button onClick={() => setCount(count + 1)}>Click</button>
+{/*  <button onClick={() => setCount(count + 1)}>Click</button>
         <BreakPoints breakpoints={useMemo(() => [ 0, 600, 800, 1000, 1200 ], [])} mode="min" parentProps={count}>
             {(bp, count: number) => <div>Breakpoint test {JSON.stringify(bp)} count: {count}</div>}
         </BreakPoints> */}
-
-        <Viewport>
-            <Booking rooms={roomsData} />
-        </Viewport>
-    </div> </Profiler>;
-};
-
-App.displayName = 'App';
-
-export default App;

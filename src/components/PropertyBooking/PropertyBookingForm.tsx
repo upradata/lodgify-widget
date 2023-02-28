@@ -1,43 +1,29 @@
 
 import isEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useState } from 'react';
-import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import { DateRange, SearchFieldsProps } from '@lodgify/ui';
-import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
+// import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
+import { Button } from '@lodgify/ui';
+// import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
 import { usePrevious } from '../../util';
+import { Form, FormProps } from '../Form';
+import { ChangeInputData, InputDataNames, InputDataValues } from './PropertyBookingForm.type';
+import { PropertyBookingFormContent, PropertyBookingFormContentProps } from './PropertyBookingFormContent';
 import './PropertyBookingForm.scss';
 
 
-type ChangeInputData = {
-    dates: DateRange;
-    guests: number;
-    location: string;
-    // willLocationDropdownOpenAbove?: boolean;
-};
-
-
-type InputDataValues = ChangeInputData[ keyof ChangeInputData ];
-type InputDataNames = keyof ChangeInputData;
-
-type InputDataValueOf<Name extends InputDataNames> = ChangeInputData[ Name ];
-
-export type PropertySearchData = {
-    data: ChangeInputData;
-    values: InputDataValues;
-    names: InputDataNames;
-};
-
-export type PropertySearchDataValueOf<Name extends InputDataNames> = InputDataValueOf<Name>;
+// type InputDataValueOf<Name extends InputDataNames> = ChangeInputData[ Name ];
+// export type PropertySearchDataValueOf<Name extends InputDataNames> = InputDataValueOf<Name>;
 
 
 
-export type PropertyBookingFormProps = SearchFieldsProps & {
+export type PropertyBookingFormProps = Omit<PropertyBookingFormContentProps, 'onInputChange'> & {
     onSubmit?: (data: ChangeInputData) => void;
     onInputChange?: (name: InputDataNames, value: InputDataValues, data: ChangeInputData) => void;
+    searchButton?: FormProps[ 'searchButton' ];
 };
 
 
-export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = ({ /* willLocationDropdownOpenAbove, */  ...props }) => {
+export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = props => {
     // const [ isDropdownOpenAbove, setDropdownOpenAbove ] = useState(willLocationDropdownOpenAbove);
 
     /* const ref = useRef<HTMLDivElement>();
@@ -72,13 +58,14 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
             props.onInputChange?.(name, value, newState);
             return newState;
         });
-    }, [ props.onInputChange ]);
+    }, [ props.onInputChange, setState ]);
 
-    const handleSubmit = useCallback(() => { props.onSubmit?.(state); }, [ state, props.onSubmit ]);
+
+    const handleSubmit = () => { props.onSubmit?.(state); };
 
 
     const previousProps = usePrevious(props);
-    /* console.log(props); */
+
     useEffect(() => {
         if (previousProps) {
             const previousInputValueProps = {
@@ -106,19 +93,21 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
 
 
     // const breakpoints = useMemo(() => [ { min: 0, max: 1300, className: 'small' }, { min: 1301, className: 'large' } ]/* [ 600, 800, 1000, 1200 ] */, []);
-    const formProps: PropertyBookingFormProps = {
+    const formProps: PropertyBookingFormContentProps = {
         datesInputValue: state.dates,
         guestsInputValue: state.guests,
         locationInputValue: state.location,
         ...props,
         willLocationDropdownOpenAbove: props.willLocationDropdownOpenAbove,
-        onInputChange,
-
+        onSubmit: handleSubmit,
+        onInputChange: onInputChange
     };
 
-    return <Form /* ref={ref}  */ onSubmit={handleSubmit} className="PropertyBookingForm">
-        <SearchFields  {...formProps} willLocationDropdownOpenAbove={props.willLocationDropdownOpenAbove ?? true /* || isDropdownOpenAbove */} />
-    </Form>;
+    return (
+        <div className="PropertyBookingForm">
+            <PropertyBookingFormContent  {...formProps} willLocationDropdownOpenAbove={props.willLocationDropdownOpenAbove ?? true /* || isDropdownOpenAbove */} />
+        </div>
+    );
 };
 
 PropertyBookingForm.displayName = 'PropertyBookingForm';

@@ -1,34 +1,42 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { BreakPoint, BreakpointRange, BreakPoints } from '../MediaQuery';
+import { BreakPoint, /* BreakpointRange, BreakPoints */ } from '../MediaQuery/MediaQuery';
 import { BarContainer, BarContentainerProps, Size } from './BarContentainer';
 import './Bar.scss';
+import { MediaQuery } from '../MediaQuery/MediaQuery';
 
 
 export type BarProps = BarContentainerProps;
 
 export const Bar: React.FunctionComponent<BarProps> = ({ children, ...props }) => {
-    type BP = BreakpointRange<{ size: Size; }>;
+    // type BP = BreakpointRange<{ size: Size; }>;
+    type BP = BreakPoint<never, { size: Size; }>;
     const [ state, setState ] = useState<BP>(null);
 
-    const breakpoints = useMemo(() => [ { max: 1200, data: { size: 'small' } }, { min: 1201, data: { size: 'large' } } ], []);
+    const breakpoints = useMemo(() => [ { max: 1200, size: 'small' }, { min: 1201, size: 'large' } ], []);
 
     return (
         <React.Fragment>
             {/* <BreakPoint max={4000}>
                 <BarContainer size="large" {...props}>{children}</BarContainer>
             </BreakPoint> */}
-            <BreakPoints breakpoints={breakpoints} onActive={bp => setState(bp as BP)} /* childrenProps={props} */>{
-                state && <BarContainer size={state.data.size} {...props}>{children}</BarContainer>
-                /* (bp: BreakpointRange<Data>) => {
-                    return <BarContainer size={bp.data.size} {...props}>{children}</BarContainer>;
-                } */
-                /* BB */
-            }</BreakPoints>
-
-            {/*  <BarContainer size="large" {...props}>{children}</BarContainer> */}
+            <MediaQuery breakpoints={breakpoints} onActive={useCallback(bp => setState(bp as BP), [ setState ])}>
+                {state && <BarContainer size={state.size} {...props}>{children}</BarContainer>}
+            </MediaQuery>
         </React.Fragment>
     );
 };
+
+/* childrenProps={props} */
+{/* <BreakPoints breakpoints={breakpoints} onActive={useCallback(bp => setState(bp as BP), [ setState ])} >{
+    state && <BarContainer size={state.data.size} {...props}>{children}</BarContainer>
+}</BreakPoints>; */}
+
+{/*  <BarContainer size="large" {...props}>{children}</BarContainer> */ }
+
+/* (bp: BreakpointRange<Data>) => {
+                   return <BarContainer size={bp.data.size} {...props}>{children}</BarContainer>;
+               } */
+/* BB */
 
 // const B = children => ({ data, max, ...props }) => {
 //     /*  debugger; */

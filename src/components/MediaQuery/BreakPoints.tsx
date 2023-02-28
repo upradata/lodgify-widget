@@ -1,8 +1,8 @@
-import React, { memo, useMemo } from 'react';
-import { BreakPoint, BreakPointChildren, getChild } from './BreakPoint';
+import React, { memo, useCallback, useMemo } from 'react';
+import { BreakPoint, BreakPointChildren, BreakPointProps } from './BreakPoint';
 
 
-type Children = React.ReactNode | React.ReactNode[];
+// type Children = React.ReactNode | React.ReactNode[];
 
 export type BreakpointNb = number;
 export type BreakpointRange<T = unknown> = { min?: number; max?: number; className?: string; data?: T; };
@@ -75,14 +75,14 @@ export const _BreakPoints: React.FunctionComponent<BreakPointsProps> = props => 
         {breakpointRanges.map((breakpoint, i) => {
             const { className, ...bp } = breakpoint;
 
-            return <BreakPoint
+            return <BreakpointWrapper
                 key={i}
                 {...bp}
                 {...breakpointProps}
                 className={className || getClassName(classNameBase, bp)}
-                onActive={onActive ? () => onActive(breakpoint) : undefined}
-                onInactive={onInactive ? () => onInactive?.(breakpoint) : undefined}
-                childrenProps={{ ...bp, ...props.childrenProps }}
+                breakpoint={breakpoint}
+                onActive={onActive}
+                onInactive={onInactive}
             >
                 {/* {getChild(children as any, { ...bp })} */}
                 {children}
@@ -90,10 +90,42 @@ export const _BreakPoints: React.FunctionComponent<BreakPointsProps> = props => 
                     console.log('CACA');
                     return children(bp, parentProps);
                 } : children */}
-            </BreakPoint>;
+            </BreakpointWrapper>;
         })}
     </React.Fragment>;
 };
+
+
+const _BreakpointWrapper: React.FunctionComponent<
+    Omit<BreakPointProps, 'onActive' | 'onInactive'> &
+    Pick<BreakPointsProps, 'onActive' | 'onInactive'> & {
+        breakpoint: BreakpointRange;
+    }> = ({
+        children, breakpoint, onActive, onInactive, childrenProps: cProps, ...props
+    }) => {
+
+        const onActiveHandler = useCallback(() => onActive?.(breakpoint), [ onActive, breakpoint ]);
+        const onInactiveHandler = useCallback(() => onInactive?.(breakpoint), [ onInactive, breakpoint ]);
+
+        const { className, ...bp } = breakpoint;
+        const childrenProps = useMemo(() => ({ ...bp, ...cProps }), [ bp, cProps ]);
+
+        return <BreakPoint {...props}
+            onActive={onActive ? onActiveHandler : undefined}
+            onInactive={onInactive ? onInactiveHandler : undefined}
+            childrenProps={childrenProps}>
+            {/* {getChild(children as any, { ...bp })} */}
+            {children}
+            {/* typeof children === 'function' ? (parentProps: unknown) => {
+                    console.log('CACA');
+                    return children(bp, parentProps);
+                } : children */}
+        </BreakPoint>;
+    };
+
+
+_BreakpointWrapper.displayName = 'BreakpointWrapper';
+const BreakpointWrapper = memo(_BreakpointWrapper);
 
 _BreakPoints.displayName = 'BreakPoints';
 

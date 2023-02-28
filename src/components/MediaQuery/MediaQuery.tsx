@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 
 type Children = React.ReactNode | React.ReactNode[];
 
-export type BreakPoint<P = unknown> = {
+export type BreakPoint<P = unknown, Data = {}> = {
     min?: number;
     max?: number;
     mediaQuery?: string;
@@ -13,12 +13,12 @@ export type BreakPoint<P = unknown> = {
     children?: (parentProps?: P) => Children;
     parentProps?: P;
     className?: string;
-};
+} & Data;
 
-export type MediaQueryProps<P = unknown> = {
-    breakpoints: readonly BreakPoint[];
-    onActive?: (bp?: BreakPoint<P>) => void;
-    onInactive?: (bp?: BreakPoint<P>) => void;
+export type MediaQueryProps<P = unknown, D = {}> = {
+    breakpoints: readonly BreakPoint<P, D>[];
+    onActive?: (bp?: BreakPoint<P, D>) => void;
+    onInactive?: (bp?: BreakPoint<P, D>) => void;
     className?: string;
     parentProps?: P;
 };
@@ -83,4 +83,4 @@ export const MediaQuery: React.FunctionComponent<MediaQueryProps> = props => {
         {props.children}
         {activeBreakPoints.flatMap(bp => bp.children?.(bp.parentProps || props.parentProps))}
     </div>;
-};;
+};

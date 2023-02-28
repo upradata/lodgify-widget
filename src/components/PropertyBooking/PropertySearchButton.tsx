@@ -3,12 +3,12 @@ import { Button, ButtonProps, TextPlaceholder } from '@lodgify/ui';
 import { localizedPrice } from '../../util';
 import React from 'react';
 
-type ButtonPrice = {
+type ButtonPriceProps = {
     price?: number;
     isLoading?: boolean;
 };
 
-export type PropertyBookingButtonProps = ButtonPrice & ButtonProps;
+export type PropertyBookingButtonProps = ButtonPriceProps & ButtonProps;
 
 
 export const PropertyBookingButton: React.FunctionComponent<PropertyBookingButtonProps> = ({ children, price, isLoading, ...buttonProps }) => {
@@ -19,7 +19,7 @@ export const PropertyBookingButton: React.FunctionComponent<PropertyBookingButto
 };
 
 
-const ButtonPrice: React.FunctionComponent<ButtonPrice> = ({ price, isLoading }) => {
+const ButtonPrice: React.FunctionComponent<ButtonPriceProps> = ({ price, isLoading }) => {
     if (price > 0)
         return <span className="search__price" style={{ marginLeft: '4px' }}>{localizedPrice(price)}</span>;
 

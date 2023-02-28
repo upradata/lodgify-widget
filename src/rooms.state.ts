@@ -32,7 +32,7 @@ export type UpdateRoomAction = |
 export const useRoomState = (roomsList: RoomData[]) => {
     const [ rooms, _setRooms ] = useState(roomsDataAsObject(roomsList));
 
-    const updateRoom = async (action: UpdateRoomAction) => {
+    const updateRoom = useCallback(async (action: UpdateRoomAction) => {
         switch (action.type) {
             case 'request-property-availability': {
                 const { roomValue, start, end } = action.payload;
@@ -92,7 +92,7 @@ export const useRoomState = (roomsList: RoomData[]) => {
             default:
                 throw new Error();
         }
-    };
+    }, [ rooms, _setRooms ]);
 
     return {
         rooms,

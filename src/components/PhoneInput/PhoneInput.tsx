@@ -1,15 +1,11 @@
 
 // import parsePhoneNumber from 'libphonenumber-js';
 import { CountryCode, MetadataJson } from 'libphonenumber-js/core';
-import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
 import { InputControllerProps, InputProps } from '@lodgify/ui';
-import { InputController } from '@lodgify/ui/lib/es/components/inputs/InputController';
-import {
-    COUNTRY_OPTIONS,
-    DEFAULT_COUNTRY,
-    INITIAL_VALUE
-} from '@lodgify/ui/lib/es/components/inputs/PhoneInput/constants';
+// import { InputController } from '@lodgify/ui/lib/es/components/inputs/InputController';
+import { DEFAULT_COUNTRY, INITIAL_VALUE } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/constants';
 // import { FlagComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/FlagComponent';
 // import { CountrySelectComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/CountrySelectComponent';
 // import { getLabels } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getLabels';
@@ -19,6 +15,7 @@ import labels from '../../../node_modules/react-phone-number-input/locale/en.jso
 // import { getAllOptions } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getAllOptions.js';
 import phoneMetadata from '../../libphonenumber-metadata.custom.json';
 import { usePreviousListener } from '../../util';
+import { InputController } from '../InputController';
 import { CountrySelectComponent } from './CountrySelectComponent';
 import 'react-phone-number-input/style.css';
 // import { Flag } from './Flag';
@@ -92,7 +89,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
 
             return { ...state, value };
         });
-    }, []);
+    }, [ setState, props.onChange ]);
 
 
     useEffect(() => {
@@ -100,14 +97,14 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
             if (getIsInputValueReset(prevValue, newValue))
                 setState(state => ({ ...state, value: newValue }));
         });
-    }, []);
+    }, [ addPropsValueListener, setState ]);
 
 
     const { error, isValid, label, name, onChange: _o, value: _v, ...reactPhoneInputProps } = props;
 
     const value = getControlledInputValue(props.value, INITIAL_VALUE, state.value);
 
-    const inputControllerProps: Partial<InputControllerProps> = {
+    const inputControllerProps: Omit<InputControllerProps, 'children'> = {
         error,
         isValid,
         // label,
@@ -116,7 +113,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         name: props.name || 'phone-number'
     };
 
-    const phoneInputProps = useMemo<ReactPhoneNumberProps>(() => ({
+    const phoneInputProps: ReactPhoneNumberProps = {
         // autoComplete: props.autoComplete,
         // defaultCountry: props.defaultCountry,
         // countryOptions: COUNTRY_OPTIONS,
@@ -124,22 +121,22 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         // flagComponent: props => <Flag name={props.countryName} code={props.country} />, // FlagComponent,
         // labels: props.labels, // state.labels,
         // onBlur: props.onBlur,
-        onChange: () => { },
-        onBlur: () => { },
-        onCountryChange: (countryISO: CountryCode) => {
+        onChange: useCallback(() => { }, []), // will be set by InputController
+        // onBlur: useCallback(() => { }, []),
+        onCountryChange: useCallback((countryISO: CountryCode) => {
             setState(state => ({ ...state, countryISO }));
             props.onCountryChange?.(countryISO);
-        },
+        }, [ props.onCountryChange, setState ]),
         metadata: phoneMetadata as MetadataJson,
         labels,
         focusInputOnCountrySelection: true,
         smartCaret: false,
-        numberInputProps: {
+        numberInputProps: useMemo(() => ({
             placeholder: label
-        },
+        }), [ label ]),
         ...reactPhoneInputProps
         // flagComponent: Flag(phoneMetadata as MetadataJson),
-    }), [ label ]);
+    };
 
     // return <PhoneNumberInput {...(phoneInputProps as any)} {...inputControllerProps} />;
     return <InputController {...inputControllerProps}>
@@ -148,7 +145,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
     </InputController>;
 };
 
-
+/* 
 const PhoneInputInput2 = (label: string) => {
     const Component: React.ForwardRefRenderFunction<unknown, {}> = (props, ref) => {
         // debugger;
@@ -178,7 +175,7 @@ const PhoneInputInput = (label: string) => {
     Component.displayName = 'MyInput';
     return React.forwardRef(Component);
 };
-
+ */
 
 PhoneInput.displayName = 'PhoneInput';
 PhoneInput.defaultProps = {

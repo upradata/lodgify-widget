@@ -27,7 +27,8 @@ declare module '@lodgify/ui' {
 
     export type DateRange<D = Moment> = { startDate: D; endDate: D; };
 
-    export type SearchBarProps<Location extends string = string> = PropsWithStyle<{
+
+    export type SearchBarFieldsProps = PropsWithStyle<{
         dateRangePickerLocaleCode?: string;
         datesCheckInLabel?: string;
         datesCheckOutLabel?: string;
@@ -35,35 +36,41 @@ declare module '@lodgify/ui' {
         datesInputOnFocusChange?: Function;
         datesInputValue?: DateRange;
         getIsDayBlocked?: Function;
+        guestsInputLabel?: string;
         guestsInputValue?: number;
+        guestsPopupId?: string;
+        isCalendarIconDisplayed?: boolean;
         isDateRangePickerLoading?: boolean;
-        onChangeInput?: (data: {
+        locationInputLabel?: string;
+        locationInputValue?: string;
+        locationOptions?: LocationOptions[];
+        maximumGuestsInputValue?: number;
+        searchButton?: React.ReactNode;
+        willLocationDropdownOpenAbove?: boolean;
+        onInputChange?: InputProps[ 'onChange' ];
+    }>;
+
+
+    export type SearchBarProps<Location extends string = string> = Omit<SearchBarFieldsProps, 'onChange'> & PropsWithStyle<{
+        onInputChange?: (data: {
             dates: DateRange;
             guests: number;
             location: Location;
             willLocationDropdownOpenAbove: boolean;
-        }) => void | Promise<void>;
+        }) => void;
         onSubmit?: Function;
         searchBarDatesCheckInLabel?: string;
         searchBarDatesCheckOutLabel?: string;
         searchBarGuestsInputLabel?: string;
         searchBarMaximumGuestsInputValue?: number;
-        searchButton?: React.ReactNode;
-        guestsInputLabel?: string;
-        guestsPopupId?: string;
-        isCalendarIconDisplayed?: boolean;
-        isFixed?: boolean;
-        isStackable?: boolean;
         locationInputLabel?: string;
         locationInputValue?: string;
         locationOptions?: LocationOptions[];
-        maximumGuestsInputValue?: number;
         isDisplayedAsModal?: boolean;
         isModalOpen?: boolean;
         modalHeadingText?: string;
         modalSummaryElement?: React.ReactNode;
         summaryElement?: React.ReactNode;
-        willLocationDropdownOpenAbove?: boolean;
     }>;
 
 
@@ -113,7 +120,41 @@ declare module '@lodgify/ui' {
     export const Button: React.ComponentType<ButtonProps>;
     export const TextPlaceholder: React.ComponentType<{ [ K: string ]: any; }>;
     export const Viewport: React.ComponentType<{ [ K: string ]: any; }>;
-    export const DateRangePicker: React.ComponentType<{ [ K: string ]: any; }>;
+
+    export type DateRangePickerProps = PropsWithStyle<{
+        displayFormat?: string | Funtion;
+        endDatePlaceholderText?: string;
+        error?: string | boolean;
+        focusedInput?: null | 'startDate' | 'endDate';
+        getIsDayBlocked?: Funtion;
+        initialValue?: DateRange;
+        isCalendarIconDisplayed?: boolean;
+        isLoading?: boolean;
+        isValid?: boolean;
+        localeCode?: string;
+        name?: string;
+        onBlur?: Funtion;
+        onChange?: Funtion;
+        onFocusChange?: Funtion;
+        startDatePlaceholderText?: string;
+        value?: DateRange;
+        willOpenAbove?: boolean;
+        windowInnerWidth?: number;
+    }> & InputProps;
+
+    export const DateRangePicker: React.ComponentType<DateRangePickerProps>;
+
+    export type CounterDropdownProps = PropsWithStyle<{
+        counterName?: string;
+        counterValue?: number;
+        dropdownLabel?: string;
+        maximumCounterValue?: number;
+        onChange?: Function;
+        popupId?: string;
+        willOpenAbove?: boolean;
+    }> & InputProps;
+
+    export const CounterDropdown: React.ComponentType<CounterDropdownProps>;
 
     export const HorizontalGutters: React.ComponentType<{ [ K: string ]: any; }>;
     export const VerticalGutters: React.ComponentType<{ [ K: string ]: any; }>;
@@ -127,7 +168,7 @@ declare module '@lodgify/ui' {
 
     export const Icon: React.ComponentType<IconProps>;
 
-    export type SearchFieldsProps = {
+    export type SearchFieldsProps = PropsWithStyle<{
         dateRangePickerLocaleCode?: string;
         datesCheckInLabel?: string;
         datesCheckOutLabel?: string;
@@ -147,12 +188,20 @@ declare module '@lodgify/ui' {
         onInputChange?: Function;
         searchButton?: React.ReactNode;
         willLocationDropdownOpenAbove?: boolean;
-    };
+    }>;
     export const SearchFields: React.ComponentType<SearchFieldsProps>;
     export const SearchModal: React.ComponentType<{ [ K: string ]: any; }>;
     export const Heading: React.ComponentType<{ [ K: string ]: any; }>;
 
-    export type FormProps<Values = {}> = {
+    export type Validation = {
+        getIsEmpty: Function;
+        getIsValid: Function;
+        invalidMessage?: string;
+        isRequired: boolean;
+        isRequiredMessage?: string;
+    };
+
+    export type FormProps<Values = unknown> = PropsWithStyle<{
         actionLink?: {
             onClick?: Function;
             text: React.ReactNode;
@@ -164,15 +213,9 @@ declare module '@lodgify/ui' {
         onSubmit?: (values: Values) => void;
         submitButtonText?: string;
         successMessage?: string;
-        validation?: Record<string, {
-            getIsEmpty?: Function;
-            getIsValid?: Function;
-            invalidMessage?: string;
-            isRequired?: boolean;
-            isRequiredMessage?: string;
-        }>;
+        validation?: Record<string, Partial<Validation>>;
         // ref?: React.MutableRefObject<typeof Form>;
-    };
+    }>;
 
     export type FormValue<V = unknown> = {
         isBlurred?: boolean;
@@ -195,6 +238,7 @@ declare module '@lodgify/ui' {
         onBlur?: (event: FocusEvent) => any;
         onChange?: (name: string, value: V) => any;
         width?: string;
+        label?: string;
     };
 
     export type DropdownProps = PropsWithStyle<{
@@ -254,7 +298,13 @@ declare module '@lodgify/ui' {
     }> & InputProps;
 
     export const TextArea: TextArea.ComponentType<TextAreaProps>;
-    
+
+    interface ReactElementLike {
+        type: ReactComponentLike;
+        props: any;
+        key: string | number | null;
+    }
+
     export type InputControllerProps = {
         adaptOnChangeEvent?: Function;
         error?: boolean | string;
@@ -268,6 +318,7 @@ declare module '@lodgify/ui' {
         value?: boolean | string | number | object | Array<unknown>;
         name: string;
         onChange?: InputProps[ 'onChange' ];
+        children: ReactElementLike;
     };
 
 

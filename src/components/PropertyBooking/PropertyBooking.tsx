@@ -1,26 +1,30 @@
 import { Moment } from 'moment';
-import React, { useCallback, useContext, useState } from 'react';
-import { LocationOptions, Summary, Icon } from '@lodgify/ui';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { Icon, LocationOptions, Summary } from '@lodgify/ui';
 import { SummaryProps } from '../../@types/@lodgify/ui/types';
 import { lodgifyDateToMoment } from '../../lodgify-info/info';
+import { LodgifyDate } from '../../lodgify-requests';
 import { RoomData } from '../../rooms.data';
 import { isDateInRange, localizedDate, localizedPrice } from '../../util';
+import { Bar } from '../Bar';
 import { BookingProps } from '../Booking/BookingComponent';
 import { BookingContext } from '../Booking/BookingContext';
 import { Reservation } from '../Booking/reservation.type';
-import { BookingDetails, BookingDetailsProps } from '../BookingDetails/BookingDetails';
+import { BookingDetails, BookingDetailsData, BookingDetailsProps } from '../BookingDetails/BookingDetails';
+import { Modal } from '../Modal';
 import { PropertyBookingForm, PropertyBookingFormProps } from './PropertyBookingForm';
+import { PropertySearchData } from './PropertyBookingForm.type';
 import { PropertyBookingButton } from './PropertySearchButton';
 // import 'semantic-ui-css/semantic.min.css';
 import 'semantic-ui-css/components/loader.css';
 import './PropertyBooking.scss';
-import { Bar } from '../Bar';
-import { Modal } from '../Modal';
-import { LodgifyDate } from '../../lodgify-requests';
 
 
 export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReservationChange, onReservationDetailsChange, onSubmit, ...reservation }) => {
     const { getRoom, rooms } = useContext(BookingContext);
+
+    const [ propertyData, setPropertyData ] = useState<Partial<PropertySearchData[ 'data' ]>>({});
+    const [ details, setDetails ] = useState<Partial<BookingDetailsData>>({});
 
     // const [ state, setState ] = useState<Partial<PropertyBookingData>>({});
 
@@ -29,21 +33,26 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
     const onSearchFormOnSubmit: PropertyBookingFormProps[ 'onSubmit' ] = useCallback(data => {
         // setState(state => ({ ...state, ...data }));
         setIsBookingDetailsOpen(true);
-    }, []);
+    }, [ setIsBookingDetailsOpen ]);
 
-
-    const onBookingDetailsSubmit: BookingDetailsProps[ 'onSubmit' ] = useCallback(data => {
-        //  setState(state => ({ ...state, ...data }));
-        onReservationDetailsChange(data);
-        setIsBookingDetailsOpen(false);
-       // onSubmit();
-    }, []);
-
-    const locationOptions = Object.values(rooms).map(room => ({ ...room, indent: 0 as const, text: room.name, imageUrl: room.image } as LocationOptions));
 
     const onPropertyBookingFormInputChange: PropertyBookingFormProps[ 'onInputChange' ] = useCallback((name, value) => {
         onReservationChange({ [ name ]: value });
-    }, []);
+        setPropertyData(state => ({ ...state, [ name ]: value }));
+    }, [ setPropertyData, onReservationChange ]);
+
+
+    const onBookingDetailFormInputChange: BookingDetailsProps[ 'onInputChange' ] = useCallback((name, value) => {
+        onReservationDetailsChange({ [ name ]: value });
+        setDetails(state => ({ ...state, [ name ]: value }));
+    }, [ setDetails, onReservationDetailsChange ]);
+
+    const onBookingDetailsSubmit: BookingDetailsProps[ 'onSubmit' ] = useCallback(data => {
+        setIsBookingDetailsOpen(false);
+        onSubmit(propertyData as PropertySearchData[ 'data' ], data/* details */ as BookingDetailsData);
+    }, [ setIsBookingDetailsOpen, onSubmit, propertyData/* , details */ ]);
+
+    const locationOptions = Object.values(rooms).map(room => ({ ...room, indent: 0 as const, text: room.name, imageUrl: room.image } as LocationOptions));
 
     const room = getRoom(reservation.roomValue);
 
@@ -57,14 +66,18 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
     return (
         <div className="PropertyBooking">
             <Bar isFixed>
-                <Summary {...summaryProps} />
-                <PropertyBookingForm {...searchProps} onSubmit={onSearchFormOnSubmit} />
+                {!isBookingDetailsOpen && <React.Fragment>
+                    <Summary {...summaryProps} />
+                    <PropertyBookingForm {...searchProps} onSubmit={onSearchFormOnSubmit} />
+                </React.Fragment>
+                }
             </Bar>
 
             <Modal isOpen={isBookingDetailsOpen} onOpenChange={useCallback(isOpen => { setIsBookingDetailsOpen(isOpen); }, [])}>
                 <BookingDetails
                     header={<BookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
                     subHeader={<BookingSubHeader price={100} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
+                    onInputChange={onBookingDetailFormInputChange}
                     onSubmit={onBookingDetailsSubmit} />
             </Modal>
         </div>
@@ -129,7 +142,7 @@ const useBookingProps = ({ reservation, room, locationOptions, onInputChange }: 
     const getIsDayBlocked = useCallback((date: Moment) => {
         const isBlocked = !!room.periodsNonAvailable?.find(({ start, end }) => isDateInRange(start, end)(date));
         return isBlocked;
-    }, [ reservation.roomValue ]);
+    }, [ room.periodsNonAvailable ]);
 
 
     const { nbGuests, price, isLoading, roomValue, startDate, endDate } = reservation;
@@ -152,10 +165,10 @@ const useBookingProps = ({ reservation, room, locationOptions, onInputChange }: 
         guestsInputLabel: `${nbGuests} Persons`,
         datesCheckInLabel: 'Arrival',
         datesCheckOutLabel: 'Departure',
-        datesInputValue: {
+        datesInputValue: useMemo(() => ({
             startDate: lodgifyDateToMoment(startDate),
             endDate: lodgifyDateToMoment(endDate)
-        },
+        }), [ startDate, endDate ]),
         maximumGuestsInputValue: 4,
         guestsInputValue: nbGuests,
         locationOptions,

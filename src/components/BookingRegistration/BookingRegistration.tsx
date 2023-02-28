@@ -114,7 +114,7 @@ const _BookingRegistration: React.ForwardRefRenderFunction<BookingRegistrationIm
         close: () => { _setIsEnabled(false); }
     }));
 
-    const onModalClose = useCallback(() => { _setIsEnabled(false); }, [ /* setIsEnabled */ ]);
+    const onModalClose = useCallback(() => { _setIsEnabled(false); }, [ _setIsEnabled ]);
 
     const bookingModalProps: BookingModalProps = {
         ...formProps,

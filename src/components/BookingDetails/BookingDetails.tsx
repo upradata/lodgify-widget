@@ -1,7 +1,7 @@
 import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 import { Moment } from 'moment';
-import React, { useCallback, useRef, useState } from 'react';
-import { Dropdown, DropdownProps, FormProps, FormValue, InputGroup, TextInput } from '@lodgify/ui';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { Dropdown, DropdownProps, FormValue, InputGroup, TextInput } from '@lodgify/ui';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
 import countriesData from '../../countries-metadata.json';
@@ -9,7 +9,7 @@ import { LodgifyDate } from '../../lodgify-requests';
 import { fragments } from '../../util';
 import { DateRange, PropsWithStyleBase } from '../../util.types';
 import { Card, CardProps } from '../Card';
-import { Form, FormImperativeAPI } from '../Form';
+import { Form, FormImperativeAPI, FormProps } from '../Form';
 import { PhoneInput } from '../PhoneInput';
 import './BookingDetails.scss';
 
@@ -47,7 +47,7 @@ type UseFormProps = { phoneCountry: CountryCode; };
 const useForm = (props: UseFormProps) => {
     const [ formState, setFormState ] = useState(props);
 
-    const validation = {
+    const validation = useMemo(()=>({
         email: {
             isRequired: true,
             getIsValid: (value: string) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value),
@@ -80,18 +80,18 @@ const useForm = (props: UseFormProps) => {
             },
             type: 'country'
         },
-        textArea: {
+        comment: {
             isRequired: false,
             type: 'string'
         }
-    } satisfies AddValueToObject<FormProps[ 'validation' ], { type: FormValueType; }>;
+    } satisfies AddValueToObject<FormProps[ 'validation' ], { type: FormValueType; }>), [ formState ]);
 
     return {
         formState,
         setFormState,
-        setPropFormState: function <P extends keyof UseFormProps>(prop: P, value: UseFormProps[ P ]) {
+        setPropFormState: useCallback(function <P extends keyof UseFormProps>(prop: P, value: UseFormProps[ P ]) {
             setFormState({ ...formState, [ prop ]: value });
-        },
+        }, [ setFormState ]),
         validation
     };
 };
@@ -116,9 +116,10 @@ export type BookingDetailsProps = PropsWithStyleBase & {
         name: string;
         code: CountryCode;
     };
-    onSubmit?: (data: BookingDetailsData) => void;
-
+    onSubmit?: FormProps<FormValues>[ 'onSubmit' ];
+    onInputChange?: FormProps<FormValues>[ 'onInputChange' ];
 } & CardProps;
+
 
 
 const getCountryOptionsWithSearch = (options: Pick<DropdownOption, 'value'>[], searchValue: string) => {
@@ -129,37 +130,16 @@ const getCountryOptionsWithSearch = (options: Pick<DropdownOption, 'value'>[], s
 
 export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ initialCountry, ...props }) => {
     const { setPropFormState, validation } = useForm({ phoneCountry: initialCountry.code });
-    /* const ref = useRef<React.Component<FormProps, FormState>>();
-
-    useEffect(() => {
-        const initValues: Partial<Record<keyof Validation, unknown>> = {
-            guests: guests.value,
-            room: location.value,
-            dateRange: dates
-        };
-
-        const formInstance = ref.current;
-
-        Object.entries(initValues).forEach(([ inputName, value ]) => {
-            const inputValidation = getValidationWithDefaults(validation[ inputName ]) as FormProps[ 'validation' ][ string ];
-
-            if (!inputValidation.getIsEmpty(value)) {
-                if (inputValidation.getIsValid(value))
-                    formInstance.setState({ [ inputName ]: { value } });
-                else
-                    formInstance.setState({ [ inputName ]: { error: inputValidation.invalidMessage } });
-            }
-        });
-
-        // const oldHandleInputChange = (formInstance as any).handleInputChange;
-        // (formInstance as any).handleInputChange = debounce((formInstance as any).handleInputChange, 300);
-    }, []); */
-
 
     const onSubmit: FormProps<FormInputValues>[ 'onSubmit' ] = useCallback((values => {
-        const v = Object.entries(values).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as FormValues);
-        props.onSubmit?.(v);
-    }), []);
+        const data = Object.entries(values).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as FormValues);
+        props.onSubmit?.(data);
+    }), [ props.onSubmit ]);
+
+
+    const onInputChange = useCallback((name: keyof FormValues, value: FormValues) => {
+        props.onInputChange?.(name, value);
+    }, [ props.onInputChange ]);
 
     const [ cardProps ] = fragments(props, CardProps);
     const formRef = useRef<FormImperativeAPI>(null);
@@ -172,7 +152,7 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
             description="Fill in the form to validate the booking. At the end of the process, you will receive a confirmation email."
             {...cardProps}>
 
-            <Form submitButtonText="Ok" validation={validation} onSubmit={onSubmit} ref={formRef}>
+            <Form submitButtonText="Ok" validation={validation} onSubmit={onSubmit} onInputChange={onInputChange} ref={formRef}>
 
                 <InputGroup>
                     <TextInput autoComplete="given-name" label="First name" name="firstName" />
@@ -188,7 +168,7 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
                         name="phoneNumber"
                         autoComplete="tel"
                         defaultCountry={initialCountry.code}
-                        onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [])} />
+                        onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [ setPropFormState ])} />
 
                     <Dropdown
                         width="five"
@@ -205,7 +185,7 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
                 </InputGroup>
 
 
-                <TextArea label="Comments" name="textArea" maxCharacters={4000} />
+                <TextArea label="Comments" name="comment" maxCharacters={4000} />
             </Form>
         </Card>
     );

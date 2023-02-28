@@ -1,12 +1,13 @@
 import isEqual from 'fast-deep-equal';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { FormProps as LodgifyFormProps, FormValue, FormValues } from '@lodgify/ui';
 import { getEmptyState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyState';
 import { getErroredState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getErroredState';
 
 
-export type FormProps = Omit<LodgifyFormProps, 'headingText'> & {
-    onInputChange?: (name: string, value: unknown) => {};
+export type FormProps<Values = unknown> = Omit<LodgifyFormProps<Values>, 'headingText'> & {
+    onInputChange?: (name: string, value: Values) => void;
+    searchButton?: React.ReactNode | ((props: { isDisabled: boolean; }) => React.ReactNode);
 };
 
 
@@ -25,7 +26,7 @@ export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validati
         }
     }); */
 
-    const setInputState = (inputName: string, inputState: FormValue) => {
+    const setInputState = useCallback((inputName: string, inputState: FormValue) => {
         if (!inputState)
             return;
 
@@ -43,7 +44,7 @@ export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validati
         //  updateSetState(previousState || {}, inputName, inputState);
 
         // return setState(prevState => updateSetState(prevState, inputName, inputState));
-    };
+    }, [ setState ]);
 
     const getInputStateWithData = (inputName: string, inputState: FormValue, previousState: FormValues) => {
         const previousInputState = previousState?.[ inputName ] || {};

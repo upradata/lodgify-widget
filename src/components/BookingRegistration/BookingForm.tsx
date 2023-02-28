@@ -239,7 +239,7 @@ export const BookingForm: React.FunctionComponent<BookingFormProps> = ({
                         name="phoneNumber"
                         autoComplete="tel"
                         defaultCountry={country.code}
-                        onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [])} />
+                        onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [ setPropFormState ])} />
 
                     <Dropdown
                         width="five"
