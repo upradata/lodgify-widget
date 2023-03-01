@@ -23,7 +23,7 @@ import './PropertyBooking.scss';
 export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReservationChange, onReservationDetailsChange, onSubmit, ...reservation }) => {
     const { getRoom, rooms } = useContext(BookingContext);
 
-    const [ propertyData, setPropertyData ] = useState<Partial<PropertySearchData[ 'data' ]>>({});
+    // const [ propertyData, setPropertyData ] = useState<Partial<PropertySearchData[ 'data' ]>>({});
     const [ details, setDetails ] = useState<Partial<BookingDetailsData>>({});
 
     // const [ state, setState ] = useState<Partial<PropertyBookingData>>({});
@@ -38,8 +38,8 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
 
     const onPropertyBookingFormInputChange: PropertyBookingFormProps[ 'onInputChange' ] = useCallback((name, value) => {
         onReservationChange({ [ name ]: value });
-        setPropertyData(state => ({ ...state, [ name ]: value }));
-    }, [ setPropertyData, onReservationChange ]);
+        // setPropertyData(state => ({ ...state, [ name ]: value }));
+    }, [ /* setPropertyData, */ onReservationChange ]);
 
 
     const onBookingDetailFormInputChange: BookingDetailsProps[ 'onInputChange' ] = useCallback((name, value) => {
@@ -49,8 +49,9 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
 
     const onBookingDetailsSubmit: BookingDetailsProps[ 'onSubmit' ] = useCallback(data => {
         setIsBookingDetailsOpen(false);
-        onSubmit(propertyData as PropertySearchData[ 'data' ], data/* details */ as BookingDetailsData);
-    }, [ setIsBookingDetailsOpen, onSubmit, propertyData/* , details */ ]);
+        onSubmit();
+        // onSubmit(propertyData as PropertySearchData[ 'data' ], data/* details */ as BookingDetailsData);
+    }, [ setIsBookingDetailsOpen, onSubmit /*, propertyData , details */ ]);
 
     const locationOptions = Object.values(rooms).map(room => ({ ...room, indent: 0 as const, text: room.name, imageUrl: room.image } as LocationOptions));
 
@@ -78,7 +79,8 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
                     header={<BookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
                     subHeader={<BookingSubHeader price={100} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
                     onInputChange={onBookingDetailFormInputChange}
-                    onSubmit={onBookingDetailsSubmit} />
+                    onSubmit={onBookingDetailsSubmit}
+                    {...details} />
             </Modal>
         </div>
     );

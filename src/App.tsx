@@ -13,11 +13,16 @@ import './App.css';
 // import('@lodgify/websites-service-client').then(({ getAvailability }) => {
 
 const App: React.FunctionComponent = () => {
-    return <Profiler id="App" onRender={console.log}><div className="App">
+    return <div className="App">
         <Viewport>
             <Booking rooms={roomsData} />
         </Viewport>
-    </div> </Profiler>;
+    </div>;
+    /*  return <Profiler id="App" onRender={console.log}><div className="App">
+         <Viewport>
+             <Booking rooms={roomsData} />
+         </Viewport>
+     </div> </Profiler>; */
 };
 
 App.displayName = 'App';

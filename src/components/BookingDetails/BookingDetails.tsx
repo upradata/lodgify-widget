@@ -6,7 +6,7 @@ import { Dropdown, DropdownProps, FormValue, InputGroup, TextInput } from '@lodg
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
 import countriesData from '../../countries-metadata.json';
 import { LodgifyDate } from '../../lodgify-requests';
-import { fragments } from '../../util';
+import { partition } from '../../util';
 import { DateRange, PropsWithStyleBase } from '../../util.types';
 import { Card, CardProps } from '../Card';
 import { Form, FormImperativeAPI, FormProps } from '../Form';
@@ -47,7 +47,7 @@ type UseFormProps = { phoneCountry: CountryCode; };
 const useForm = (props: UseFormProps) => {
     const [ formState, setFormState ] = useState(props);
 
-    const validation = useMemo(()=>({
+    const validation = useMemo(() => ({
         email: {
             isRequired: true,
             getIsValid: (value: string) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value),
@@ -75,9 +75,7 @@ const useForm = (props: UseFormProps) => {
         country: {
             isRequired: true,
             isRequiredMessage: `Required`,
-            getIsEmpty: (value: string) => {
-                return !value;
-            },
+            getIsValid: (value: string) => countriesOptions.some(({ value: v }) => value === v),
             type: 'country'
         },
         comment: {
@@ -90,7 +88,7 @@ const useForm = (props: UseFormProps) => {
         formState,
         setFormState,
         setPropFormState: useCallback(function <P extends keyof UseFormProps>(prop: P, value: UseFormProps[ P ]) {
-            setFormState({ ...formState, [ prop ]: value });
+            setFormState(state => ({ ...state, [ prop ]: value }));
         }, [ setFormState ]),
         validation
     };
@@ -112,13 +110,9 @@ type FormInputValues = {
 export type BookingDetailsData = FormValues;
 
 export type BookingDetailsProps = PropsWithStyleBase & {
-    initialCountry?: {
-        name: string;
-        code: CountryCode;
-    };
     onSubmit?: FormProps<FormValues>[ 'onSubmit' ];
     onInputChange?: FormProps<FormValues>[ 'onInputChange' ];
-} & CardProps;
+} & CardProps & Partial<FormValues>;
 
 
 
@@ -128,20 +122,22 @@ const getCountryOptionsWithSearch = (options: Pick<DropdownOption, 'value'>[], s
 };
 
 
-export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ initialCountry, ...props }) => {
-    const { setPropFormState, validation } = useForm({ phoneCountry: initialCountry.code });
+export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = props => {
+    const [ cardProps, { onSubmit: handleSummit, onInputChange: handleInputChange, ...formData } ] = partition(props, CardProps);
+
+    const { setPropFormState, validation } = useForm({ phoneCountry: formData.country });
 
     const onSubmit: FormProps<FormInputValues>[ 'onSubmit' ] = useCallback((values => {
         const data = Object.entries(values).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as FormValues);
-        props.onSubmit?.(data);
-    }), [ props.onSubmit ]);
+        handleSummit?.(data);
+    }), [ handleSummit ]);
 
 
     const onInputChange = useCallback((name: keyof FormValues, value: FormValues) => {
-        props.onInputChange?.(name, value);
-    }, [ props.onInputChange ]);
+        handleInputChange?.(name, value);
+    }, [ handleInputChange ]);
 
-    const [ cardProps ] = fragments(props, CardProps);
+
     const formRef = useRef<FormImperativeAPI>(null);
 
     return (
@@ -155,11 +151,11 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
             <Form submitButtonText="Ok" validation={validation} onSubmit={onSubmit} onInputChange={onInputChange} ref={formRef}>
 
                 <InputGroup>
-                    <TextInput autoComplete="given-name" label="First name" name="firstName" />
-                    <TextInput autoComplete="family-name" label="Last name" name="lastName" />
+                    <TextInput autoComplete="given-name" label="First name" name="firstName" value={formData.firstName} />
+                    <TextInput autoComplete="family-name" label="Last name" name="lastName" value={formData.lastName} />
                 </InputGroup>
 
-                <TextInput autoComplete="email" label="Email" name="email" />
+                <TextInput autoComplete="email" label="Email" name="email" value={formData.email} />
 
                 <InputGroup>
                     <PhoneInput
@@ -167,7 +163,8 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
                         label="Phone number"
                         name="phoneNumber"
                         autoComplete="tel"
-                        defaultCountry={initialCountry.code}
+                        defaultCountry={formData.country}
+                        value={formData.phoneNumber}
                         onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [ setPropFormState ])} />
 
                     <Dropdown
@@ -175,7 +172,7 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
                         label="Country"
                         name="country"
                         options={countriesOptions}
-                        value={initialCountry.code}
+                        value={formData.country}
                         isClearable={false}
                         noResultsText="No country"
                         getOptionsWithSearch={getCountryOptionsWithSearch}
@@ -185,7 +182,7 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
                 </InputGroup>
 
 
-                <TextArea label="Comments" name="comment" maxCharacters={4000} />
+                <TextArea label="Comments" name="comment" maxCharacters={4000} value={formData.comment} />
             </Form>
         </Card>
     );
@@ -193,8 +190,5 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = ({ i
 
 BookingDetails.displayName = 'BookingDetails';
 BookingDetails.defaultProps = {
-    initialCountry: {
-        name: 'France',
-        code: 'FR'
-    }
+    country: 'FR'
 };

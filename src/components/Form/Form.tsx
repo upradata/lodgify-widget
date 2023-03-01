@@ -49,8 +49,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
             value: value
         });
 
-        props.onInputChange?.(name, value);
-    }, [ setInputState, props.onInputChange ]);
+    }, [ setInputState ]);
 
 
     const handleSubmit = useCallback(() => {

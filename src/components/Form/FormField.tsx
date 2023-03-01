@@ -17,6 +17,11 @@ export type ParentImperativeApi = {
     validation: FormProps[ 'validation' ];
 };
 
+const isPrimitiveElement = (element: React.ReactElement | string | number | boolean): string | number | boolean => {
+    return typeof element === 'string' || typeof element === 'number' || typeof element === 'boolean';
+};
+
+// const isObjectElement = (element: React.ReactElement | string | number | boolean): React.ReactElement => !isPrimitiveElement(element);
 
 export const FormField: React.FunctionComponent<ParentImperativeApi & { children: React.ReactChild | boolean; }> = ({ children, ...props }) => {
     if (!children)
@@ -26,13 +31,15 @@ export const FormField: React.FunctionComponent<ParentImperativeApi & { children
         throw new Error(`FormField accetps only one child and ${React.Children.count(children)} has been specified.`);
 
 
-    if (typeof children === 'string' || typeof children === 'number' || typeof children === 'boolean') {
+    if (isPrimitiveElement(children)) {
         return <InputField>{children}</InputField>;
     }
 
-    if (children.type === InputGroup) {
-        return React.cloneElement(children, {
-            children: React.Children.map(children.props.children, nestedChild => <FormField {...props}>{nestedChild}</FormField>),
+    const _children = children as React.ReactElement; // for typing
+
+    if (_children.type === InputGroup) {
+        return React.cloneElement(_children, {
+            children: React.Children.map(_children.props.children, c => <FormField {...props}>{c}</FormField>),
             widths: 'equal'
         });
     }
@@ -40,14 +47,20 @@ export const FormField: React.FunctionComponent<ParentImperativeApi & { children
     const { state, ...parent } = props;
 
     return (
-        <_InputField inputState={state[ children.props.name ]} parent={parent} isInputField={children.type === InputField}>
-            {children}
+        <_InputField inputState={state[ _children.props.name ]} parent={parent} isInputField={_children.type === InputField}>
+            {_children}
         </_InputField>
     );
 };
 
 type InputFieldChild = Exclude<React.ReactElement<InputControllerProps & { onBlur?: InputProps[ 'onBlur' ]; }>, string>;
 
+const reactChildComponent = (element: React.ReactElement) => {
+    if (!React.Children.only(element))
+        throw new Error(`React element does not have only one child`);
+
+    return React.Children.toArray(element.props.children)[ 0 ] as React.ReactElement;
+};
 
 export const _InputField: React.FunctionComponent<{
     // input: InputElement;
@@ -55,12 +68,12 @@ export const _InputField: React.FunctionComponent<{
     inputState: FormValues;
     isInputField: boolean;
     parent: Omit<ParentImperativeApi, 'state'>;
-}> = ({ /* input */children: input, inputState, isInputField, parent }) => {
+}> = ({ /* input */children: inputOrField, inputState, isInputField, parent }) => {
 
-    const { name } = input.props;
+    const { name } = isInputField ? reactChildComponent(inputOrField)?.props || {} : inputOrField.props;
 
     useEffect(() => {
-        const { value } = input.props;
+        const { value } = inputOrField.props;
 
         if (!value)
             return;
@@ -73,38 +86,33 @@ export const _InputField: React.FunctionComponent<{
             else
                 parent.setInputState(name, { value, error: inputValidation.invalidMessage });
         }
-    }, [ parent.validation, parent.setInputState, input.props, name ]);
+    }, [ /* parent.validation, parent.setInputState, inputOrField.props, name */ ]);
 
 
-    const onBlur = useCallback(() => parent.handleInputBlur(name), [ parent.handleInputBlur ]);
+    const onBlur = useCallback(() => parent.handleInputBlur(name), [ name, parent.handleInputBlur ]);
 
-    const onChange = useCallback((name: string, value: unknown) => {
+    const onChange = useCallback((_name: string, value: unknown) => {
         parent.handleInputChange(name, value);
-        input.props.onChange?.(name, value);
-    }, [ parent.handleInputChange, input.props.onChange ]);
+        inputOrField.props.onChange?.(name, value);
+    }, [ name, parent.handleInputChange, inputOrField.props.onChange ]);
 
 
     const element = useMemo(() => {
+        const input = isInputField ? reactChildComponent(inputOrField) : null;
+
         return isInputField && React.cloneElement(
-            input,
-            { width: getInputWidth(input), ...input.props },
-            React.Children.map(input, child => {
-                if (typeof child === 'string' || typeof child === 'number' || typeof child === 'boolean')
-                    return child;
-
-                const c = child as React.ReactElement;
-
-                return React.cloneElement(c, {
-                    ...c.props,
-                    onBlur,
-                    onChange,
-                    ...inputState
-                });
+            inputOrField,
+            { width: getInputWidth(input), ...inputOrField.props },
+            isPrimitiveElement(input) ? input : React.cloneElement(input, {
+                ...input.props,
+                onBlur,
+                onChange,
+                ...inputState
             }));
-    }, [ input, onChange, onBlur, inputState ]);
+    }, [ isInputField, inputOrField, onChange, onBlur, inputState ]);
 
 
-    const children = useMemo(() => !isInputField && React.cloneElement(input, {
+    const children = useMemo(() => !isInputField && React.cloneElement(inputOrField, {
         /* onBlur: () => parent.handleInputBlur(name),
         onChange: (name: string, value: unknown) => {
             parent.handleInputChange(name, value);
@@ -113,11 +121,11 @@ export const _InputField: React.FunctionComponent<{
         onBlur,
         onChange,
         ...inputState
-    }), [ input, onChange, onBlur, inputState ]);
+    }), [ isInputField, inputOrField, onChange, onBlur, inputState ]);
 
 
     if (element)
         return element;
 
-    return <InputField width={getInputWidth(input)}>{children}</InputField>;
+    return <InputField width={getInputWidth(inputOrField)}>{children}</InputField>;
 };

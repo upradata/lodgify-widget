@@ -54,7 +54,7 @@ const reservationReducer: React.Reducer<Reservation, { type: ReservationReducerT
                     return value ? setState({ roomValue: value as BookingDataValueOf<'location'> }) : reservation;
             }
 
-            break; // to be sure
+            throw new Error(`Reducer action "${type}" with payload name "${name}" doest not exist.`);
         }
 
         case 'request-info': {
@@ -93,10 +93,10 @@ const reservationReducer: React.Reducer<Reservation, { type: ReservationReducerT
             }
 
             return reservation;
-
-            break;
         }
     }
+
+    throw new Error(`Reducer action "${type}" doest not exist.`);
 };
 
 
@@ -108,7 +108,7 @@ export const useReservation = (room: RoomData) => {
             const newReservation = reservationReducer(reservation, { type: 'change-input', name, value });
             return reservationReducer(newReservation, { type: 'request-info', room, previousReservation: reservation, setReservation });
         });
-    }, [ reservation, setReservation ]);
+    }, [ room, reservation, setReservation ]);
 
     return { setReservation: updateReservation, reservation };
 };

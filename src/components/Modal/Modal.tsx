@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Modal as LodgifyModal, ModalProps as LodgifyModalProps } from '@lodgify/ui';
 import { partition } from '../../util';
-import { BreakpointRange, BreakPoints } from '../MediaQuery';
 import './Modal.scss';
 import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
 
@@ -64,11 +63,6 @@ const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps
     );
 };
 
-{/* <BreakPoints breakpoints={breakpoints} onActive={bp => setBp(bp as BP)}>
-            {bp && <LodgifyModal {...lodgifyModalProps} isFullscreen={bp.data.size === 'small'} size="small">
-                {children}
-            </LodgifyModal>}
-        </BreakPoints> */}
 
 _Modal.displayName = 'Modal';
 

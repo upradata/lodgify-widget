@@ -36,8 +36,7 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
         }, [ setDetails ]);
 
 
-        const onSubmit: BookingProps[ 'onSubmit' ] = useCallback((a, b) => {
-            console.log(a, b);
+        const onSubmit: BookingProps[ 'onSubmit' ] = useCallback(() => {
             console.log(reservation, details);
         }, [ reservation, details ]);
         /*  useCallback(() => {

@@ -2,10 +2,9 @@
 import isEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useState } from 'react';
 // import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import { Button } from '@lodgify/ui';
 // import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
 import { usePrevious } from '../../util';
-import { Form, FormProps } from '../Form';
+import { FormProps } from '../Form';
 import { ChangeInputData, InputDataNames, InputDataValues } from './PropertyBookingForm.type';
 import { PropertyBookingFormContent, PropertyBookingFormContentProps } from './PropertyBookingFormContent';
 import './PropertyBookingForm.scss';
@@ -52,9 +51,6 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
     const onInputChange = useCallback((name: InputDataNames, value: InputDataValues) => {
         setState(state => {
             const newState = { ...state, [ name ]: value };
-            /* console.log('persistInputChange-START');
-            console.log(prev, { [ name ]: value }, newState);
-            console.log('persistInputChange-END'); */
             props.onInputChange?.(name, value, newState);
             return newState;
         });
@@ -80,19 +76,13 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
                 location: props.locationInputValue
             };
 
-            /*  console.log('previous--current', 'START');
-             console.log(previousInputValueProps, currentInputValueProps); */
-
             if (!isEqual(previousInputValueProps, currentInputValueProps)) {
-                // console.log('CHANGED');
                 setState(prev => ({ ...prev, ...currentInputValueProps }));
             }
-            // console.log('previous--current', 'END');
         }
     }, [ props, previousProps ]);
 
 
-    // const breakpoints = useMemo(() => [ { min: 0, max: 1300, className: 'small' }, { min: 1301, className: 'large' } ]/* [ 600, 800, 1000, 1200 ] */, []);
     const formProps: PropertyBookingFormContentProps = {
         datesInputValue: state.dates,
         guestsInputValue: state.guests,

@@ -19,7 +19,7 @@ const _InputController: React.FunctionComponent<InputControllerProps> = ({
 
     const handleChange = useCallback((...args: any[]) => {
         onChange(name, adaptOnChangeEvent.apply(null, args));
-    }, [ name, adaptOnChangeEvent ]);
+    }, [ name, onChange, adaptOnChangeEvent ]);
 
     return (
         <Input className={classnames({

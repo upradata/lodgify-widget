@@ -56,8 +56,6 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         popupId: props.guestsPopupId
     };
 
-    /* if (!!size(props.locationOptions))
-        return; */
 
     const searchButton: FormProps[ 'searchButton' ] = useCallback(({ isDisabled }) => (
         <Button isDisabled={isDisabled} isFormSubmit isPositionedRight isRounded>
@@ -103,7 +101,7 @@ PropertyBookingFormContent.defaultProps = {
     locationOptions: null,
     maximumGuestsInputValue: undefined,
     // searchButton: <Button icon={ICON_NAMES.SEARCH} isFormSubmit isRounded>{SEARCH}</Button>,
-    willLocationDropdownOpenAbove: false,
+    willLocationDropdownOpenAbove: true,
     onInputChange: () => { }
 };
 

@@ -11,40 +11,31 @@ export type FormProps<Values = unknown> = Omit<LodgifyFormProps<Values>, 'headin
 };
 
 
-export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validation'>) => {
+export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'>) => {
 
     const [ state, setState ] = useState<FormValues>({});
-
-    // const previousState = usePrevious(state);
-    // const previousProps = usePrevious(props);
-
-    /* const updateSetState = (prevState: FormState, inputName: string, inputState: FormState[ string ]) => ({
-        ...prevState,
-        [ inputName ]: {
-            ...prevState[ inputName ],
-            ...inputState
-        }
-    }); */
 
     const setInputState = useCallback((inputName: string, inputState: FormValue) => {
         if (!inputState)
             return;
 
-        // const pState = previousState || {};
-
         setState(state => {
             const inputStateWithData = getInputStateWithData(inputName, { ...state[ inputName ], ...inputState }, state);
 
-            return inputStateWithData ? {
-                ...state,
-                [ inputName ]: inputStateWithData
-            } : state;
-        });
-        //  if (prevState)
-        //  updateSetState(previousState || {}, inputName, inputState);
+            if (inputStateWithData) {
+                const newState = {
+                    ...state,
+                    [ inputName ]: inputStateWithData
+                };
 
-        // return setState(prevState => updateSetState(prevState, inputName, inputState));
-    }, [ setState ]);
+                props.onInputChange?.(inputName, inputStateWithData.value);
+                return newState;
+            }
+
+            return state;
+        });
+    }, [ setState, props.onInputChange ]);
+
 
     const getInputStateWithData = (inputName: string, inputState: FormValue, previousState: FormValues) => {
         const previousInputState = previousState?.[ inputName ] || {};
@@ -80,12 +71,6 @@ export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validati
         }
     }, [ props.successMessage ]);
 
-
-    /* useEffect(() => {
-        Object.entries(state).forEach(([ inputName, inputState ]) => {
-            setInputState(inputName, getInputState(inputName, inputState));
-        });
-    }, [ state ]); */
 
     return { state, setState, setInputState };
 };

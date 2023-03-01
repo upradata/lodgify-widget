@@ -68,14 +68,16 @@ export type PhoneIputProps = Omit<Partial<ReactPhoneNumberProps>, 'value' | 'onC
     // name?: string;
     // onBlur?: () => any;
     // onChange?: (name: string, value: string) => any;
+    initialValue?: string;
     value?: string;
-} & InputProps;
+} & InputProps<string>;
 
 export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
+    const metadata = props.metadata || phoneMetadata as MetadataJson;
 
     const [ state, setState ] = useState({
         // labels: getLabels(props.countryNames),
-        value: INITIAL_VALUE,
+        value: getControlledInputValue(props.value, props.initialValue, props.value),
         countryISO: props.defaultCountry
     });
 
@@ -102,7 +104,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
 
     const { error, isValid, label, name, onChange: _o, value: _v, ...reactPhoneInputProps } = props;
 
-    const value = getControlledInputValue(props.value, INITIAL_VALUE, state.value);
+    const value = getControlledInputValue(props.value, props.initialValue, state.value);
 
     const inputControllerProps: Omit<InputControllerProps, 'children'> = {
         error,
@@ -127,14 +129,14 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
             setState(state => ({ ...state, countryISO }));
             props.onCountryChange?.(countryISO);
         }, [ props.onCountryChange, setState ]),
-        metadata: phoneMetadata as MetadataJson,
         labels,
         focusInputOnCountrySelection: true,
         smartCaret: false,
         numberInputProps: useMemo(() => ({
             placeholder: label
         }), [ label ]),
-        ...reactPhoneInputProps
+        ...reactPhoneInputProps,
+        metadata
         // flagComponent: Flag(phoneMetadata as MetadataJson),
     };
 
@@ -188,5 +190,5 @@ PhoneInput.defaultProps = {
     name: '',
     // onBlur: () => { },
     // onChange: () => { },
-    value: INITIAL_VALUE
+    initialValue: INITIAL_VALUE
 };
