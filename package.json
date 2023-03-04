@@ -1,5 +1,6 @@
 {
-    "name": "my-app",
+    "name": "@uprdata/lodgify-widget",
+    "description": "A React Lodgify Widget",
     "version": "0.1.0",
     "private": true,
     "scripts": {
