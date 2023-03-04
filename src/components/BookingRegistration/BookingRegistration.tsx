@@ -1,13 +1,16 @@
-import classnames from 'classnames';
-import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Modal, Summary, SummaryProps } from '@lodgify/ui';
-import { ModalProps } from '../../@types/@lodgify/ui/types';
-import { fragments } from '../../util';
-import { Bar } from '../Bar';
-import { BreakPoint } from '../MediaQuery/BreakPoint';
-import { PropertyBooking, PropertyBookingForm } from '../PropertyBooking';
-import { BookingForm, BookingFormProps } from './BookingForm';
 import './BookingRegistration.scss';
+
+import React, { useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import { Modal } from '@lodgify/ui';
+import classnames from 'classnames';
+// import { Bar } from '../Bar';
+import { BookingForm, BookingFormProps } from './BookingForm';
+import { BreakPoint } from '../MediaQuery/BreakPoint';
+import { fragments } from '../../util';
+import { ModalProps } from '../../@types/@lodgify/ui/types';
+
+
+// import { PropertyBooking, PropertyBookingForm } from '../PropertyBooking';
 
 
 type BookingModalProps = Omit<ModalProps, 'children'> & { hasBar?: 'bottom' | 'top' | false; } & BookingFormProps;

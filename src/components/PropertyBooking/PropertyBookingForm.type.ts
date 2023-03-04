@@ -1,5 +1,6 @@
 import { DateRange } from '@lodgify/ui';
 
+
 export type ChangeInputData = {
     dates: DateRange;
     guests: number;

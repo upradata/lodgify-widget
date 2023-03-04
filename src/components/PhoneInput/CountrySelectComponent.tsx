@@ -1,15 +1,16 @@
-// import parsePhoneNumber from 'libphonenumber-js';
-import { CountryCode } from 'libphonenumber-js/core';
+import 'react-phone-number-input/style.css';
+
 import React, { memo, useCallback, useMemo } from 'react';
-import { InputProps as SemanticInputProps } from 'semantic-ui-react';
 import { Dropdown, DropdownProps } from '@lodgify/ui';
 import { getDiallingCode } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getDiallingCode.js';
 import { getOptionsWithSearch } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getOptionsWithSearch.js';
+// import parsePhoneNumber from 'libphonenumber-js';
+import { CountryCode } from 'libphonenumber-js/core';
+import { InputProps as SemanticInputProps } from 'semantic-ui-react';
 // import { FlagComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/FlagComponent';
 // import { CountrySelectComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/CountrySelectComponent';
 // import { getAllOptions } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getAllOptions.js';
 import CountryIcon from '../../../node_modules/react-phone-number-input/modules/CountryIcon.js';
-import 'react-phone-number-input/style.css';
 
 
 export type CountrySelectComponentProps = {

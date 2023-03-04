@@ -1,7 +1,8 @@
-import { Loader } from 'semantic-ui-react';
-import { Button, ButtonProps, TextPlaceholder } from '@lodgify/ui';
-import { localizedPrice } from '../../util';
 import React from 'react';
+import { Button, ButtonProps, TextPlaceholder } from '@lodgify/ui';
+import { Loader } from 'semantic-ui-react';
+import { localizedPrice } from '../../util';
+
 
 type ButtonPriceProps = {
     price?: number;

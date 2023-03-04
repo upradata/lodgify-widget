@@ -1,29 +1,32 @@
 import moment, { Moment } from 'moment';
+import { DailyRates, LodgifyDate } from '../lodgify-requests';
 import * as requests from '../lodgify-requests';
-import { LodgifyDate, DailyRates } from '../lodgify-requests';
-import { RoomData, roomsData } from '../rooms.data';
-import { Range } from '../types';
 import { round } from '../util';
+
+import type { Range } from '../types';
+import type { RoomData } from '../rooms.data';
 
 
 type _Requests = typeof requests;
+
+export type RequestNames = { [ K in keyof _Requests ]: _Requests[ K ] extends Function ? K : never }[ keyof _Requests ];
 export type Requests = {
-    [ K in keyof _Requests ]: _Requests[ K ] extends Function ? _Requests[ K ] : never;
+    [ K in RequestNames ]: _Requests[ K ];
 };
 
-export type RequestNames = keyof Requests;
 
-export type LodgifyInfoOption<T> = T | ((roomData: RoomData) => T);
+export type LodgifyInfoOption<T extends {}> = T | ((roomData: RoomData) => T);
 export type RequestOption<R extends RequestNames> = Parameters<Requests[ R ]>[ 0 ];
 export type RequestReturn<R extends RequestNames> = ReturnType<Requests[ R ]>;
 
-export const getLodgifyInfo = <R extends RequestNames>(roomValue: string, request: R, options: LodgifyInfoOption<RequestOption<R>>): RequestReturn<R> => {
-    const roomData = roomsData.find(l => l.value === roomValue);
 
-    if (!roomData)
-        return Promise.resolve({ type: 'error', error: new Error(`There is no room with value "${roomValue}"`) } as requests.RequestError) as any;
+export const getLodgifyInfo = <R extends RequestNames>(/* roomValue: string,  */request: R, options: LodgifyInfoOption<RequestOption<R>>): RequestReturn<R> => {
+    // const roomData = getRoomDataByValue(roomValue);
 
-    return requests[ request ]((typeof options === 'function' ? options(roomData) : options) as any) as any;
+    /*  if (!roomData)
+         return Promise.resolve({ type: 'error', error: new Error(`There is no room with value "${roomValue}"`) } as requests.RequestError) as any; */
+    return requests[ request ](options as any) as any;
+    //  return requests[ request ]((typeof options === 'function' ? options(roomData) : options) as any) as any;
 };
 
 

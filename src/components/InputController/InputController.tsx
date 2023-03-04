@@ -1,11 +1,11 @@
-import classnames from 'classnames';
 import React, { cloneElement, createRef, memo, useCallback } from 'react';
-import Input from 'semantic-ui-react/dist/es/elements/Input/Input.js';
-import { InputControllerProps } from '@lodgify/ui';
-import { returnFirstArgument } from '@lodgify/ui/lib/es//utils/return-first-argument';
 import { ErrorMessage } from '@lodgify/ui/lib/es/components/inputs/ErrorMessage';
 import { getValueFromEvent } from '@lodgify/ui/lib/es/components/inputs/InputController/utils/getValueFromEvent';
+import { InputControllerProps } from '@lodgify/ui';
+import { returnFirstArgument } from '@lodgify/ui/lib/es/utils/return-first-argument';
 import { some } from '@lodgify/ui/lib/es/utils/some';
+import classnames from 'classnames';
+import Input from 'semantic-ui-react/dist/es/elements/Input/Input.js';
 
 
 const ICON_POSITION = 'left';

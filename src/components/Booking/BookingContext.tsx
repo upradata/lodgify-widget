@@ -1,5 +1,7 @@
 import { createContext } from 'react';
-import { RoomsData, RoomData } from '../../rooms.data';
+
+import type { RoomData, RoomsData } from '../../rooms.data';
+
 
 export const BookingContext = createContext<{
     getRoom: (roomValue: string) => RoomData;

@@ -1,19 +1,20 @@
-import React, { useCallback, useImperativeHandle, useMemo } from 'react';
-import SemanticForm from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import Message from 'semantic-ui-react/dist/es/collections/Message/Message.js';
-// import Card from 'semantic-ui-react/dist/es/views/Card/Card.js';
-import { Button, FormValue, FormValues, Link, Validation } from '@lodgify/ui';
+import './Form.scss';
+
+import React, { useCallback, useImperativeHandle, useMemo, memo } from 'react';
 import { getEmptyRequiredInputs as _getEmptyRequiredInputs } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyRequiredInputs';
 import { getIsSubmitButtonDisabled as _getIsSubmitButtonDisabled } from '@lodgify/ui/lib/es/components/collections/Form/utils/getIsSubmitButtonDisabled';
 import { getValidationWithDefaults as _getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
+// import Card from 'semantic-ui-react/dist/es/views/Card/Card.js';
+import { Button, FormValue, FormValues, Link, Validation } from '@lodgify/ui';
+import { forEach } from '@lodgify/ui/lib/es/utils/for-each';
 // import { setInputState } from '@lodgify/ui/lib/es/components/collections/Form/utils/setInputState';
 import { SEND } from '@lodgify/ui/lib/es/utils/default-strings';
-import { forEach } from '@lodgify/ui/lib/es/utils/for-each';
 import { size } from '@lodgify/ui/lib/es/utils/size';
-import { FormProps, useFormState } from './Form.state';
-import { /* getFormField */FormField, ParentImperativeApi } from './FormField';
-import './Form.scss';
 import classnames from 'classnames';
+import Message from 'semantic-ui-react/dist/es/collections/Message/Message.js';
+import SemanticForm from 'semantic-ui-react/dist/es/collections/Form/Form.js';
+import { FormField, ParentImperativeApi } from './FormField';
+import { FormProps, useFormState } from './Form.state';
 
 
 export type { FormProps } from './Form.state';
@@ -31,7 +32,7 @@ export type FormImperativeAPI = {
 };
 
 
-const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, ...props }, ref) => {
+const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, submitButtonText, ...props }, ref) => {
     const { state, setInputState } = useFormState(props);
 
     useImperativeHandle(ref, () => ({ setInputState }), [ setInputState ]);
@@ -77,21 +78,6 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
 
     const { autoComplete, errorMessage, successMessage, actionLink } = props;
 
-    const getButton = () => {
-        if (!searchButton) {
-            return (
-                <Button isDisabled={getIsSubmitButtonDisabled(state)} isFormSubmit isPositionedRight isRounded>
-                    {props.submitButtonText || SEND}
-                </Button>
-            );
-        }
-
-        if (typeof searchButton === 'function')
-            return searchButton({ isDisabled: getIsSubmitButtonDisabled(state) });
-
-        return searchButton;
-    };
-
     return (
         <SemanticForm autoComplete={autoComplete} error={!!errorMessage} success={!!successMessage} onSubmit={handleSubmit} className={classnames('Form', className)}>
             {React.Children.map(props.children as FormProps[ 'children' ], child => <FormField {...imperativeInterfaceForChildren}>{child}</FormField>
@@ -103,10 +89,33 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
             {errorMessage && <Message content={errorMessage} error />}
             {actionLink && <Link onClick={actionLink.onClick}>{actionLink.text}</Link>}
 
-            {getButton()}
+            <FormButton searchButton={searchButton} submitButtonText={submitButtonText} isDisabled={getIsSubmitButtonDisabled(state)} />
         </SemanticForm>
     );
 };
+
+
+const _FormButton: React.FunctionComponent<Pick<FormProps, 'searchButton' | 'submitButtonText'> & { isDisabled?: boolean; }> = ({
+    searchButton, submitButtonText, isDisabled
+}) => {
+    if (!searchButton) {
+        return (
+            <Button isDisabled={isDisabled} isFormSubmit isPositionedRight isRounded>
+                {submitButtonText || SEND}
+            </Button>
+        );
+    }
+
+    if (typeof searchButton === 'function')
+        return searchButton({ isDisabled });
+
+    return searchButton;
+};
+
+_FormButton.displayName = 'FormButton';
+const FormButton = memo(_FormButton);
+
+
 
 
 _Form.displayName = 'Form';

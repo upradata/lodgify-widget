@@ -1,13 +1,13 @@
+import './PropertyBookingForm.scss';
 
-import isEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useState } from 'react';
+// import isEqual from 'fast-deep-equal';
+import { ChangeInputData, InputDataNames, InputDataValues } from './PropertyBookingForm.type';
+import { FormProps } from '../Form';
+import { PropertyBookingFormContent, PropertyBookingFormContentProps } from './PropertyBookingFormContent';
 // import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
 // import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
-import { usePrevious } from '../../util';
-import { FormProps } from '../Form';
-import { ChangeInputData, InputDataNames, InputDataValues } from './PropertyBookingForm.type';
-import { PropertyBookingFormContent, PropertyBookingFormContentProps } from './PropertyBookingFormContent';
-import './PropertyBookingForm.scss';
+// import { usePrevious } from '../../util';
 
 
 // type InputDataValueOf<Name extends InputDataNames> = ChangeInputData[ Name ];
@@ -22,7 +22,7 @@ export type PropertyBookingFormProps = Omit<PropertyBookingFormContentProps, 'on
 };
 
 
-export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = props => {
+export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = ({ onSubmit, onInputChange: onChange, ...props }) => {
     // const [ isDropdownOpenAbove, setDropdownOpenAbove ] = useState(willLocationDropdownOpenAbove);
 
     /* const ref = useRef<HTMLDivElement>();
@@ -47,22 +47,32 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
         // willLocationDropdownOpenAbove
     });
 
+    const [ stateNameChanged, onStateNameChanged ] = useState<{ name: InputDataNames | null; }>({ name: null });
 
     const onInputChange = useCallback((name: InputDataNames, value: InputDataValues) => {
         setState(state => {
             const newState = { ...state, [ name ]: value };
-            props.onInputChange?.(name, value, newState);
+            // onChange?.(name, value, newState);
             return newState;
         });
-    }, [ props.onInputChange, setState ]);
 
-
-    const handleSubmit = () => { props.onSubmit?.(state); };
-
-
-    const previousProps = usePrevious(props);
+        onStateNameChanged({ name });
+    }, [ /* onChange, */ onStateNameChanged, setState ]);
 
     useEffect(() => {
+        const { name } = stateNameChanged;
+
+        if (name)
+            onChange?.(name, state[ name ], state);
+    }, [ stateNameChanged, onChange ]);
+
+
+    const handleSubmit = useCallback(() => { onSubmit?.(state); }, [ onSubmit, state ]);
+
+
+    // const previousProps = usePrevious(props);
+
+    /* useEffect(() => {
         if (previousProps) {
             const previousInputValueProps = {
                 dates: previousProps.datesInputValue,
@@ -80,14 +90,14 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
                 setState(prev => ({ ...prev, ...currentInputValueProps }));
             }
         }
-    }, [ props, previousProps ]);
+    }, [ props, previousProps ]); */
 
 
     const formProps: PropertyBookingFormContentProps = {
+        ...props,
         datesInputValue: state.dates,
         guestsInputValue: state.guests,
         locationInputValue: state.location,
-        ...props,
         willLocationDropdownOpenAbove: props.willLocationDropdownOpenAbove,
         onSubmit: handleSubmit,
         onInputChange: onInputChange
@@ -95,7 +105,7 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
 
     return (
         <div className="PropertyBookingForm">
-            <PropertyBookingFormContent  {...formProps} willLocationDropdownOpenAbove={props.willLocationDropdownOpenAbove ?? true /* || isDropdownOpenAbove */} />
+            <PropertyBookingFormContent {...formProps} willLocationDropdownOpenAbove={props.willLocationDropdownOpenAbove ?? true /* || isDropdownOpenAbove */} />
         </div>
     );
 };

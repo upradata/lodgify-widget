@@ -1,8 +1,9 @@
+import './Modal.scss';
+
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Modal as LodgifyModal, ModalProps as LodgifyModalProps } from '@lodgify/ui';
-import { partition } from '../../util';
-import './Modal.scss';
 import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
+import { partition } from '../../util';
 
 
 class _ModalProps {

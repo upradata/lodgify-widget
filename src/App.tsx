@@ -1,9 +1,9 @@
+import './App.css';
+
 import React, { Profiler, useState } from 'react';
 import { Viewport } from '@lodgify/ui';
 import { Booking } from './components/Booking';
 import { roomsData } from './rooms.data';
-import './App.css';
-
 
 
 // window.global = { process: { env: {} } as any } as any; // NodeJS.ProcessEnv

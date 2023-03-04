@@ -10,10 +10,10 @@ import {
     LocationOptions,
     SearchBarFieldsProps
 } from '@lodgify/ui';
-import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
-import { Form, FormProps, InputField } from '../Form';
+import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { ChangeInputData } from './PropertyBookingForm.type';
+import { Form, FormProps, InputField } from '../Form';
 
 
 // import { size } from '@lodgify/ui/lib/es/utils/size';
@@ -57,26 +57,39 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
     };
 
 
-    const searchButton: FormProps[ 'searchButton' ] = useCallback(({ isDisabled }) => (
+    /* const searchButton: FormProps[ 'searchButton' ] = useCallback(({ isDisabled }) => (
         <Button isDisabled={isDisabled} isFormSubmit isPositionedRight isRounded>
             Search
         </Button>
     ), []);
 
 
-    const button = <div className="button-container">{props.searchButton || searchButton}</div>;
+    const button = <div className="button-container">{props.searchButton || searchButton}</div>; */
 
     return (
         <Form className="inputs-container"
             onSubmit={props.onSubmit}
             onInputChange={props.onInputChange}
-            searchButton={button}>
+            searchButton={<FormButton isDisabled={false} searchButton={props.searchButton} />}>
 
             <InputField className="input-container location-input-container"><Dropdown icon={ICON_NAMES.MAP_PIN} name="location" {...dropdownProps} /></InputField>
             <InputField className="input-container dates-input-container"><DateRangePicker name="dates" {...dateRangePickerProps} /></InputField>
             <InputField className="input-container guests-input-container"><CounterDropdown name="guests" {...counterDropdownProps} /></InputField>
 
         </Form>
+    );
+};
+
+
+const FormButton: React.FunctionComponent<{ isDisabled: boolean; searchButton: FormProps[ 'searchButton' ]; }> = ({ isDisabled, searchButton }) => {
+    return (
+        <div className="button-container">{
+            searchButton ||
+            <Button isDisabled={isDisabled} isFormSubmit isPositionedRight isRounded>
+                Search
+            </Button>
+        }
+        </div>
     );
 };
 

@@ -1,23 +1,23 @@
-import { Moment } from 'moment';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { Icon, LocationOptions, Summary } from '@lodgify/ui';
-import { SummaryProps } from '../../@types/@lodgify/ui/types';
-import { lodgifyDateToMoment } from '../../lodgify-info/info';
-import { LodgifyDate } from '../../lodgify-requests';
-import { RoomData } from '../../rooms.data';
-import { isDateInRange, localizedDate, localizedPrice } from '../../util';
-import { Bar } from '../Bar';
-import { BookingProps } from '../Booking/BookingComponent';
-import { BookingContext } from '../Booking/BookingContext';
-import { Reservation } from '../Booking/reservation.type';
-import { BookingDetails, BookingDetailsData, BookingDetailsProps } from '../BookingDetails/BookingDetails';
-import { Modal } from '../Modal';
-import { PropertyBookingForm, PropertyBookingFormProps } from './PropertyBookingForm';
-import { PropertySearchData } from './PropertyBookingForm.type';
-import { PropertyBookingButton } from './PropertySearchButton';
 // import 'semantic-ui-css/semantic.min.css';
 import 'semantic-ui-css/components/loader.css';
 import './PropertyBooking.scss';
+
+import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { Icon, LocationOptions, Summary } from '@lodgify/ui';
+import { Moment } from 'moment';
+import { Bar } from '../Bar';
+import { BookingContext } from '../Booking/BookingContext';
+import { BookingDetails, BookingDetailsData, BookingDetailsProps } from '../BookingDetails/BookingDetails';
+import { BookingProps } from '../Booking/BookingComponent';
+import { isDateInRange, localizedDate, localizedPrice } from '../../util';
+import { LodgifyDate } from '../../lodgify-requests';
+import { lodgifyDateToMoment } from '../../lodgify-info/info';
+import { Modal } from '../Modal';
+import { PropertyBookingButton } from './PropertySearchButton';
+import { PropertyBookingForm, PropertyBookingFormProps } from './PropertyBookingForm';
+import { Reservation } from '../Booking/reservation.type';
+import { SummaryProps } from '../../@types/@lodgify/ui/types';
+import { RoomState } from '../../rooms.state';
 
 
 export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReservationChange, onReservationDetailsChange, onSubmit, ...reservation }) => {
@@ -133,7 +133,7 @@ const BookingSubHeader: React.FunctionComponent<{ price: number; nbGuest: number
 
 type UseBookingProps = {
     reservation: Reservation;
-    room: RoomData;
+    room: RoomState;
     locationOptions: LocationOptions[];
     onInputChange: PropertyBookingFormProps[ 'onInputChange' ];
 };
@@ -147,9 +147,9 @@ const useBookingProps = ({ reservation, room, locationOptions, onInputChange }: 
     }, [ room.periodsNonAvailable ]);
 
 
-    const { nbGuests, price, isLoading, roomValue, startDate, endDate } = reservation;
+    const { nbGuests, isLoading, quote, roomValue, startDate, endDate } = reservation;
 
-    const bookButton = <PropertyBookingButton price={nbGuests * price} isLoading={isLoading} />;
+    const bookButton = <PropertyBookingButton price={quote ? nbGuests * quote.totalGross : undefined} isLoading={isLoading} />;
 
     const searchProps: PropertyBookingFormProps = {
         // isFixed: true,
@@ -179,7 +179,7 @@ const useBookingProps = ({ reservation, room, locationOptions, onInputChange }: 
 
     const summaryProps: SummaryProps = {
         locationName: 'Za Rohom',
-        pricePerPeriod: room.price ? localizedPrice(room.price.min_price) : '?',
+        pricePerPeriod: room.price ? localizedPrice(room.price.minPrice) : '?',
         pricePerPeriodPrefix: 'from',
         propertyName: room.name || 'Room',
         ratingNumber: room.rating || 4.5,

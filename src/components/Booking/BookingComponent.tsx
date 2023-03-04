@@ -1,6 +1,6 @@
-import { CountryCode } from 'libphonenumber-js';
-import { DateRange } from '@lodgify/ui';
-import { Reservation } from './reservation.type';
+import type { DateRange } from '@lodgify/ui';
+import type { CountryCode } from 'libphonenumber-js';
+import type { Reservation } from './reservation.type';
 
 
 export type BookingData = {

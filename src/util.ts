@@ -186,3 +186,6 @@ export const debounce = <Fn extends Function>(fn: Fn, wait: number = 0, immediat
 
     return debouncedFn as any;
 };
+
+
+export const getElementList = <T>(list: T[], select: (item: T) => boolean): T | undefined => list.find(select);

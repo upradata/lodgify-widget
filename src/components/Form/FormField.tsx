@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import SemanticForm from 'semantic-ui-react/dist/es/collections/Form/Form.js';
 import { FormValue, FormValues, InputControllerProps, InputGroup, InputProps } from '@lodgify/ui';
 import { getInputWidth } from '@lodgify/ui/lib/es/components/collections/Form/utils/getInputWidth';
 import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
+import SemanticForm from 'semantic-ui-react/dist/es/collections/Form/Form.js';
 import { FormProps } from './Form.state';
 
 

@@ -1,9 +1,11 @@
+import 'react-phone-number-input/style.css';
+// import { Flag } from './Flag';
+import './PhoneInput.scss';
 
-// import parsePhoneNumber from 'libphonenumber-js';
-import { CountryCode, MetadataJson } from 'libphonenumber-js/core';
+// import { getAllOptions } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getAllOptions.js';
+import phoneMetadata from '../../libphonenumber-metadata.custom.json';
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
-import { InputControllerProps, InputProps } from '@lodgify/ui';
 // import { InputController } from '@lodgify/ui/lib/es/components/inputs/InputController';
 import { DEFAULT_COUNTRY, INITIAL_VALUE } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/constants';
 // import { FlagComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/FlagComponent';
@@ -11,20 +13,20 @@ import { DEFAULT_COUNTRY, INITIAL_VALUE } from '@lodgify/ui/lib/es/components/in
 // import { getLabels } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getLabels';
 import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
 import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
-import labels from '../../../node_modules/react-phone-number-input/locale/en.json.js';
-// import { getAllOptions } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getAllOptions.js';
-import phoneMetadata from '../../libphonenumber-metadata.custom.json';
-import { usePreviousListener } from '../../util';
-import { InputController } from '../InputController';
+import { InputControllerProps, InputProps } from '@lodgify/ui';
+// import parsePhoneNumber from 'libphonenumber-js';
+import { CountryCode, MetadataJson } from 'libphonenumber-js/core';
+import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
 import { CountrySelectComponent } from './CountrySelectComponent';
-import 'react-phone-number-input/style.css';
-// import { Flag } from './Flag';
-import './PhoneInput.scss';
-
+import { InputController } from '../InputController';
+import labels from '../../../node_modules/react-phone-number-input/locale/en.json.js';
+import { usePreviousListener } from '../../util';
 
 // import { createPhoneInput } from 'react-phone-number-input/modules/react-hook-form/PhoneInputWithCountry';
 // import _ReactPhoneNumberInput from 'react-phone-number-input/react-hook-form-core';
 import type { Labels, Metadata, Props as _ReactPhoneNumberProps } from 'react-phone-number-input';
+
+
 // const metadata = new Metadata(phoneMetadata as MetadataJson);
 // const ReactPhoneNumberInput = createPhoneInput(metadata);
 
@@ -65,6 +67,7 @@ export type PhoneIputProps = Omit<Partial<ReactPhoneNumberProps>, 'value' | 'onC
     // initialCountryValue?: string;
     isValid?: boolean;
     label?: string;
+    isBlurred?: boolean;
     // name?: string;
     // onBlur?: () => any;
     // onChange?: (name: string, value: string) => any;
@@ -102,9 +105,9 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
     }, [ addPropsValueListener, setState ]);
 
 
-    const { error, isValid, label, name, onChange: _o, value: _v, ...reactPhoneInputProps } = props;
+    const { error, isValid, label, isBlurred, name, onChange: _o, value: _v, initialValue, ...reactPhoneInputProps } = props;
 
-    const value = getControlledInputValue(props.value, props.initialValue, state.value);
+    const value = getControlledInputValue(props.value, initialValue, state.value);
 
     const inputControllerProps: Omit<InputControllerProps, 'children'> = {
         error,

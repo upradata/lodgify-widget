@@ -31,3 +31,6 @@ export class DateRange<T = string>{
 export type Typify<T> = {
     [ K in keyof T ]: T[ K ]
 };
+
+
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;

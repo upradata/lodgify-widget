@@ -1,10 +1,11 @@
-import classnames from 'classnames';
+import './Card.scss';
+
 import React from 'react';
+import { Heading, Paragraph } from '@lodgify/ui';
+import classnames from 'classnames';
 // import Card from 'semantic-ui-react/dist/es/views/Card/Card.js';
 import { Card as SemanticCard, Image } from 'semantic-ui-react';
-import { Heading, Paragraph } from '@lodgify/ui';
 import { PropsWithStyleBase } from '../../util.types';
-import './Card.scss';
 
 
 export class CardProps extends PropsWithStyleBase {

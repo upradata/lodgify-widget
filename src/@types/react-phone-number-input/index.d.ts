@@ -1,5 +1,5 @@
 declare module 'react-phone-number-input/modules/react-hook-form/PhoneInputWithCountry' {
-import PhoneInputWithCountrySelect from 'react-phone-number-input/react-hook-form-core';
+    import PhoneInputWithCountrySelect from 'react-phone-number-input/react-hook-form-core';
 
 
     import type { Metadata } from 'libphonenumber-js/core';

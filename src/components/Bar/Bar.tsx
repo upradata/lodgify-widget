@@ -1,8 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { BreakPoint, /* BreakpointRange, BreakPoints */ } from '../MediaQuery/MediaQuery';
-import { BarContainer, BarContentainerProps, Size } from './BarContentainer';
 import './Bar.scss';
-import { MediaQuery } from '../MediaQuery/MediaQuery';
+
+import React, { useCallback, useMemo, useState } from 'react';
+import { BarContainer, BarContentainerProps, Size } from './BarContentainer';
+import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
 
 
 export type BarProps = BarContentainerProps;

@@ -1,8 +1,10 @@
+import './BookingView.scss';
+
 import React, { useState } from 'react';
 import { Button } from '@lodgify/ui';
 import { PropertyBooking } from '../PropertyBooking';
-import { BookingProps } from './BookingComponent';
-import './BookingView.scss';
+
+import type { BookingProps } from './BookingComponent';
 
 
 export const BookingView: React.FunctionComponent<BookingProps> = props => {

@@ -1,17 +1,19 @@
-import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
-import { Moment } from 'moment';
+import './BookingDetails.scss';
+
+import countriesData from '../../countries-metadata.json';
+
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Dropdown, DropdownProps, FormValue, InputGroup, TextInput } from '@lodgify/ui';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
-import countriesData from '../../countries-metadata.json';
+import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
+import { Moment } from 'moment';
+import { Card, CardProps } from '../Card';
+import { DateRange, PropsWithStyleBase } from '../../util.types';
+import { Form, FormImperativeAPI, FormProps } from '../Form';
 import { LodgifyDate } from '../../lodgify-requests';
 import { partition } from '../../util';
-import { DateRange, PropsWithStyleBase } from '../../util.types';
-import { Card, CardProps } from '../Card';
-import { Form, FormImperativeAPI, FormProps } from '../Form';
 import { PhoneInput } from '../PhoneInput';
-import './BookingDetails.scss';
 
 
 type DropdownOption = DropdownProps[ 'options' ][ number ] & { key?: string; };

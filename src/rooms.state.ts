@@ -1,15 +1,41 @@
 import { useCallback, useState } from 'react';
-import { getLodgifyInfo, getPeriodsNonAvailable, RequestOption } from './lodgify-info/info';
-import { PropertyInfoPrice } from './lodgify-requests/types';
-import { RoomData, RoomsData, RoomValues } from './rooms.data';
+import { getAvailability, getPropertyInfo } from './lodgify-requests';
+import {
+    getPeriodsNonAvailable,
+    RequestOption,
+} from './lodgify-info/info';
+
+import type { Moment } from 'moment';
+import type { RoomData, RoomsData, RoomValue } from './rooms.data';
 
 
-export const roomsDataAsObject = (rooms: RoomData[]) => rooms.reduce((o, room) => {
-    return { ...o, [ room.value ]: room };
+export type RoomInfo = {
+    periodsNonAvailable?: { start: Moment; end: Moment; }[];
+    price?: { minPrice: number; maxPrice: number; };
+    rating?: number;
+};
+
+
+export type RoomState = RoomInfo & RoomData;
+export type RoomsState = Record<string, RoomState>;
+
+
+const initialRoomsState = (rooms: RoomData[]): RoomsState => rooms.reduce((o, room) => {
+    return {
+        ...o,
+        [ room.value ]: {
+            ...room,
+            ...{
+                periodsNonAvailable: [],
+                price: undefined,
+                rating: undefined
+            } as RoomInfo
+        }
+    };
 }, {} as RoomsData);
 
 
-export const setRoom = (data: { rooms: RoomsData, room: Partial<RoomData>; roomValue: RoomValues; }) => ({
+export const setRoom = (data: { rooms: RoomsState, room: Partial<RoomState>; roomValue: RoomValue; }) => ({
     ...data.rooms,
     [ data.roomValue ]: {
         ...data.rooms[ data.roomValue ],
@@ -18,41 +44,32 @@ export const setRoom = (data: { rooms: RoomsData, room: Partial<RoomData>; roomV
 });
 
 export type UpdateRoomAction = |
-{
-    type: 'request-property-availability'; payload: { roomValue: RoomValues; } & Omit<RequestOption<'getAvailability'>, 'propertyId'>;
-} |
-{
-    type: 'request-property-info'; payload: { roomValue: RoomValues; } & Omit<RequestOption<'getPropertyInfo'>, 'propertyId'>;
-} |
-{
-    type: 'request-property-price'; payload: { roomValue: RoomValues; } & Omit<RequestOption<'getDailyRates'>, 'propertyId'>;
-};
+    { type: 'request-property-availability'; roomValue: RoomValue; } & Omit<RequestOption<'getAvailability'>, 'propertyId'> |
+    { type: 'request-property-info'; roomValue: RoomValue; } & Omit<RequestOption<'getPropertyInfo'>, 'propertyId'>;
 
 
 export const useRoomState = (roomsList: RoomData[]) => {
-    const [ rooms, _setRooms ] = useState(roomsDataAsObject(roomsList));
+    const [ rooms, _setRooms ] = useState<RoomsState>(initialRoomsState(roomsList));
 
     const updateRoom = useCallback(async (action: UpdateRoomAction) => {
         switch (action.type) {
             case 'request-property-availability': {
-                const { roomValue, start, end } = action.payload;
+                const { roomValue, start, end } = action;
+                const { propertyId } = rooms[ roomValue ];
 
-                if (!!rooms[ roomValue ].periodsNonAvailable)
-                    return;
-
-                const perdiods = await getLodgifyInfo(roomValue, 'getAvailability', ({ propertyId }) => ({
-                    propertyId, start, end //  start: '2023-01-01', end: '2024-01-01'
-                })).then(res => {
+                const periodsNonAvailable = await getAvailability({
+                    propertyId, start, end
+                }).then(res => {
                     if (res.type === 'success')
                         return getPeriodsNonAvailable(res.json[ 0 ]);
                 });
 
-                if (perdiods) {
+                if (periodsNonAvailable) {
                     _setRooms(rooms => setRoom({
                         rooms,
                         roomValue,
                         room: {
-                            periodsNonAvailable: perdiods
+                            periodsNonAvailable
                         }
                     }));
                 }
@@ -61,15 +78,15 @@ export const useRoomState = (roomsList: RoomData[]) => {
             }
 
             case 'request-property-info': {
-                const { roomValue } = action.payload;
+                const { roomValue } = action;
                 const room = rooms[ roomValue ];
 
-                if (room.price !== undefined && room.rating !== undefined)
+                if (room.price !== undefined && room.rating !== undefined && room.image !== undefined)
                     return;
 
-                const propertyInfo = await getLodgifyInfo(roomValue, 'getPropertyInfo', ({ propertyId }) => ({
-                    propertyId
-                })).then(res => {
+                const { propertyId } = rooms[ roomValue ];
+
+                const propertyInfo = await getPropertyInfo({ propertyId }).then(res => {
                     if (res.type === 'success')
                         return res.json;
                 });
@@ -79,10 +96,12 @@ export const useRoomState = (roomsList: RoomData[]) => {
                         rooms,
                         roomValue,
                         room: {
-                            price: Object.entries(propertyInfo).reduce((o, [ k, v ]) => {
-                                return k.includes('price') ? { ...o, [ k ]: v } : o;
-                            }, {} as PropertyInfoPrice),
-                            rating: propertyInfo.rating
+                            price: {
+                                minPrice: propertyInfo.min_price,
+                                maxPrice: propertyInfo.max_price
+                            },
+                            rating: propertyInfo.rating,
+                            image: rooms[ roomValue ].image || propertyInfo.image_url
                         }
                     }));
                 }
@@ -90,13 +109,13 @@ export const useRoomState = (roomsList: RoomData[]) => {
             }
 
             default:
-                throw new Error();
+                throw new Error(`Action type "${(action as UpdateRoomAction).type}" is not handled!`);
         }
     }, [ rooms, _setRooms ]);
 
     return {
         rooms,
         setRoom: updateRoom,
-        getRoom: useCallback((roomValue: RoomValues) => rooms[ roomValue ], [ rooms ])
+        getRoom: useCallback((roomValue: RoomValue) => rooms[ roomValue ], [ rooms ])
     };
 };

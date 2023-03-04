@@ -1,11 +1,10 @@
-import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
-import moment, { Moment } from 'moment';
+import countriesData from '../../countries-metadata.json';
+
 import React, { useCallback, useMemo, useState } from 'react';
 import {
     DateRangePicker,
     Dropdown,
     DropdownProps,
-    Form as LodgifyForm,
     FormProps,
     InputGroup,
     LocationOptions,
@@ -14,14 +13,16 @@ import {
 } from '@lodgify/ui';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
-import countriesData from '../../countries-metadata.json';
-import { lodgifyDateToMoment } from '../../lodgify-info/info';
-import { LodgifyDate } from '../../lodgify-requests';
-import { RoomValues } from '../../rooms.data';
-import { DateRange, PropsWithStyleBase } from '../../util.types';
+import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
+import moment, { Moment } from 'moment';
 import { Card } from '../Card';
+import { DateRange, PropsWithStyleBase } from '../../util.types';
 import { Form } from '../Form';
+import { lodgifyDateToMoment } from '../../lodgify-info/info';
 import { PhoneInput } from '../PhoneInput';
+import { RoomValue } from '../../rooms.data';
+
+import type { LodgifyDate } from '../../lodgify-requests';
 
 
 type DropdownOption = DropdownProps[ 'options' ][ number ] & { key?: string; };
@@ -147,7 +148,7 @@ export class BookingFormProps extends PropsWithStyleBase {
     };
     location = {
         options: undefined as LocationOptions[],
-        value: undefined as RoomValues
+        value: undefined as RoomValue
     };
     price: number;
     dates = new DateRange<LodgifyDate | Moment>() as BookingRegisrationDate;
@@ -207,7 +208,7 @@ export const BookingForm: React.FunctionComponent<BookingFormProps> = ({
             subHeader="sub-header very very very very long"
             description="Fill in the form to validate the booking. At the end of the process, you will receive a confirmation email.">
 
-            <Form submitButtonText="Submit" validation={validation} onSubmit={onSubmit} >
+            <Form submitButtonText="Submit" validation={validation} onSubmit={onSubmit}>
 
                 {/* <Paragraph>
                     Fill in the form to validate the booking. At the end of the process, you will receive a confirmation email.

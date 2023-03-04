@@ -1,8 +1,8 @@
-import isEqual from 'fast-deep-equal';
-import { useEffect, useState, useCallback } from 'react';
-import { FormProps as LodgifyFormProps, FormValue, FormValues } from '@lodgify/ui';
+import { useCallback, useEffect, useState } from 'react';
 import { getEmptyState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyState';
 import { getErroredState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getErroredState';
+import { FormProps as LodgifyFormProps, FormValue, FormValues } from '@lodgify/ui';
+import isEqual from 'fast-deep-equal';
 
 
 export type FormProps<Values = unknown> = Omit<LodgifyFormProps<Values>, 'headingText'> & {
@@ -11,9 +11,20 @@ export type FormProps<Values = unknown> = Omit<LodgifyFormProps<Values>, 'headin
 };
 
 
-export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'>) => {
+export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'> & { callOnIputChangedAfterFirstRender?: boolean; };
+
+export const useFormState = (props: UseFormStateProps) => {
 
     const [ state, setState ] = useState<FormValues>({});
+    const [ stateNameChanged, onStateNameChanged ] = useState<{ name: string | null; }>({ name: null });
+
+    useEffect(() => {
+        const { name } = stateNameChanged;
+
+        if (name)
+            props.onInputChange?.(name, (state[ name ] as FormValue).value);
+    }, [ stateNameChanged, props.onInputChange ]);
+
 
     const setInputState = useCallback((inputName: string, inputState: FormValue) => {
         if (!inputState)
@@ -28,7 +39,7 @@ export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validati
                     [ inputName ]: inputStateWithData
                 };
 
-                props.onInputChange?.(inputName, inputStateWithData.value);
+                onStateNameChanged({ name: inputName });
                 return newState;
             }
 
@@ -37,7 +48,7 @@ export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validati
     }, [ setState, props.onInputChange ]);
 
 
-    const getInputStateWithData = (inputName: string, inputState: FormValue, previousState: FormValues) => {
+    const getInputStateWithData = useCallback((inputName: string, inputState: FormValue, previousState: FormValues) => {
         const previousInputState = previousState?.[ inputName ] || {};
 
         switch (true) {
@@ -59,7 +70,7 @@ export const useFormState = (props: Pick<FormProps, 'successMessage' | 'validati
             default:
                 break;
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (!!props.successMessage) {

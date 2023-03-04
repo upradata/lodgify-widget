@@ -1,6 +1,6 @@
-import classnames from 'classnames';
 import React from 'react';
 import { HorizontalGutters, VerticalGutters } from '@lodgify/ui';
+import classnames from 'classnames';
 
 
 export type Size = 'small' | 'large';
