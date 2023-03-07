@@ -3,14 +3,13 @@ import 'semantic-ui-css/components/loader.css';
 import './PropertyBooking.scss';
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { Icon, LocationOptions, Summary } from '@lodgify/ui';
+import { LocationOptions, Summary } from '@lodgify/ui';
 import { Moment } from 'moment';
 import { Bar } from '../Bar';
 import { BookingContext } from '../Booking/BookingContext';
 import { BookingDetails, BookingDetailsData, BookingDetailsProps } from '../BookingDetails/BookingDetails';
 import { BookingProps } from '../Booking/BookingComponent';
-import { isDateInRange, localizedDate, localizedPrice } from '../../util';
-import { LodgifyDate } from '../../lodgify-requests';
+import { isDateInRange, localizedPrice } from '../../util';
 import { lodgifyDateToMoment } from '../../lodgify-info/info';
 import { Modal } from '../Modal';
 import { PropertyBookingButton } from './PropertySearchButton';
@@ -18,7 +17,9 @@ import { PropertyBookingForm, PropertyBookingFormProps } from './PropertyBooking
 import { Reservation } from '../Booking/reservation.type';
 import { SummaryProps } from '../../@types/@lodgify/ui/types';
 import { RoomState } from '../../rooms.state';
-
+import { PropertyBookingHeader } from './PropertyBookingHeader';
+import { PropertyBookingSubHeader } from './PropertyBookingSubHeader';
+import { BookingSummary } from '../BookingSummary/BookingSummary';
 
 export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReservationChange, onReservationDetailsChange, onSubmit, ...reservation }) => {
     const { getRoom, rooms } = useContext(BookingContext);
@@ -76,59 +77,18 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
 
             <Modal isOpen={isBookingDetailsOpen} onOpenChange={useCallback(isOpen => { setIsBookingDetailsOpen(isOpen); }, [])}>
                 <BookingDetails
-                    header={<BookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
-                    subHeader={<BookingSubHeader price={100} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
+                    header={<PropertyBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
+                    subHeader={<PropertyBookingSubHeader price={reservation.quote.totalGross} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
                     onInputChange={onBookingDetailFormInputChange}
                     onSubmit={onBookingDetailsSubmit}
                     {...details} />
+
+                <BookingSummary {...reservation}></BookingSummary>
             </Modal>
         </div>
     );
 };
 
-
-PropertyBooking.displayName = 'PropertyBooking';
-
-
-const dateAsString = (date: LodgifyDate) => localizedDate(lodgifyDateToMoment(date));
-
-const BookingHeader: React.FunctionComponent<{ roomName: string; startDate: LodgifyDate; endDate: LodgifyDate; }> = ({ roomName, startDate, endDate }) => {
-    return (
-        <div className="BookingHeader vertical-baseline">
-            <span className="BookingHeader__location">{roomName}</span>
-
-            <div className="BookingHeader__dates vertical-center">
-                <span>{dateAsString(startDate)}</span>
-                <Icon name="arrow right" />
-                <span>{dateAsString(endDate)}</span>
-            </div>
-        </div>
-    );
-};
-
-
-const plural = (n: number, s: string) => `${s}${n > 1 ? 's' : ''}`;
-
-const BookingSubHeader: React.FunctionComponent<{ price: number; nbGuest: number; nbNights: number; }> = ({ price, nbGuest, nbNights }) => {
-
-    return (
-        <div className="BookingSubHeader vertical-center">
-            <div className="BookingSubHeader__guests vertical-center" style={{ gap: 2 }}>
-                <span style={{ marginTop: 1 }}>{nbGuest}x</span>
-                <Icon name="guests" />
-            </div>
-
-            <div className="BookingSubHeader__nights vertical-center">
-                ｜ <span>{nbNights} {plural(nbNights, 'night')}</span>
-            </div>
-
-            <div className="BookingSubHeader__price vertical-center" style={{ color: '#4b4b4b', marginLeft: 20 }}>
-                {/* <Icon name="caret right" /> */}
-                <span className="BookingSubHeader__price">{localizedPrice(price)}</span>
-            </div>
-        </div>
-    );
-};
 
 
 type UseBookingProps = {
@@ -156,6 +116,7 @@ const useBookingProps = ({ reservation, room, locationOptions, onInputChange }: 
         // isStackable: true,
         searchButton: bookButton,
         getIsDayBlocked,
+        minimumNights: room.minStay,
         // modalTrigger: <Button isPositionedRight isRounded isCompact>Check Availability</Button>,
         // summaryElement: <div>Property Information</div>,
         // modalSummaryElement: <div>Property information for mobile modal</div>,

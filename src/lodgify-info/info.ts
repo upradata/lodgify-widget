@@ -1,7 +1,7 @@
 import moment, { Moment } from 'moment';
 import { DailyRates, LodgifyDate } from '../lodgify-requests';
 import * as requests from '../lodgify-requests';
-import { round } from '../util';
+import { localizedDate, round } from '../util';
 
 import type { Range } from '../types';
 import type { RoomData } from '../rooms.data';
@@ -47,6 +47,7 @@ export const getPeriodsNonAvailable = (availibities: requests.Availibity) => ava
 }));
 
 
+export const dateAsString = (date: LodgifyDate) => localizedDate(lodgifyDateToMoment(date));
 
 
 export const getReservationPrice = (rates: DailyRates, dateRange: Range<Moment>) => {

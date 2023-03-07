@@ -4,7 +4,7 @@ import { getNbOfNights } from '../../util';
 import { getQuote, GetQuoteOptions } from '../../lodgify-requests';
 import { lodgifyDateToMoment, momentToLodgifyDate } from '../../lodgify-info/info';
 import { PriceType, QuotePrice, QuotePriceType } from '../../lodgify-requests/quote.type';
-import { Reservation, ReservationQuote, ReservationQuotePriceDetails, ReservationQuoteSubPricesWithCategory } from './reservation.type';
+import { Reservation, ReservationQuote, ReservationQuoteRoomPriceDetails, ReservationQuoteRoomCategoryPrices, ReservationDebug } from './reservation.type';
 
 import type { Omit } from '../../util.types';
 import type { RoomData } from '../../rooms.data';
@@ -135,35 +135,36 @@ const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> 
                         return res.json[ 0 ];
                 }).then(quote => {
 
-                    const getSubprices = (prices: QuotePrice[]): ReservationQuoteSubPricesWithCategory[ 'subPrices' ] => {
+                    const getSubprices = (prices: QuotePrice[]): ReservationQuoteRoomCategoryPrices[ 'items' ] => {
                         return prices.map(({ amount, description }) => ({ price: amount, description }));
                     };
 
-                    const getSubPricesPerCategory = (priceTypes: PriceType[]): ReservationQuoteSubPricesWithCategory[] => {
+                    const getCategoriesPrices = (priceTypes: PriceType[]): ReservationQuoteRoomCategoryPrices[] => {
                         return priceTypes.map(({ prices, type, subtotal, description: category }) => ({
                             category,
                             type,
                             isRoomRate: type === QuotePriceType.RoomRate,
                             subTotal: subtotal,
-                            subPrices: getSubprices(prices)
+                            items: getSubprices(prices)
                         }));
                     };
 
-                    const priceDetails: ReservationQuotePriceDetails[] = quote.room_types.map(({ people: nbGuests, price_types }) => ({
+                    const roomsPriceDetails: ReservationQuoteRoomPriceDetails[] = quote.room_types.map(({ people: nbGuests, price_types, subtotal }) => ({
                         nbGuests,
                         roomValue: reservation.roomValue,
-                        subPricesPerCategory: getSubPricesPerCategory(price_types)
+                        categoriesPrices: getCategoriesPrices(price_types),
+                        subTotal: subtotal
                     }));
 
-                    const hasVat = !!quote.total_including_vat;
+                    const isPricesIncludesVat = !!quote.total_including_vat;
                     const totalGross = quote.amount_gross;
 
                     const reservationQuote: ReservationQuote = {
                         totalGross,
                         totalNet: quote.total_excluding_vat,
                         vat: quote.total_vat,
-                        hasVat,
-                        priceDetails
+                        isPricesIncludesVat,
+                        roomsPriceDetails
                     };
 
                     return reservationQuote;
@@ -184,7 +185,7 @@ const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> 
 
 
 export const useReservation = (initRoom: RoomData) => {
-    const [ reservation, setReservation ] = useState<Reservation>({ ...new Reservation(), nbGuests: 1, roomValue: initRoom.value, isLoading: false });
+    const [ reservation, setReservation ] = useState<Reservation>({ ...new ReservationDebug(), /* nbGuests: 1, roomValue: initRoom.value, */ isLoading: false });
 
     const updateReservation = useCallback((name: keyof BookingData, value: BookingData[ keyof BookingData ], room: RoomData) => {
         setReservation(reservation => {

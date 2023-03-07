@@ -1,10 +1,9 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
     Button,
     CounterDropdown,
     CounterDropdownProps,
-    DateRangePicker,
-    DateRangePickerProps,
+    // DateRangePickerProps,
     Dropdown,
     DropdownProps,
     LocationOptions,
@@ -12,6 +11,7 @@ import {
 } from '@lodgify/ui';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
+import { Calendar, CalendarProps } from '../Calendar';
 import { ChangeInputData } from './PropertyBookingForm.type';
 import { Form, FormProps, InputField } from '../Form';
 
@@ -22,7 +22,7 @@ export type PropertyBookingFormContentProps = Omit<SearchBarFieldsProps, 'locati
     locationOptions: LocationOptions[];
     onSubmit?: (data: ChangeInputData) => void;
     searchButton?: FormProps[ 'searchButton' ];
-};
+} & Pick<CalendarProps, 'minimumNights'>;
 
 export const PropertyBookingFormContent: React.FunctionComponent<PropertyBookingFormContentProps> = props => {
 
@@ -34,10 +34,11 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         willOpenAbove: props.willLocationDropdownOpenAbove
     };
 
-    const dateRangePickerProps: DateRangePickerProps = {
+    const calendarProps: CalendarProps /* DateRangePickerProps */ = {
         endDatePlaceholderText: props.datesCheckOutLabel,
         focusedInput: props.datesInputFocusedInput,
         getIsDayBlocked: props.getIsDayBlocked,
+        minimumNights: props.minimumNights,
         isCalendarIconDisplayed: props.isCalendarIconDisplayed,
         isLoading: props.isDateRangePickerLoading,
         localeCode: props.dateRangePickerLocaleCode,
@@ -73,7 +74,10 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
             searchButton={<FormButton isDisabled={false} searchButton={props.searchButton} />}>
 
             <InputField className="input-container location-input-container"><Dropdown icon={ICON_NAMES.MAP_PIN} name="location" {...dropdownProps} /></InputField>
-            <InputField className="input-container dates-input-container"><DateRangePicker name="dates" {...dateRangePickerProps} /></InputField>
+            <InputField className="input-container dates-input-container">
+                {/* <DateRangePicker name="dates" {...dateRangePickerProps} /> */}
+                <Calendar name="dates" {...calendarProps} />
+            </InputField>
             <InputField className="input-container guests-input-container"><CounterDropdown name="guests" {...counterDropdownProps} /></InputField>
 
         </Form>

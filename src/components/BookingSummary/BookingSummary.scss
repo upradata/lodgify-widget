@@ -1,0 +1,39 @@
+.BookingSummary {
+    .accordion {
+        .title {
+            display: flex;
+            align-items: center;
+
+            .label {
+                margin-top: 2px;
+            }
+        }
+    }
+
+    .QuoteSummary {
+        margin-top: 40px;
+    }
+
+    .ui.table,
+    .ui.styled.accordion,
+    .ui.styled.accordion .accordion {
+        border-radius: 8px;
+    }
+
+    .ui.styled.accordion,
+    .ui.styled.accordion .accordion {
+        .ui.table {
+            border: none;
+        }
+    }
+
+    .ui.accordion .accordion .title > .icon,
+    .ui.accordion .title > .icon {
+        transition: transform 0.1s ease, opacity 0.1s ease;
+    }
+
+    .ui.accordion .accordion .active.title > .icon,
+    .ui.accordion .active.title > .icon {
+        transform: rotate(90deg);
+    }
+}

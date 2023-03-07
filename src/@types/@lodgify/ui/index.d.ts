@@ -122,20 +122,20 @@ declare module '@lodgify/ui' {
     export const Viewport: React.ComponentType<{ [ K: string ]: any; }>;
 
     export type DateRangePickerProps = PropsWithStyle<{
-        displayFormat?: string | Funtion;
+        displayFormat?: string | Function;
         endDatePlaceholderText?: string;
         error?: string | boolean;
         focusedInput?: null | 'startDate' | 'endDate';
-        getIsDayBlocked?: Funtion;
+        getIsDayBlocked?: Function;
         initialValue?: DateRange;
         isCalendarIconDisplayed?: boolean;
         isLoading?: boolean;
         isValid?: boolean;
         localeCode?: string;
         name?: string;
-        onBlur?: Funtion;
-        onChange?: Funtion;
-        onFocusChange?: Funtion;
+        onBlur?: Function;
+        onChange?: Function;
+        onFocusChange?: Function;
         startDatePlaceholderText?: string;
         value?: DateRange;
         willOpenAbove?: boolean;
@@ -160,13 +160,55 @@ declare module '@lodgify/ui' {
     export const VerticalGutters: React.ComponentType<{ [ K: string ]: any; }>;
 
 
+    type Directions = 'down' | 'left' | 'right' | 'up';
+
     export type IconProps = PropsWithStyle<{
         labelText?: string;
-        name?: string;
+        color?: 'black' | 'blue' | 'brown' | 'green' | 'grey' | 'light grey' | 'olive' | 'orange' | 'pink' | 'primary' | 'purple' | 'red' | 'teal' | 'violet' | 'yellow';
+        hasBorder?: boolean;
+        isButton?: boolean;
+        isCircular?: boolean;
+        isColorInverted?: boolean;
+        isDisabled?: boolean;
+        isLabelLeft?: boolean;
+        labelText?: string;
+        labelWeight?: 'heavy' | 'light',
+        name?: `arrow ${Directions}` | `chevron ${Directions}` | `caret ${Directions}` |
+        'baby crib' | 'bars' | 'bathroom' | 'bedroom door' |
+        'bed linen' | 'blog' | 'bus' | 'calendar' |
+        'checkmark' | 'checkmark circle' | 'check in' | 'check out' |
+        'coffee' | 'cooking' | 'couch' | 'credit card' |
+        'double bed' | 'entertainment' | 'facebook' | 'filter' |
+        'fire' | 'further info' | 'google plus' | 'guests' |
+        'heating' | 'home' | 'info' | 'instagram' |
+        'laundry' | 'leaf' | 'linkedin' | 'list' |
+        'location' | 'loft bed' | 'map pin' | 'minus' |
+        'no children' | 'parking' | 'paw' | 'phone' |
+        'pinterest' | 'placeholder' | 'plane' | 'plus' |
+        'port' | 'question mark' | 'road' | 'search' |
+        'single bed' | 'spinner' | 'square' | 'star' |
+        'sun' | 'train' | 'twitter' | 'underground' |
+        'users' | 'wheelchair' | 'wifi' | 'youtube';
         path?: string;
+        size?: 'mini' | 'tiny' | 'small' | 'large' | 'big' | 'huge' | 'massive';
     }>;
 
     export const Icon: React.ComponentType<IconProps>;
+
+
+    export type CheckboxProps = PropsWithStyle<{
+        isChecked?: boolean;
+        isCompact?: boolean;
+        isDisabled?: boolean;
+        isFluid?: boolean;
+        isLabelLeft?: boolean;
+        isRadioButton?: boolean;
+        isToggle?: boolean;
+        onClick?: Function,
+    }> & InputProps<boolean | string>;
+
+
+    export const Checkbox: React.ComponentType<CheckboxProps>;
 
     export type SearchFieldsProps = PropsWithStyle<{
         dateRangePickerLocaleCode?: string;
@@ -239,6 +281,7 @@ declare module '@lodgify/ui' {
         onChange?: (name: string, value: V) => any;
         width?: string;
         label?: string;
+        value?: V;
     };
 
     export type DropdownProps = PropsWithStyle<{

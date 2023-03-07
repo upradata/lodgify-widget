@@ -12,26 +12,80 @@ export class Reservation {
     quote?: ReservationQuote;
 };
 
+export class ReservationDebug {
+    roomValue?: string = 'carla';
+    nbOfNights?: number = 3;
+    startDate?: LodgifyDate = '2023-05-01';
+    endDate?: LodgifyDate = '2023-05-01';
+    // price?: number;
+    nbGuests: number = 3;
+    isLoading?: boolean;
+    quote?: ReservationQuote = {
+        totalGross: 1000,
+        totalNet: null,
+        vat: 20,
+        isPricesIncludesVat: true,
+        roomsPriceDetails: [
+            {
+                nbGuests: 3,
+                roomValue: 'carla',
+                categoriesPrices: [
+                    {
+                        category: 'RoomRate',
+                        type: QuotePriceType.RoomRate,
+                        isRoomRate: true,
+                        subTotal: 700,
+                        items: [
+                            { price: 700, description: 'Rate' }
+                        ]
+                    },
+                    {
+                        category: 'Promotion',
+                        type: QuotePriceType.Promotion,
+                        isRoomRate: false,
+                        subTotal: -210,
+                        items: [
+                            { price: -210, description: 'Doggy Promo' }
+                        ]
+                    },
+                    {
+                        category: 'Taxes',
+                        type: QuotePriceType.Tax,
+                        isRoomRate: false,
+                        subTotal: 66.5,
+                        items: [
+                            { price: 59.5, description: 'Local Tax' },
+                            { price: 7.0, description: 'Online Service Tax' }
+                        ]
+                    }
+                ],
+                subTotal: 1000
+            }
+        ]
+    };
+};
 
-export type ReservationQuoteSubPricesWithCategory = {
+
+export type ReservationQuoteRoomCategoryPrices = {
     category: string;
     type: QuotePriceType;
     isRoomRate: boolean;
     subTotal: number;
-    subPrices: { price: number; description: string; }[];
+    items: { price: number; description: string; }[];
 };
 
 
-export type ReservationQuotePriceDetails = {
+export type ReservationQuoteRoomPriceDetails = {
     nbGuests: number;
     roomValue: string;
-    subPricesPerCategory: ReservationQuoteSubPricesWithCategory[];
+    categoriesPrices: ReservationQuoteRoomCategoryPrices[];
+    subTotal: number;
 };
 
 export type ReservationQuote = {
     totalGross: number;
     totalNet: number;
     vat: number;
-    hasVat: boolean;
-    priceDetails: ReservationQuotePriceDetails[];
+    isPricesIncludesVat: boolean;
+    roomsPriceDetails: ReservationQuoteRoomPriceDetails[];
 };

@@ -1,5 +1,7 @@
 import { Addon, Availibity, DailyRates, LodgifyDate, PropertyInfo, Quote } from './types';
 import { Range } from '../types';
+import { RatesSettings } from './rates-settings';
+import { RoomInfo } from './room-info.type';
 
 
 // API at https://docs.lodgify.com/reference/
@@ -100,8 +102,8 @@ const createRequest = <T = unknown>(verb: string, options: Options, version: Lod
 };
 
 
-const createRequestV1 = <T = unknown>(verb: string, options: Options) => createRequest<T>(verb, options, 'v1');
-const createRequestV2 = <T = unknown>(verb: string, options: Options) => createRequest<T>(verb, options, 'v2');
+const createRequestV1 = <T = unknown>(verb: string, options: Options = {}) => createRequest<T>(verb, options, 'v1');
+const createRequestV2 = <T = unknown>(verb: string, options: Options = {}) => createRequest<T>(verb, options, 'v2');
 
 
 export type DateRange = Range<LodgifyDate>;
@@ -113,13 +115,14 @@ export type DateRange = Range<LodgifyDate>;
 )); */
 
 
+export type GetAllAvailibitiesOptions = DateRange & { includeDetails?: boolean; };
+
 // 'https://api.lodgify.com/v2/availability?start=2023-02-01&end=2023-02-15&includeDetails=false'
-export const getAllAvailabilities = (options: DateRange & { includeDetails?: boolean; }) => createRequestV2('availability', options);
+export const getAllAvailabilities = (options: GetAllAvailibitiesOptions) => createRequestV2('availability', options);
 
 
-export const getAvailability = (options: DateRange & { includeDetails?: boolean; } & Required<Pick<Options, 'propertyId'>> & Pick<Options, 'roomTypeId'>) => {
-    return createRequestV2<Availibity[]>(`availability`, options);
-};
+export type GetAvailibityOptions = DateRange & { includeDetails?: boolean; } & Required<Pick<Options, 'propertyId'>> & Pick<Options, 'roomTypeId'>;
+export const getAvailability = (options: GetAvailibityOptions) => createRequestV2<Availibity[]>(`availability`, options);
 
 
 export type getDailyRatesOptions = DateRange & Required<Pick<Options, 'propertyId' | 'roomTypeId'>>;
@@ -131,16 +134,16 @@ export const getDailyRates = ({ propertyId, roomTypeId, start, end, ...options }
 );
 
 
-export type GetPropertyInfoProps = { includeInOut?: boolean; } & Required<Pick<Options, 'propertyId'>>;
+export type GetPropertyInfoOptions = { includeInOut?: boolean; } & Required<Pick<Options, 'propertyId'>>;
 
 // 'https://api.lodgify.com/v2/properties/432806?includeInOut=false'
-export const getPropertyInfo = (options: GetPropertyInfoProps) => createRequestV2<PropertyInfo>(`properties`, options);
+export const getPropertyInfo = (options: GetPropertyInfoOptions) => createRequestV2<PropertyInfo>(`properties`, options);
 
 
 export type GetRoomInfoProps = Required<Pick<Options, 'propertyId' | 'roomTypeId'>>;
 
 // 'https://api.lodgify.com/v2/properties/432806?includeInOut=false'
-export const getRoomInfo = (options: GetRoomInfoProps) => createRequestV2<PropertyInfo>(`properties`, options);
+export const getRoomInfo = ({ propertyId, roomTypeId }: GetRoomInfoProps) => createRequestV1<RoomInfo>(`properties/${propertyId}/rooms/${roomTypeId}`);
 
 
 export type GetQuoteOptions = DateRange & Required<Pick<Options, 'propertyId'>> & {
@@ -172,5 +175,11 @@ export const getQuote = ({ start, end, roomTypes, addOns, ...opts }: GetQuoteOpt
 
 // 'https://api.lodgify.com/v1/properties/436901/rates/addons?start=2023-03-01&end=2023-03-08'
 
-export type GetAddons = DateRange & Required<Pick<Options, 'propertyId'>>;
-export const getAddons = (options: GetAddons) => createRequestV1<Addon[]>(`properties`, options);
+export type GetAddonsOptions = DateRange & Required<Pick<Options, 'propertyId'>>;
+export const getAddons = (options: GetAddonsOptions) => createRequestV1<Addon[]>(`properties`, options);
+
+
+export type GetRatesSettingsOptions = Required<Pick<Options, 'propertyId'>>;
+
+// fetch('https://api.lodgify.com/v2/rates/settings?houseId=436901', options)
+export const getRatesSettings = (options: GetRatesSettingsOptions) => createRequestV2<RatesSettings>(`rates/settings`, { houseId: options.propertyId });

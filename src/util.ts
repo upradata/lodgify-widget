@@ -1,5 +1,5 @@
 import moment, { Moment } from 'moment';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 
 export const isInRange = (min: number, max: number) => (v: number) => min <= v && v <= max;
@@ -15,7 +15,7 @@ export const isDateInRange = (min: Moment, max: Moment) => (date: Moment) => {
 export const getNbOfNights = (start: Moment, end: Moment) => moment.duration(end.startOf('day').diff(start.startOf('day'))).asDays();
 
 
-export function usePrevious<T>(value: T, init: T = null): T | null {
+/* export function usePrevious<T>(value: T, init: T = null): T | null {
     const ref = useRef<T>(init);
 
     useEffect(() => {
@@ -23,16 +23,18 @@ export function usePrevious<T>(value: T, init: T = null): T | null {
     }, [ value ]);
 
     return ref.current;
-}
+} */
 
 export type NewValueListener<T> = (prevValue: T, newValue: T) => void;
 
-export function usePreviousListener<T>(value: T) {
-    const [ prevValue, setPrevValue ] = useState(value);
+export function usePreviousListener<T>(value: T, options: { init?: T | undefined | null; isSame?: (v1: T, v2: T) => boolean; } = {}) {
+    const { init = null, isSame = Object.is } = options;
+
+    const [ prevValue, setPrevValue ] = useState(init);
     // const [ listeners, setListeners ] = useState<NewValueListener<T>[]>([]);
     let listeners = useRef<NewValueListener<T>[]>([]);
 
-    if (prevValue !== value) {
+    if (isSame(prevValue, value)) {
         setPrevValue(value);
         listeners.current.forEach(listener => listener(prevValue, value));
     }
@@ -50,9 +52,9 @@ export function usePreviousListener<T>(value: T) {
 export const round = (num = 0, precision = 2) => +(Math.round(+`${num}e${precision}`) + `e-${precision}`);
 
 
-export const localizedPrice = (price: number) => new Intl.NumberFormat('fr', {
+export const localizedPrice = (price: number, currency: string = 'EUR') => new Intl.NumberFormat('fr', {
     style: 'currency',
-    currency: 'EUR',
+    currency,
     currencyDisplay: 'narrowSymbol',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -189,3 +191,17 @@ export const debounce = <Fn extends Function>(fn: Fn, wait: number = 0, immediat
 
 
 export const getElementList = <T>(list: T[], select: (item: T) => boolean): T | undefined => list.find(select);
+
+
+const isObjectOrArray = (v: unknown) => v !== null && typeof v === 'object';
+
+export const isSame = <T, U>(value1: T, value2: U): boolean => {
+    if (isObjectOrArray(value1) || isObjectOrArray(value2)) {
+        return Object.is(value1, value2);
+    }
+
+    return Object.entries(value1).every(([ k, v ]) => k in (value2 as {}) && v === value2[ k ]);
+};
+
+
+export const plural = (n: number, s: string) => `${s}${n > 1 ? 's' : ''}`;
