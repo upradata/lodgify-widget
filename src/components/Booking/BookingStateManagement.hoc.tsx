@@ -25,8 +25,9 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
 
         const context = useMemo(() => ({
             getRoom,
-            rooms
-        }), [ rooms, getRoom ]);
+            rooms,
+            reservation
+        }), [ rooms, getRoom, reservation ]);
 
 
         const onReservationChange: BookingProps[ 'onReservationChange' ] = useCallback(data => {

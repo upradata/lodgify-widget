@@ -83,6 +83,8 @@ export const useRoomState = (roomsList: RoomData[]) => {
                 }).then(res => {
                     if (res.type === 'success')
                         return getPeriodsNonAvailable(res.json[ 0 ]);
+                }).catch(err => {
+                    console.error(err);
                 });
 
                 if (periodsNonAvailable) {
@@ -93,70 +95,74 @@ export const useRoomState = (roomsList: RoomData[]) => {
             }
 
             case 'request-property-info': {
-                const room = rooms[ roomValue ];
+                try {
+                    const room = rooms[ roomValue ];
 
-                if (room.price !== undefined && room.rating !== undefined && room.image !== undefined)
-                    return;
+                    if (room.price !== undefined && room.rating !== undefined && room.image !== undefined)
+                        return;
 
-                const { propertyId, roomId: roomTypeId } = rooms[ roomValue ];
-                const today = momentToLodgifyDate(moment());
+                    const { propertyId, roomId: roomTypeId } = rooms[ roomValue ];
+                    const today = momentToLodgifyDate(moment());
 
-                const [ propertyInfo, roomInfo, dailyRates, rateSettings ] = await Promise.all([
-                    getPropertyInfo({ propertyId }).then(res => {
-                        if (res.type === 'success')
-                            return res.json;
-                    }),
-                    getRoomInfo({ propertyId, roomTypeId }).then(res => {
-                        if (res.type === 'success')
-                            return res.json;
-                    }),
-                    // To get the min_stay/max_stay, I have to get the "is_default": true" data from getDailyRates
-                    getDailyRates({ start: today, end: today, propertyId, roomTypeId }).then(res => {
-                        if (res.type === 'success')
-                            return res.json;
-                    }),
-                    getRatesSettings({ propertyId }).then(res => {
-                        if (res.type === 'success')
-                            return res.json;
-                    })
-                ]);
+                    const [ propertyInfo, roomInfo, dailyRates, rateSettings ] = await Promise.all([
+                        getPropertyInfo({ propertyId }).then(res => {
+                            if (res.type === 'success')
+                                return res.json;
+                        }),
+                        getRoomInfo({ propertyId, roomTypeId }).then(res => {
+                            if (res.type === 'success')
+                                return res.json;
+                        }),
+                        // To get the min_stay/max_stay, I have to get the "is_default": true" data from getDailyRates
+                        getDailyRates({ start: today, end: today, propertyId, roomTypeId }).then(res => {
+                            if (res.type === 'success')
+                                return res.json;
+                        }),
+                        getRatesSettings({ propertyId }).then(res => {
+                            if (res.type === 'success')
+                                return res.json;
+                        })
+                    ]);
 
-                if (propertyInfo) {
-                    setRoom({
-                        price: {
-                            minPrice: propertyInfo.min_price,
-                            maxPrice: propertyInfo.max_price
-                        },
-                        rating: propertyInfo.rating,
-                        image: rooms[ roomValue ].image || propertyInfo.image_url,
-                        minStay: propertyInfo.price_unit_in_days,
-                    });
-                }
-
-                if (roomInfo) {
-                    setRoom({ maxGuests: roomInfo.max_people });
-                }
-
-                if (dailyRates) {
-                    const defaultRates = dailyRates.calendar_items.find(item => item.is_default)?.prices.map(price => ({
-                        minStay: price.min_stay || 0,
-                        maxStay: price.max_stay || Infinity,
-                        pricePerDay: price.price_per_day
-                    }));
-
-                    if (defaultRates) {
+                    if (propertyInfo) {
                         setRoom({
-                            defaultRates,
-                            // minStay: defaultRates.reduce((min, { minStay }) => Math.min(min, minStay), Infinity),
-                            maxStay: defaultRates.reduce((max, { maxStay }) => Math.max(max, maxStay), 0),
+                            price: {
+                                minPrice: propertyInfo.min_price,
+                                maxPrice: propertyInfo.max_price
+                            },
+                            rating: propertyInfo.rating,
+                            image: rooms[ roomValue ].image || propertyInfo.image_url,
+                            minStay: propertyInfo.price_unit_in_days,
                         });
                     }
-                }
 
-                if (rateSettings) {
-                    setRoom({ vat: rateSettings.vat });
-                }
+                    if (roomInfo) {
+                        setRoom({ maxGuests: roomInfo.max_people });
+                    }
 
+                    if (dailyRates) {
+                        const defaultRates = dailyRates.calendar_items.find(item => item.is_default)?.prices.map(price => ({
+                            minStay: price.min_stay || 0,
+                            maxStay: price.max_stay || Infinity,
+                            pricePerDay: price.price_per_day
+                        }));
+
+                        if (defaultRates) {
+                            setRoom({
+                                defaultRates,
+                                // minStay: defaultRates.reduce((min, { minStay }) => Math.min(min, minStay), Infinity),
+                                maxStay: defaultRates.reduce((max, { maxStay }) => Math.max(max, maxStay), 0),
+                            });
+                        }
+                    }
+
+                    if (rateSettings) {
+                        setRoom({ vat: rateSettings.vat });
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                }
 
                 return;
             }

@@ -7,6 +7,7 @@ export type BookingData = {
     dates: DateRange;
     guests: number;
     location: string;
+    promotionCode?: string;
 };
 
 export class BookingDetails {

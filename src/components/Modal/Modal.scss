@@ -14,8 +14,22 @@
     }
 }
 
-@media only screen and (max-width: 1200px) {
+/* @media only screen and (max-width: 1200px) {
     .ui.fullscreen.modal > .content {
         padding: 35px 5% !important;
+    }
+} */
+
+.ui.modal.Modal {
+    background: none;
+
+    & > .content {
+        background: none;
+    }
+
+    @media only screen and (max-width: 1200px) {
+        &.fullscreen > .content {
+            padding: 35px 5% !important;
+        }
     }
 }

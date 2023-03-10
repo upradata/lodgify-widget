@@ -36,4 +36,34 @@
     .ui.accordion .active.title > .icon {
         transform: rotate(90deg);
     }
+
+    .ui.checkbox .box:after,
+    .ui.checkbox label:after {
+        left: 1px;
+    }
+
+    .ui.checkbox input:checked ~ .box:before,
+    .ui.checkbox input:checked ~ label:before {
+        border-radius: 4px;
+    }
+
+    .ui.accordion .title .label {
+        width: 100%;
+    }
+
+    .PlaceHolder {
+        .placeholder {
+            margin: unset;
+
+            &.short {
+                width: 4em;
+            }
+        }
+
+        /* width: 100%; */
+        &.is-right {
+            display: flex;
+            justify-content: flex-end;
+        }
+    }
 }

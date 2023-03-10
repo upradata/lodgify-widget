@@ -9,14 +9,16 @@ export class Reservation {
     // price?: number;
     nbGuests: number;
     isLoading?: boolean;
+    promotionCode?: string;
     quote?: ReservationQuote;
 };
 
+
 export class ReservationDebug {
-    roomValue?: string = 'carla';
+    roomValue?: string = 'mini-hotel';
     nbOfNights?: number = 3;
-    startDate?: LodgifyDate = '2023-05-01';
-    endDate?: LodgifyDate = '2023-05-01';
+    startDate?: LodgifyDate = '2023-03-10'; // '2023-05-01';
+    endDate?: LodgifyDate = '2023-03-15'; // '2023-05-10';
     // price?: number;
     nbGuests: number = 3;
     isLoading?: boolean;
@@ -28,7 +30,7 @@ export class ReservationDebug {
         roomsPriceDetails: [
             {
                 nbGuests: 3,
-                roomValue: 'carla',
+                roomValue: 'mini-hotel',
                 categoriesPrices: [
                     {
                         category: 'RoomRate',

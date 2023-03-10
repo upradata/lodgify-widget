@@ -142,6 +142,8 @@ export const BookingDetails: React.FunctionComponent<BookingDetailsProps> = prop
 
     const formRef = useRef<FormImperativeAPI>(null);
 
+
+
     return (
         <Card
             className="BookingDetails"

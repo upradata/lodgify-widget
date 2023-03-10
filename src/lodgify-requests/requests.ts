@@ -13,7 +13,11 @@ const arrayToOption = <T extends {}>(options: T[], baseKey: string, map?: (key: 
     const mapping = map || ((k: string) => k);
 
     return options.reduce((o, item, i) => {
-        const option = Object.fromEntries(Object.entries(item).map(([ k, v ]) => [ `${baseKey}[${i}].${mapping(k as keyof T & string)}`, v ]));
+        const option = Object.fromEntries(
+            Object.entries(item)
+                .map(([ k, v ]) => [ `${baseKey}[${i}].${mapping(k as keyof T & string)}`, v ])
+                .filter(([ , v ]) => !!v)
+        );
 
         return {
             ...o,
@@ -86,19 +90,27 @@ const lodgifyREST = (verb: string, options: Record<string, Primitive> = {}) => {
 const createRequest = <T = unknown>(verb: string, options: Options, version: LodgifyVersion): Promise<RequestSuccess<T> | RequestError> => {
     console.log(`${corsProxy}/${lodgifyApi(version)}/${lodgifyREST(verb, options)}`);
 
+    const requestUrl = `${corsProxy}/${lodgifyApi(version)}/${lodgifyREST(verb, options)}`;
+
     return fetch(
-        `${corsProxy}/${lodgifyApi(version)}/${lodgifyREST(verb, options)}`,
+        requestUrl,
         lodgifyOptions
     ).then(response => response.json()).then(json => {
         if (json.code) {
             const { code, message } = json as LodgifyError;
+            console.error(`Lodgify request error. Request -> ${requestUrl}`);
+            console.error(json);
             return { type: 'error' as const, error: new Error(`Lodgify request error "${message}" with code (${code})`) };
         }
 
         return { type: 'success' as const, json };
     })
         // .then(response => console.log(response))
-        .catch(e => ({ type: 'error' as const, error: e instanceof Error ? e : new Error(JSON.stringify(e)) }));
+        .catch(e => {
+            console.error(`Lodgify request error. Request -> ${requestUrl}`);
+            console.error(e);
+            return { type: 'error' as const, error: e instanceof Error ? e : new Error(JSON.stringify(e)) };
+        });
 };
 
 

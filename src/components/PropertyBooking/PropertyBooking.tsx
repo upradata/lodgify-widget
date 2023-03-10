@@ -3,7 +3,7 @@ import 'semantic-ui-css/components/loader.css';
 import './PropertyBooking.scss';
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { LocationOptions, Summary } from '@lodgify/ui';
+import { Button, LocationOptions, Summary } from '@lodgify/ui';
 import { Moment } from 'moment';
 import { Bar } from '../Bar';
 import { BookingContext } from '../Booking/BookingContext';
@@ -65,8 +65,11 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
         room
     });
 
+    // const [ isLoading, setIsLoading ] = useState(false);
+
     return (
         <div className="PropertyBooking">
+
             <Bar isFixed>
                 {!isBookingDetailsOpen && <React.Fragment>
                     <Summary {...summaryProps} />
@@ -75,15 +78,20 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onReser
                 }
             </Bar>
 
-            <Modal isOpen={isBookingDetailsOpen} onOpenChange={useCallback(isOpen => { setIsBookingDetailsOpen(isOpen); }, [])}>
+            <Modal dimmer="inverted" isOpen={isBookingDetailsOpen} onOpenChange={useCallback(isOpen => { setIsBookingDetailsOpen(isOpen); }, [])}>
+                {/* <Button onClick={() => setIsLoading(!isLoading)}>Enable Loading</Button> */}
+
                 <BookingDetails
                     header={<PropertyBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
-                    subHeader={<PropertyBookingSubHeader price={reservation.quote.totalGross} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
+                    subHeader={
+                        <PropertyBookingSubHeader price={reservation.quote?.totalGross} isLoading={/* isLoading */reservation.isLoading}
+                            nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />
+                    }
                     onInputChange={onBookingDetailFormInputChange}
                     onSubmit={onBookingDetailsSubmit}
                     {...details} />
 
-                <BookingSummary {...reservation}></BookingSummary>
+                <BookingSummary onReservationChange={onReservationChange} {...reservation}></BookingSummary>
             </Modal>
         </div>
     );
@@ -109,7 +117,7 @@ const useBookingProps = ({ reservation, room, locationOptions, onInputChange }: 
 
     const { nbGuests, isLoading, quote, roomValue, startDate, endDate } = reservation;
 
-    const bookButton = <PropertyBookingButton price={quote ? nbGuests * quote.totalGross : undefined} isLoading={isLoading} />;
+    const bookButton = <PropertyBookingButton loaderInverted price={quote ? nbGuests * quote.totalGross : undefined} isLoading={true/* isLoading */} />;
 
     const searchProps: PropertyBookingFormProps = {
         // isFixed: true,

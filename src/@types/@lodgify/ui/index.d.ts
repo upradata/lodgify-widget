@@ -118,7 +118,22 @@ declare module '@lodgify/ui' {
     }>;
 
     export const Button: React.ComponentType<ButtonProps>;
-    export const TextPlaceholder: React.ComponentType<{ [ K: string ]: any; }>;
+
+    export type TextPlaceholderProps = PropsWithStyle<{
+        isFluid?: boolean;
+        length?: 'short' | 'medium' | 'long' | 'full';
+    }>;
+
+    export const TextPlaceholder: React.ComponentType<TextPlaceholderProps>;
+
+
+    export type BlockPlaceholderProps = PropsWithStyle<{
+        isFluid?: boolean;
+        isRectangular?: boolean;
+        isSquare?: boolean;
+    }>;
+    export const BlockPlaceholder: React.ComponentType<BlockPlaceholderProps>;
+
     export const Viewport: React.ComponentType<{ [ K: string ]: any; }>;
 
     export type DateRangePickerProps = PropsWithStyle<{
@@ -319,12 +334,9 @@ declare module '@lodgify/ui' {
         error?: boolean | string;
         isFluid?: boolean;
         isValid?: boolean;
-        label?: string;
         maxCharacters?: number;
-        name?: string;
         type?: string;
-        value?: string;
-    }> & InputProps;
+    }> & InputProps<string>;
 
     export const TextInput: React.ComponentType<TextInputProps>;
 

@@ -2,43 +2,44 @@
 import './BookingSummary.scss';
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
-import { Icon, Checkbox, TextInput } from '@lodgify/ui';
+import {
+    BlockPlaceholder,
+    BlockPlaceholderProps,
+    Button,
+    Checkbox,
+    FlexContainer,
+    Icon,
+    TextInput,
+    TextPlaceholder,
+    TextPlaceholderProps
+} from '@lodgify/ui';
 import {
     Accordion,
     AccordionTitleProps,
     Label,
     Menu,
+    Placeholder,
+    PlaceholderLine,
+    PlaceholderLineProps,
+    PlaceholderParagraph,
+    PlaceholderParagraphProps,
+    PlaceholderProps,
     Tab,
     Table,
     TabProps
 } from 'semantic-ui-react';
+import classnames from 'classnames';
 import { BookingContext } from '../Booking/BookingContext';
+import { BookingData } from '../Booking/BookingComponent';
 import { Card } from '../Card';
 import { CardProps } from '../Card/Card';
+import { Form, FormProps, InputField, RenderInputField } from '../Form';
 import { localizedPrice, partition, plural } from '../../util';
 import { PropertyBookingHeader } from '../PropertyBooking/PropertyBookingHeader';
 import { PropertyBookingSubHeader } from '../PropertyBooking/PropertyBookingSubHeader';
 import { Reservation, ReservationQuote, ReservationQuoteRoomCategoryPrices, ReservationQuoteRoomPriceDetails } from '../Booking/reservation.type';
-import { Form, FormProps } from '../Form';
+import { QuotePriceType } from '../../lodgify-requests';
 
-
-type AAProps = CardProps & {
-
-};
-
-const AA: React.FunctionComponent<AAProps> = (props) => {
-    const [ cardProps ] = partition(props, CardProps);
-
-    return (
-        <Card
-            /*  header={<PropertyBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
-             subHeader={<PropertyBookingSubHeader price={100} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />} */
-            {...cardProps}>
-
-
-        </Card>
-    );
-};
 
 const panes: TabProps[ 'panes' ] = [
     {
@@ -55,15 +56,111 @@ const panes: TabProps[ 'panes' ] = [
     },
 ];
 
-type CategoryItemsProps = { items: ReservationQuoteRoomCategoryPrices[ 'items' ]; };
+type _PlaceholderProps = Pick<PlaceholderProps, 'fluid' | 'inverted' | 'className'>;
+type PlaceHolderProps = |
+    { type: 'paragraph'; nbLines?: number; } & _PlaceholderProps & PlaceholderParagraphProps /* BlockPlaceholderProps */ |
+    { type: 'line'; } & _PlaceholderProps & PlaceholderLineProps /* TextPlaceholderProps */;
 
-const CategoryItems: React.FunctionComponent<CategoryItemsProps> = ({ items }) => {
+
+const PlaceHolder: React.FunctionComponent<PlaceHolderProps> = ({ fluid, inverted, className, type, ...props }) => {
+    const placeholderProps = { fluid, inverted, className };
+
+    type GetProps<T extends string> = PlaceHolderProps extends infer P ? P extends PlaceHolderProps ? P[ 'type' ] extends T ? P : never : never : never;
+
+    const getProps = function <T extends string>(type: T): GetProps<T> {
+        return props as any;
+    };
+
+    const getPlaceHolder = () => {
+        if (type === 'line') {
+            const props = getProps(type);
+            return <PlaceholderLine {...props} style={{/*  height: 'unset', */ /* minWidth: '6ch' */ }} />;
+        }
+
+
+        if (type === 'paragraph') {
+            const { nbLines = 1, ...props } = getProps(type);
+
+            return <PlaceholderParagraph {...props} >
+                {Array.from(Array(nbLines)).map(() => <PlaceholderLine /* style={{ minWidth: '6ch' }} */ />)}
+            </PlaceholderParagraph>;
+
+        }
+    };
+
+    return (
+        <Placeholder {...placeholderProps}>{getPlaceHolder()}</Placeholder>
+    );
+};
+
+
+type PlaceHolderProps2 = |
+    { type: 'paragraph'; nbLines?: number; isRight?: boolean; } & TextPlaceholderProps /* BlockPlaceholderProps */ |
+    { type: 'line'; isRight?: boolean; } & TextPlaceholderProps /* TextPlaceholderProps */;
+
+
+const PlaceHolder2: React.FunctionComponent<PlaceHolderProps2> = ({ type, isRight, ...props }) => {
+
+    type GetProps<T extends string> = PlaceHolderProps2 extends infer P ? P extends PlaceHolderProps2 ? P[ 'type' ] extends T ? P : never : never : never;
+
+    const getProps = function <T extends string>(type: T): GetProps<T> {
+        return props as any;
+    };
+
+    const className = classnames('PlaceHolder', { 'is-right': isRight });
+
+    if (type === 'line') {
+        const props = getProps(type);
+        return <div className={className}><TextPlaceholder {...props} /></div>;
+    }
+
+
+    if (type === 'paragraph') {
+        const { nbLines = 1, ...props } = getProps(type);
+        return <>{Array.from(Array(nbLines)).map(() => <TextPlaceholder />)}</>;
+    }
+
+    return null;
+};
+
+
+/* type AddKeyPrefix<T, Prefix extends string> = T extends infer P ? P extends T ? // to get the distribution over an union A | B | C
+        {[ K in `${Prefix}${Capitalize<keyof P & string>}` ]: K extends `${Prefix}${infer Key}` ? P[ Uncapitalize<Key> & keyof P ] : never } :
+            never : never; */
+
+
+type WithPlaceHolderProps = { isLoading: boolean; } & PlaceHolderProps2; /* PlaceHolderProps */ // AddKeyPrefix<PlaceHolderProps, 'placeholder'>;
+
+
+const WithPlaceHolder: React.FunctionComponent<WithPlaceHolderProps> = ({ children, isLoading, ...props }) => {
+    /* const placeholderProps = Object.fromEntries(
+        Object.entries(props).map(([ k, v ]) => [
+            // remove the placeholder prefix and lowercase first letter
+            k.replace(/^placeholder(.)(.*)/, (_, g1: string, g2: string) => `${g1.toUpperCase()}${g2}`),
+                v
+                ])
+                ) as PlaceHolderProps; */
+
+    return (
+        <React.Fragment>
+            {isLoading ? <PlaceHolder2 {...props} /> : children}
+        </React.Fragment>
+    );
+};
+
+
+type CategoryItemsProps = { items: ReservationQuoteRoomCategoryPrices[ 'items' ]; isLoading: boolean; };
+
+const CategoryItems: React.FunctionComponent<CategoryItemsProps> = ({ items, isLoading }) => {
     return (
         <React.Fragment>{
             items.map(({ price, description }, i) => (
                 <Table.Row key={i}>
-                    <Table.Cell>{description}</Table.Cell>
-                    <Table.Cell textAlign="right">{localizedPrice(price)}</Table.Cell>
+                    <Table.Cell><WithPlaceHolder type="line" length="long" isLoading={isLoading}>{description}</WithPlaceHolder></Table.Cell>
+                    <Table.Cell textAlign="right">
+                        {/* <WithPlaceHolder type="line" isRight length="short" isLoading={isLoading}>{localizedPrice(price)}</WithPlaceHolder> */}
+                        {!isLoading && localizedPrice(price)}
+                    </Table.Cell>
                 </Table.Row>
             ))
         }</React.Fragment>
@@ -71,9 +168,11 @@ const CategoryItems: React.FunctionComponent<CategoryItemsProps> = ({ items }) =
 };
 
 
-type CategoryProps = Pick<ReservationQuoteRoomCategoryPrices, 'category' | 'subTotal'> & { index: number; as: React.ElementType; } & CategoryItemsProps;
+type CategoryProps = Pick<ReservationQuoteRoomCategoryPrices, 'category' | 'subTotal'> &
+{ index: number; as: React.ElementType; isLoading: boolean; } & CategoryItemsProps;
 
-const Category: React.FunctionComponent<CategoryProps> = ({ category, subTotal, index, items, as: As }) => {
+
+const Category: React.FunctionComponent<CategoryProps> = ({ isLoading, category, subTotal, index, items, as: As }) => {
     const [ state, setState ] = useState({ activeIndex: -1 });
 
     const onClick: AccordeonSegmentProps[ 'onClick' ] = useCallback(({ index }) => {
@@ -81,9 +180,14 @@ const Category: React.FunctionComponent<CategoryProps> = ({ category, subTotal, 
         setState({ activeIndex: newIndex });
     }, [ setState, state ]);
 
+    const title = <FlexContainer justifyContent="space-between" alignItems="center">
+        <span>{category}</span>
+        <WithPlaceHolder type="line" length="short" isRight isLoading={isLoading}><span>{localizedPrice(subTotal)}</span></WithPlaceHolder>
+    </FlexContainer>;
 
     return (
-        <As title={`${category}: ${localizedPrice(subTotal)}`} index={index} activeIndex={state.activeIndex} onClick={onClick} >
+        <As title={title}
+            index={index} activeIndex={state.activeIndex} onClick={onClick}>
             <Table compact /* padded */>
                 {/* <Table.Header>
                             <Table.Row>
@@ -94,7 +198,7 @@ const Category: React.FunctionComponent<CategoryProps> = ({ category, subTotal, 
                         </Table.Header> */}
 
                 <Table.Body>
-                    <CategoryItems items={items} />
+                    <CategoryItems items={items} isLoading={isLoading} />
                 </Table.Body>
                 {/* <Table.Footer>{subTotal}</Table.Footer> */}
             </Table>
@@ -105,19 +209,28 @@ const Category: React.FunctionComponent<CategoryProps> = ({ category, subTotal, 
 
 /* type CategoriesProps = ReservationQuoteRoomPriceDetails;
 
-const Categories: React.FunctionComponent<CategoriesProps> = ({ categoriesPrices, subTotal }) => {
+const Categories: React.FunctionComponent<CategoriesProps> = ({categoriesPrices, subTotal}) => {
     return (
-        <div>
-            {categoriesPrices.map((category, i) => <Category {...category} index={i} key={i} />)}
-            <p>Subtotal: {subTotal}</p>
-        </div>
-    );
+                            <div>
+                                {categoriesPrices.map((category, i) => <Category {...category} index={i} key={i} />)}
+                                <p>Subtotal: {subTotal}</p>
+                            </div>
+                            );
 }; */
 
 
-type RoomPriceDetailsProps = ReservationQuoteRoomPriceDetails & { isOnlyOneRoom: boolean; };
+type RoomPriceDetailsProps = ReservationQuoteRoomPriceDetails & { isOnlyOneRoom: boolean; isLoading: boolean; };
 
-const RoomPriceDetails: React.FunctionComponent<RoomPriceDetailsProps> = ({ nbGuests, roomValue, categoriesPrices, subTotal, isOnlyOneRoom }) => {
+const quotePriceTypeOrder = {
+    [ QuotePriceType.RoomRate ]: 0,
+    [ QuotePriceType.Fee ]: 1,
+    [ QuotePriceType.Tax ]: 2,
+    [ QuotePriceType.AddOn ]: 3,
+    [ QuotePriceType.Other ]: 4,
+    [ QuotePriceType.Promotion ]: 5
+};
+
+const RoomPriceDetails: React.FunctionComponent<RoomPriceDetailsProps> = ({ isLoading, nbGuests, roomValue, categoriesPrices = [], subTotal, isOnlyOneRoom }) => {
     const { getRoom } = useContext(BookingContext);
 
     const room = getRoom(roomValue);
@@ -134,25 +247,32 @@ const RoomPriceDetails: React.FunctionComponent<RoomPriceDetailsProps> = ({ nbGu
                 <Table.Body>
                     <Table.Row>
                         <Table.Cell>{room.name} room : {nbGuests} {plural(nbGuests, 'person')}</Table.Cell>
-                        <Table.Cell textAlign="right">{localizedPrice(roomRateCategory.subTotal)}</Table.Cell>
+                        <Table.Cell textAlign="right">
+                            <WithPlaceHolder type="line" isRight length="short" isLoading={isLoading}>{localizedPrice(roomRateCategory.subTotal)}</WithPlaceHolder>
+                        </Table.Cell>
                     </Table.Row>
                 </Table.Body>
             </Table>
 
             <div className="CategoriesPrices">
-                <Accordion fluid styled>
-                    {categories.map((categoryPrices, i) => <Category {...categoryPrices} as={AccordeonSegment} index={i} key={i} />)}
-                </Accordion>
-                {!isOnlyOneRoom && <p>Subtotal: {subTotal}</p>}
+                <Accordion fluid styled>{
+                    categories
+                        .sort((c1, c2) => quotePriceTypeOrder[ c1.type ] - quotePriceTypeOrder[ c2.type ])
+                        .map((categoryPrices, i) => <Category {...categoryPrices} as={AccordeonSegment} index={i} isLoading={isLoading} key={i} />)
+                }</Accordion>
+                {!isOnlyOneRoom && <div>
+                    <span>Subtotal: </span>
+                    <WithPlaceHolder type="line" length="full" isLoading={isLoading}>{localizedPrice(subTotal)}</WithPlaceHolder>
+                </div>}
             </div>
         </div>
     );
 };
 
 
-type QuoteProps = ReservationQuote;
+type QuoteProps = ReservationQuote & { isLoading: boolean; };
 
-const QuoteSummary: React.FunctionComponent<QuoteProps> = ({ roomsPriceDetails, totalNet, totalGross, vat, isPricesIncludesVat }) => {
+const QuoteSummary: React.FunctionComponent<QuoteProps> = ({ roomsPriceDetails, isLoading, totalNet, totalGross, vat, isPricesIncludesVat }) => {
     const isOnlyOneRoom = roomsPriceDetails.length === 1;
     const isOnlyPropertyPrice = isOnlyOneRoom && roomsPriceDetails[ 0 ].categoriesPrices.length === 0 && roomsPriceDetails[ 0 ].categoriesPrices[ 0 ].isRoomRate;
 
@@ -161,7 +281,7 @@ const QuoteSummary: React.FunctionComponent<QuoteProps> = ({ roomsPriceDetails, 
 
     return (
         <div className="QuoteSummary">
-            {roomsPriceDetails.map((roomPriceDetails, i) => <RoomPriceDetails {...roomPriceDetails} isOnlyOneRoom={isOnlyOneRoom} key={i} />)}
+            {roomsPriceDetails.map((roomPriceDetails, i) => <RoomPriceDetails {...roomPriceDetails} isOnlyOneRoom={isOnlyOneRoom} isLoading={isLoading} key={i} />)}
             {/* <Table padded>
                 <Table.Header>
                     <Table.Row>
@@ -184,22 +304,22 @@ const QuoteSummary: React.FunctionComponent<QuoteProps> = ({ roomsPriceDetails, 
 
 
 export type BookingSummaryProps = {
-
+    onReservationChange?: (data: Partial<BookingData>) => void;
 } & Reservation;
 
 
 export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = props => {
     const { getRoom, } = useContext(BookingContext);
-    const [ reservation, rest ] = partition(props, Reservation);
+    const [ reservation, { onReservationChange } ] = partition(props, Reservation);
 
     const room = getRoom(reservation.roomValue);
 
     /* return (
         <Tab panes={panes} menu={{ fluid: true, vertical: true, borderless: true, attached: false }} menuPosition='right' />
-    ); */
+                                        ); */
     const { quote } = reservation;
 
-    const [ formState, setFormState ] = useState({ hasCoupon: false });
+    const [ formState, setFormState ] = useState({ hasCoupon: false, coupon: null as string });
 
     const onSubmit: FormProps<{}>[ 'onSubmit' ] = useCallback((values => {
         // const data = Object.entries(values).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as FormValues);
@@ -212,21 +332,37 @@ export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = prop
         // handleInputChange?.(name, value);
     }, [ setFormState ]);
 
-    const totalGross = reservation.quote.totalGross;
+    const onCouponApply = useCallback(() => {
+        if (formState.coupon)
+            onReservationChange?.({ promotionCode: formState.coupon });
+    }, [ onReservationChange, formState.coupon ]);
+
+    // const [ isLoading, setIsLoading ] = useState(reservation.isLoading);
 
     return (
         <Card
             className="BookingSummary"
             header={<PropertyBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
-            subHeader={<PropertyBookingSubHeader price={totalGross} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
+            subHeader={<PropertyBookingSubHeader price={quote?.totalGross} isLoading={reservation.isLoading}
+                nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
             /* {...cardProps} */>
 
-            <QuoteSummary {...quote} />
+            {/* <Button onClick={() => setIsLoading(!isLoading)}>Enable Loading</Button> */}
 
-            <Form submitButtonText={`Pay ${localizedPrice(totalGross)}`} /* validation={validation} */ onSubmit={onSubmit} onInputChange={onInputChange} >
+            <QuoteSummary {...quote} isLoading={/* isLoading */reservation.isLoading} />
+
+            <Form submitButtonText="Proceed to payment" /* validation={validation} */ onSubmit={onSubmit} onInputChange={onInputChange} >
 
                 <Checkbox label={"Do you have any coupon?"} name="hasCoupon" />
-                {formState.hasCoupon && <TextInput label="Coupon" name="coupon" />}
+                {formState.hasCoupon && <RenderInputField name="coupon">
+                    {props => (
+                        <FlexContainer alignItems="flex-start">
+                            <InputField style={{ flexGrow: 1 }}><TextInput label="Coupon" {...props} /></InputField>
+                            <Button isLoading={reservation.isLoading} onClick={onCouponApply}>Apply</Button>
+                        </FlexContainer>
+                    )}
+                </RenderInputField>
+                }
             </Form>
         </Card>
     );
@@ -234,27 +370,27 @@ export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = prop
 
 
 
-/* export type BookingSummaryHeaderProps = { roomName: string; startDate: LodgifyDate; endDate: LodgifyDate; };
+/* export type BookingSummaryHeaderProps = {roomName: string; startDate: LodgifyDate; endDate: LodgifyDate; };
 
-export const BookingSummaryHeader: React.FunctionComponent<BookingSummaryHeaderProps> = ({ roomName, startDate, endDate }) => {
+                                            export const BookingSummaryHeader: React.FunctionComponent<BookingSummaryHeaderProps> = ({roomName, startDate, endDate}) => {
     return (
-        <div className="BookingHeader vertical-baseline">
-            <span className="BookingHeader__location">{roomName}</span>
+                                                <div className="BookingHeader vertical-baseline">
+                                                    <span className="BookingHeader__location">{roomName}</span>
 
-            <div className="BookingHeader__dates vertical-center">
-                <span>{dateAsString(startDate)}</span>
-                <Icon name="arrow right" />
-                <span>{dateAsString(endDate)}</span>
-            </div>
-        </div>
-    );
+                                                    <div className="BookingHeader__dates vertical-center">
+                                                        <span>{dateAsString(startDate)}</span>
+                                                        <Icon name="arrow right" />
+                                                        <span>{dateAsString(endDate)}</span>
+                                                    </div>
+                                                </div>
+                                                );
 }; */
 
 type AccordeonSegmentProps = {
     activeIndex: number;
     index: number;
     onClick: (accordeonTitleProps: AccordionTitleProps) => void;
-    title: string;
+    title: string | React.ReactNode;
 };
 
 const AccordeonSegment: React.FunctionComponent<AccordeonSegmentProps> = ({ onClick, activeIndex, index, title, children }) => {
@@ -265,7 +401,7 @@ const AccordeonSegment: React.FunctionComponent<AccordeonSegmentProps> = ({ onCl
         <React.Fragment>
             <Accordion.Title active={activeIndex === index} index={index} onClick={handleClick}>
                 <Icon name="caret right" size="small" />
-                <span className="label">{title}</span>
+                <div className="label">{title}</div>
             </Accordion.Title>
 
             <Accordion.Content active={activeIndex === index}>

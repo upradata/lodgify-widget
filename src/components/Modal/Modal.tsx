@@ -1,9 +1,10 @@
 import './Modal.scss';
 
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Modal as LodgifyModal, ModalProps as LodgifyModalProps } from '@lodgify/ui';
+// import { Modal as LodgifyModal, ModalProps as LodgifyModalProps } from '@lodgify/ui';
 import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
 import { partition } from '../../util';
+import { ModalView, ModalViewProps } from './ModalView';
 
 
 class _ModalProps {
@@ -13,7 +14,7 @@ class _ModalProps {
     onOpenChange?: (isOpen: boolean) => void;
 };
 
-export type ModalProps = LodgifyModalProps & _ModalProps;
+export type ModalProps = /* LodgifyModalProps */ ModalViewProps & _ModalProps;
 
 
 export type ModalPropsImperativeAPI = {
@@ -42,7 +43,7 @@ const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps
 
     const onModalClose = useCallback(() => { _setIsEnabled(false); }, [ _setIsEnabled ]);
 
-    const lodgifyModalProps: LodgifyModalProps = {
+    const modalViewProps: ModalViewProps /* LodgifyModalProps */ = {
         ...modalProps,
         onClose: onModalClose,
         isOpen: isEnabled
@@ -57,9 +58,9 @@ const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps
 
     return (
         <MediaQuery breakpoints={breakpoints} onActive={bp => setBp(bp as BP)}>
-            {bp && <LodgifyModal {...lodgifyModalProps} isFullscreen={bp.size === 'small'} size="small">
+            {bp && <ModalView {...modalViewProps} isFullscreen={bp.size === 'small'} size="small">
                 {children}
-            </LodgifyModal>}
+            </ModalView>}
         </MediaQuery>
     );
 };

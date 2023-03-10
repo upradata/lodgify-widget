@@ -61,3 +61,22 @@ body .ui.inverted::-webkit-scrollbar-thumb:hover {
     width: auto;
     padding: inherit;
 }
+
+
+
+.ui.inverted.dimmer .ui.loader.inverted:before {
+    border-color: rgba(255, 255, 255, 0.15);
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-right-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+    border-left-color: rgba(255, 255, 255, 0.15);
+}
+
+
+.ui.inverted.dimmer .ui.loader.inverted:after {
+    border-color: #FFFFFF transparent transparent;
+    border-top-color: rgb(255, 255, 255);
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+}
