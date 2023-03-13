@@ -1,5 +1,5 @@
 import moment, { Moment } from 'moment';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 
 export const isInRange = (min: number, max: number) => (v: number) => min <= v && v <= max;
@@ -15,7 +15,7 @@ export const isDateInRange = (min: Moment, max: Moment) => (date: Moment) => {
 export const getNbOfNights = (start: Moment, end: Moment) => moment.duration(end.startOf('day').diff(start.startOf('day'))).asDays();
 
 
-/* export function usePrevious<T>(value: T, init: T = null): T | null {
+export function usePrevious<T>(value: T, init: T = null): T | null {
     const ref = useRef<T>(init);
 
     useEffect(() => {
@@ -23,7 +23,7 @@ export const getNbOfNights = (start: Moment, end: Moment) => moment.duration(end
     }, [ value ]);
 
     return ref.current;
-} */
+}
 
 export type NewValueListener<T> = (prevValue: T, newValue: T) => void;
 
@@ -174,7 +174,7 @@ export const debounce = <Fn extends Function>(fn: Fn, wait: number = 0, immediat
         };
 
         const callNow = immediate && !timeout;
-        
+
         clearTimeout(timeout);
         timeout = window.setTimeout(later, wait);
 

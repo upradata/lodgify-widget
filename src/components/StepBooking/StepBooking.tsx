@@ -47,7 +47,7 @@ export const StepBookingMenuItem: React.FunctionComponent<StepBookingMenuItemPro
 
 
 const TabContentHeader: React.FunctionComponent<{}> = () => {
-    const { getRoom, reservation, setReservation } = useContext(BookingContext);
+    const { getRoom, reservation } = useContext(BookingContext);
     const room = getRoom(reservation.roomValue);
 
     return (
@@ -56,7 +56,7 @@ const TabContentHeader: React.FunctionComponent<{}> = () => {
                 <StepBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />
             </TabHeader>
             <TabSubHeader>
-                <StepBookingSubHeader price={reservation.quote?.totalGross} isLoading={reservation.isLoading}
+                <StepBookingSubHeader loaderInverted price={reservation.quote?.totalGross} isLoading={reservation.isLoading}
                     nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />
             </TabSubHeader>
         </div>

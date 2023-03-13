@@ -20,7 +20,7 @@ import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
 import { CountrySelectComponent } from './CountrySelectComponent';
 import { InputController } from '../InputController';
 import labels from '../../../node_modules/react-phone-number-input/locale/en.json.js';
-import { usePreviousListener } from '../../util';
+import { usePrevious, usePreviousListener } from '../../util';
 
 // import { createPhoneInput } from 'react-phone-number-input/modules/react-hook-form/PhoneInputWithCountry';
 // import _ReactPhoneNumberInput from 'react-phone-number-input/react-hook-form-core';
@@ -58,7 +58,7 @@ const Flag: React.FunctionComponent<FlagComponentProps> = ({ code, name = '' }) 
 };
 
 PhoneNumberInput.displayName = 'PhoneNumberInput'; */
-
+const isReset = (previousValue: string, value: string) => (previousValue !== null || typeof previousValue !== 'undefined') && value === null;
 
 export type PhoneIputProps = Omit<Partial<ReactPhoneNumberProps>, 'value' | 'onChange'> & {
     // autoComplete?: string;
@@ -68,12 +68,10 @@ export type PhoneIputProps = Omit<Partial<ReactPhoneNumberProps>, 'value' | 'onC
     isValid?: boolean;
     label?: string;
     isBlurred?: boolean;
-    // name?: string;
-    // onBlur?: () => any;
-    // onChange?: (name: string, value: string) => any;
     initialValue?: string;
     value?: string;
 } & InputProps<string>;
+
 
 export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
     const metadata = props.metadata || phoneMetadata as MetadataJson;
@@ -84,25 +82,18 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         countryISO: props.defaultCountry
     });
 
-    // const previousPropsValue = usePrevious(props.value);
-    const { addListener: addPropsValueListener } = usePreviousListener(props.value);
-
     const handleChange: PhoneIputProps[ 'onChange' ] = useCallback((name, value) => {
         setState(state => {
-            if (state.value !== value)
-                props.onChange?.(name, value);
+            const newValue = isReset(state.value, value) ? '' : value;
 
-            return { ...state, value };
+            if (state.value !== newValue) {
+                props.onChange?.(name, newValue);
+                return { ...state, value: newValue };
+            }
+
+            return state;
         });
-    }, [ setState, props.onChange ]);
-
-
-    useEffect(() => {
-        addPropsValueListener((prevValue, newValue) => {
-            if (getIsInputValueReset(prevValue, newValue))
-                setState(state => ({ ...state, value: newValue }));
-        });
-    }, [ addPropsValueListener, setState ]);
+    }, [ props.onChange ]);
 
 
     const { error, isValid, label, isBlurred, name, onChange: _o, value: _v, initialValue, ...reactPhoneInputProps } = props;
