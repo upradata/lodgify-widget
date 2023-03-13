@@ -329,6 +329,18 @@ declare module '@lodgify/ui' {
 
     export const Dropdown: React.ComponentType<DropdownProps>;
 
+    export type NumberInputProps = {
+        autoComplete?: string;
+        error?: boolean | string;
+        icon?: React.ReactElement;
+        isValid?: boolean;
+        label?: string;
+        max?: number;
+        min?: number;
+    } & InputProps<boolean | string | number>;
+
+    export const NumberInput: React.ComponentType<NumberInputProps>;
+
     export type TextInputProps = PropsWithStyle<{
         autoComplete?: string;
         error?: boolean | string;

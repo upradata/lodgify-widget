@@ -126,7 +126,7 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
         };
 
         if (name === 'booking') {
-            const searchButton = <Button isFormSubmit isRounded isDisabled={false}>Next</Button>;
+            const searchButton = <Button isFormSubmit isRounded>Next</Button>;
 
             return {
                 name,

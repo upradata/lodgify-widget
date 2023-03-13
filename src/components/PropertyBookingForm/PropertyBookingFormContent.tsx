@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { Button, CounterDropdown, CounterDropdownProps, Dropdown, DropdownProps, FormValues, FormValue } from '@lodgify/ui';
+import React /* , { useCallback } */ from 'react';
+import { Button, /* CounterDropdown, CounterDropdownProps, */ Dropdown, DropdownProps, FormValues, FormValue, NumberInput, NumberInputProps } from '@lodgify/ui';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { Calendar, CalendarProps } from '../Calendar';
@@ -9,7 +9,6 @@ import type { ChangeInputData } from './PropertyBookingForm.type';
 import type { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
 
 
-// import { size } from '@lodgify/ui/lib/es/utils/size';
 
 type InputNames = keyof ChangeInputData;
 type InputValues = ChangeInputData[ InputNames ];
@@ -39,6 +38,7 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         willOpenAbove: props.willLocationDropdownOpenAbove
     };
 
+
     const calendarProps: CalendarProps = {
         endDatePlaceholderText: props.datesCheckOutLabel,
         focusedInput: props.datesInputFocusedInput,
@@ -54,12 +54,21 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         willOpenAbove: props.willLocationDropdownOpenAbove
     };
 
-    const counterDropdownProps: CounterDropdownProps = {
+    /* const counterDropdownProps: CounterDropdownProps = {
         counterValue: props.guestsInputValue,
         dropdownLabel: props.guestsInputLabel,
         maximumCounterValue: props.maximumGuestsInputValue,
         onChange: props.onInputChange,
         popupId: props.guestsPopupId
+    }; */
+
+    const numberInputProps: NumberInputProps = {
+        // icon: ...;
+        label: props.guestsInputLabel,
+        onChange: props.onInputChange,
+        max: props.maximumGuestsInputValue,
+        min: 1,
+        value: props.guestsInputValue
     };
 
 
@@ -72,7 +81,8 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
 
             <InputField className="input-container location-input-container"><Dropdown icon={ICON_NAMES.MAP_PIN} name="location" {...dropdownProps} /></InputField>
             <InputField className="input-container dates-input-container"><Calendar name="dates" {...calendarProps} /></InputField>
-            <InputField className="input-container guests-input-container is-last"><CounterDropdown name="guests" {...counterDropdownProps} /></InputField>
+            {/* <InputField className="input-container guests-input-container is-last"><CounterDropdown name="guests" {...counterDropdownProps} /></InputField> */}
+            <InputField className="input-container guests-input-container is-last"><NumberInput name="guests" {...numberInputProps} /></InputField>
 
         </Form>
     );
