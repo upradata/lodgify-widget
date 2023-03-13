@@ -1,29 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getEmptyState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyState';
 import { getErroredState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getErroredState';
-import { FormProps as LodgifyFormProps, FormValue, FormValues } from '@lodgify/ui';
 import isEqual from 'fast-deep-equal';
 
-
-export type FormProps<Values = unknown> = Omit<LodgifyFormProps<Values>, 'headingText'> & {
-    onInputChange?: (name: string, value: Values) => void;
-    searchButton?: React.ReactNode | ((props: { isDisabled: boolean; }) => React.ReactNode);
-};
+import type { FormValue, FormValues } from '@lodgify/ui';
+import type { FormProps } from './Form.props';
 
 
-export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'> & { callOnIputChangedAfterFirstRender?: boolean; };
+export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'>;
 
 export const useFormState = (props: UseFormStateProps) => {
 
     const [ state, setState ] = useState<FormValues>({});
-    const [ stateNameChanged, onStateNameChanged ] = useState<{ name: string | null; }>({ name: null });
+   // const [ stateNameChanged, setStateNameChanged ] = useState<{ name: string | null; }>({ name: null });
 
-    useEffect(() => {
+    /* useEffect(() => {
         const { name } = stateNameChanged;
 
         if (name)
             props.onInputChange?.(name, (state[ name ] as FormValue).value);
-    }, [ stateNameChanged, props.onInputChange ]);
+    }, [ stateNameChanged, props.onInputChange ]); */
 
 
     const setInputState = useCallback((inputName: string, inputState: FormValue) => {
@@ -39,13 +35,14 @@ export const useFormState = (props: UseFormStateProps) => {
                     [ inputName ]: inputStateWithData
                 };
 
-                onStateNameChanged({ name: inputName });
+                // setStateNameChanged({ name: inputName });
+                props.onInputChange?.(inputName, inputStateWithData.value);
                 return newState;
             }
 
             return state;
         });
-    }, [ setState, props.onInputChange ]);
+    }, [ props.onInputChange ]);
 
 
     const getInputStateWithData = useCallback((inputName: string, inputState: FormValue, previousState: FormValues) => {
@@ -68,7 +65,7 @@ export const useFormState = (props: UseFormStateProps) => {
                 };
 
             default:
-                break;
+                return null;
         }
     }, []);
 

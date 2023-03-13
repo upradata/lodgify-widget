@@ -1,4 +1,4 @@
-import type { DateRange } from '@lodgify/ui';
+import type { DateRange, FormValue as LodgifyFormValue } from '@lodgify/ui';
 
 
 class InputProps<V = unknown> {
@@ -9,14 +9,21 @@ class InputProps<V = unknown> {
     label?: string;
 };
 
+class FormValue<V = unknown> extends InputProps implements Required<LodgifyFormValue> {
+    isBlurred: boolean;
+    value: V;
+    isValid: boolean;
+    error: boolean | string;
+};
 
-export class DateRangePickerProps extends InputProps {
+
+export class DateRangePickerProps extends (FormValue as (new () => Partial<FormValue>)) {
     displayFormat?: string | Function;
     endDatePlaceholderText?: string;
     error?: string | boolean;
     focusedInput?: null | 'startDate' | 'endDate';
     getIsDayBlocked?: Function;
-    initialValue?: DateRange;
+    // initialValue?: DateRange;
     isCalendarIconDisplayed?: boolean;
     isLoading?: boolean;
     isValid?: boolean;

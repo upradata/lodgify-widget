@@ -1,3 +1,5 @@
+import type React from 'react';
+
 type TrimStart<S> = S extends `${infer Char}${infer Rest}`
     ? Char extends ' ' ? TrimStart<Rest> : S :
     S;
@@ -34,3 +36,9 @@ export type Typify<T> = {
 
 
 export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export type AddValueToObject<T, O> = {
+    [ K in keyof T ]: T[ K ] & O
+};
+
+export type GetPropsFromReactElement<E> = E extends React.ElementType<infer P> ? E extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[ E ] : never : never;

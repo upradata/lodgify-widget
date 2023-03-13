@@ -292,8 +292,8 @@ declare module '@lodgify/ui' {
 
     export type InputProps<V = unknown> = {
         name?: string;
-        onBlur?: (event: FocusEvent) => any;
-        onChange?: (name: string, value: V) => any;
+        onBlur?: (event: FocusEvent) => void;
+        onChange?: (name: string, value: V) => void;
         width?: string;
         label?: string;
         value?: V;

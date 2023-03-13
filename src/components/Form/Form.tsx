@@ -1,6 +1,6 @@
 import './Form.scss';
 
-import React, { useCallback, useImperativeHandle, useMemo, memo } from 'react';
+import React, { memo, useCallback, useImperativeHandle, useMemo } from 'react';
 import { getEmptyRequiredInputs as _getEmptyRequiredInputs } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyRequiredInputs';
 import { getIsSubmitButtonDisabled as _getIsSubmitButtonDisabled } from '@lodgify/ui/lib/es/components/collections/Form/utils/getIsSubmitButtonDisabled';
 import { getValidationWithDefaults as _getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
@@ -11,13 +11,12 @@ import { forEach } from '@lodgify/ui/lib/es/utils/for-each';
 import { SEND } from '@lodgify/ui/lib/es/utils/default-strings';
 import { size } from '@lodgify/ui/lib/es/utils/size';
 import classnames from 'classnames';
-import Message from 'semantic-ui-react/dist/es/collections/Message/Message.js';
-import SemanticForm from 'semantic-ui-react/dist/es/collections/Form/Form.js';
+import { Form as SemanticForm, Message } from 'semantic-ui-react';
 import { FormField, ParentImperativeApi } from './FormField';
-import { FormProps, useFormState } from './Form.state';
+import { useFormState } from './Form.state';
 
+import type { FormProps } from './Form.props';
 
-export type { FormProps } from './Form.state';
 
 type GetEmptyRequiredInputs = (validation: FormProps[ 'validation' ], state: FormValues) => Record<string, boolean>;
 const getEmptyRequiredInputs = _getEmptyRequiredInputs as GetEmptyRequiredInputs;

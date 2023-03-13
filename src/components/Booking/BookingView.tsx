@@ -1,8 +1,6 @@
-import './BookingView.scss';
-
 import React, { useState } from 'react';
 import { Button } from '@lodgify/ui';
-import { PropertyBooking } from '../PropertyBooking';
+import { PropertyBooking } from '../PropertyBookingBar';
 
 import type { BookingProps } from './BookingComponent';
 

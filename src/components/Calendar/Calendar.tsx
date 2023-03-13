@@ -1,7 +1,7 @@
 import 'react-dates/esm/initialize';
 
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-// import { DateRangePickerProps } from '@lodgify/ui';
+// import { DateRangePickerProps, InputControllerProps } from '@lodgify/ui';
 import { getIsFocusControlled } from '@lodgify/ui/lib/es/components/inputs/DateRangePicker/utils/getIsFocusControlled';
 import { getIsVisible } from '@lodgify/ui/lib/es/components/inputs/DateRangePicker/utils/getIsVisible';
 import { getNumberOfMonths } from '@lodgify/ui/lib/es/components/inputs/DateRangePicker/utils/getNumberOfMonths';
@@ -16,14 +16,15 @@ import { mapValueToProps } from '@lodgify/ui/lib/es/components/inputs/DateRangeP
 import { returnFirstArgument } from '@lodgify/ui/lib/es/utils/return-first-argument';
 // import { withResponsive } from '@lodgify/ui/lib/es/utils/with-responsive';
 import DateRangePicker from 'react-dates/esm/components/DateRangePicker';
-import { debounce } from 'debounce';
 import moment from 'moment';
 import { v4 as uuid } from 'uuid';
 import { ComponentWithResponsiveProps, withResponsive } from '../../withResponsive';
 import { DateRangePickerProps } from './DateRangePicker.type';
-import { InputController } from '../InputController';
+import { InputController, InputControllerProps } from '../InputController';
 import { isSame, partition, usePreviousListener } from '../../util';
-import { ReactDatesDateRangePickerProps } from './ReactDates.type';
+
+import type { Omit } from '../../util.types';
+import type { ReactDatesDateRangePickerProps } from './ReactDates.type';
 
 
 export type CalendarProps = ComponentWithResponsiveProps<
@@ -54,7 +55,7 @@ export type CalendarProps = ComponentWithResponsiveProps<
 
 const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUserOnMobile: _is, windowWidth, windowHeight, ...props }) => {
 
-    const [ calendarProps, reactDatesProps ] = partition(props, DateRangePickerProps);
+    const [ rangePickerProps, reactDatesProps ] = partition(props, DateRangePickerProps);
 
     type FocusedInput = DateRangePickerProps[ 'focusedInput' ];
 
@@ -66,7 +67,7 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
 
 
     useEffect(() => {
-        moment.locale(calendarProps.localeCode);
+        moment.locale(rangePickerProps.localeCode);
         /* handleHeightChange();
         global.addEventListener('resize', handleHeightChange);
 
@@ -77,7 +78,7 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
 
 
     const previous = usePreviousListener({
-        propsFocusedInput: calendarProps.focusedInput,
+        propsFocusedInput: rangePickerProps.focusedInput,
         stateFocusedInput: state.focusedInput
     }, { isSame });
 
@@ -92,63 +93,63 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
             const focusedInput = isFocusControlled ? newValue.propsFocusedInput : newValue.stateFocusedInput;
 
             if (isBlurEvent(previousFocusedInput, focusedInput))
-                calendarProps.onBlur?.();
+                rangePickerProps.onBlur?.();
 
             if (isFocusControlled)
                 return;
 
             if (previousFocusedInput !== focusedInput)
-                calendarProps.onFocusChange?.(focusedInput);
+                rangePickerProps.onFocusChange?.(focusedInput);
         });
-    }, [ calendarProps.onBlur, calendarProps.onFocusChange ]);
+    }, [ rangePickerProps.onBlur, rangePickerProps.onFocusChange ]);
 
 
     const visibilityCheck = useRef();
 
 
-    const handleFocusChange = useCallback((focusedInput: FocusedInput) => {
+    const handleFocusChange: ReactDatesDateRangePickerProps[ 'onFocusChange' ] = useCallback((focusedInput: FocusedInput) => {
         if (!isDisplayedAsModal(windowHeight) && !getIsVisible(visibilityCheck.current))
             return;
 
-        if (getIsFocusControlled(calendarProps.focusedInput))
-            calendarProps.onFocusChange(focusedInput);
+        if (getIsFocusControlled(rangePickerProps.focusedInput))
+            rangePickerProps.onFocusChange(focusedInput);
         else
             setState(state => ({ ...state, focusedInput }));
-    }, [ setState, windowHeight, calendarProps.focusedInput, calendarProps.onFocusChange ]);
+    }, [ setState, windowHeight, rangePickerProps.focusedInput, rangePickerProps.onFocusChange ]);
 
 
 
-    const focusedInput = getIsFocusControlled(calendarProps.focusedInput) ? calendarProps.focusedInput : state.focusedInput;
+    const focusedInput: ReactDatesDateRangePickerProps[ 'focusedInput' ] = getIsFocusControlled(rangePickerProps.focusedInput) ? rangePickerProps.focusedInput : state.focusedInput;
 
 
-    const inputControllerProps = {
+    const inputControllerProps: Omit<InputControllerProps, 'children'> = {
         adaptOnChangeEvent: returnFirstArgument,
-        error: calendarProps.error,
-        initialValue: calendarProps.initialValue,
+        error: rangePickerProps.error,
         inputOnChangeFunctionName: 'onDatesChange',
         isFocused: !!focusedInput,
-        isValid: calendarProps.isValid,
-        mapValueToProps: mapValueToProps,
-        name: calendarProps.name,
-        onChange: calendarProps.onChange,
-        value: calendarProps.value
+        isValid: rangePickerProps.isValid,
+        mapValueToProps,
+        name: rangePickerProps.name,
+        onChange: rangePickerProps.onChange,
+        value: rangePickerProps.value
     };
 
-    const dateRangePickerProps = {
+    const dateRangePickerProps: ReactDatesDateRangePickerProps = {
         ...reactDatesProps,
-        displayFormat: calendarProps.displayFormat,
-        endDatePlaceholderText: calendarProps.isLoading ? LOADING_PLACEHOLDER_TEXT : calendarProps.endDatePlaceholderText,
-        isDayBlocked: calendarProps.getIsDayBlocked,
-        openDirection: getUpOrDownFromBoolean(calendarProps.willOpenAbove),
-        startDatePlaceholderText: calendarProps.isLoading ? LOADING_PLACEHOLDER_TEXT : calendarProps.startDatePlaceholderText,
-        focusedInput: focusedInput,
-        onDatesChange: Function.prototype,
+        // initialValue: calendarProps.initialValue,
+        displayFormat: rangePickerProps.displayFormat,
+        endDatePlaceholderText: rangePickerProps.isLoading ? LOADING_PLACEHOLDER_TEXT : rangePickerProps.endDatePlaceholderText,
+        isDayBlocked: rangePickerProps.getIsDayBlocked,
+        openDirection: getUpOrDownFromBoolean(rangePickerProps.willOpenAbove),
+        startDatePlaceholderText: rangePickerProps.isLoading ? LOADING_PLACEHOLDER_TEXT : rangePickerProps.startDatePlaceholderText,
+        focusedInput,
+        onDatesChange: () => { },
         onFocusChange: handleFocusChange,
-        endDateId: state.endDateId,
-        startDateId: state.startDateId,
-        customArrowIcon: calendarProps.isLoading ? <Icon name={ICON_NAMES.SPINNER} /> : <Icon name={ICON_NAMES.ARROW_RIGHT} />,
-        disabled: calendarProps.isLoading,
-        customInputIcon: calendarProps.isCalendarIconDisplayed ? React.createElement(Icon, {
+        endDateId: `${state.endDateId}`,
+        startDateId: `${state.startDateId}`,
+        customArrowIcon: rangePickerProps.isLoading ? <Icon name={ICON_NAMES.SPINNER} /> : <Icon name={ICON_NAMES.ARROW_RIGHT} />,
+        disabled: rangePickerProps.isLoading,
+        customInputIcon: rangePickerProps.isCalendarIconDisplayed ? React.createElement(Icon, {
             name: ICON_NAMES.CALENDAR
         }) : undefined,
         daySize: 52,
@@ -183,7 +184,6 @@ _Calendar.defaultProps = {
     error: false,
     focusedInput: undefined,
     getIsDayBlocked: Function.prototype,
-    initialValue: undefined,
     isCalendarIconDisplayed: true,
     isLoading: false,
     isValid: false,
@@ -198,5 +198,7 @@ _Calendar.defaultProps = {
     windowWidth: MAXIMUM_SCREEN_WIDTH_FOR_TWO_MONTH_CALENDAR
 };
 
+const MemoCalendar = memo(_Calendar);
+MemoCalendar.displayName = 'memo(Calendar)';
 
-export const Calendar = withResponsive(memo(_Calendar));
+export const Calendar = withResponsive(MemoCalendar);

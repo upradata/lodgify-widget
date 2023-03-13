@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BookingContext } from './BookingContext';
-import { BookingData, BookingDetails, BookingProps } from './BookingComponent';
+import { BookingContext, BookingContextType } from './BookingContext';
+import { BookingData, BookingBillingInfo, BookingProps } from './BookingComponent';
 import { useReservation } from './BookingReservation.state';
 import { useRoomState } from '../../rooms.state';
 
@@ -12,8 +12,8 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
     const BookingReservationStateManagement: React.FunctionComponent<{ rooms: RoomData[]; }> = ({ rooms: roomsList }) => {
 
         const { rooms, setRoom, getRoom } = useRoomState(roomsList);
-        const { reservation, setReservation } = useReservation(roomsList[ 0 ]);
-        const [ details, setDetails ] = useState(new BookingDetails());
+        const { reservation, setReservation } = useReservation(roomsList[ 0 ], rooms);
+        const [ billingInfo, setBillingInfo ] = useState(new BookingBillingInfo());
 
         useEffect(() => {
             roomsList.forEach(({ value }) => {
@@ -23,25 +23,42 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
         }, []);
 
 
-        const context = useMemo(() => ({
+        const contextFns: Pick<BookingContextType, 'setReservation' | 'setBillingInfo'> = {
+            setReservation: useCallback(data => {
+                Object.entries(data).forEach(([ name, value ]) => { setReservation(name as keyof BookingData, value); });
+            }, []),
+
+            setBillingInfo: useCallback(data => setBillingInfo(state => {
+                if (Object.entries(data).some(([ k, v ]) => state[ k ] !== v))
+                    return { ...state, ...data };
+
+                return state;
+            }), [])
+        };
+
+        const context = useMemo<BookingContextType>(() => ({
             getRoom,
             rooms,
-            reservation
-        }), [ rooms, getRoom, reservation ]);
+            reservation,
+            billingInfo,
+            ...contextFns
+        }), [ getRoom, rooms, reservation, billingInfo, setReservation, setBillingInfo ]);
 
 
-        const onReservationChange: BookingProps[ 'onReservationChange' ] = useCallback(data => {
+        // const onReservationChange: BookingProps[ 'onReservationChange' ] = context.setReservation;
+        /*  useCallback(data => {
             Object.entries(data).forEach(([ name, value ]) => setReservation(name as keyof BookingData, value, rooms[ reservation.roomValue ]));
-        }, [ setReservation ]);
+        }, [ setReservation ]); */
 
-        const onReservationDetailsChange: BookingProps[ 'onReservationDetailsChange' ] = useCallback(data => {
+        // const onBillingInfoChange: BookingProps[ 'onBillingInfoChange' ] = context.setBillingInfo;
+        /* useCallback(data => {
             setDetails(state => ({ ...state, ...data }));
-        }, [ setDetails ]);
+        }, [ setDetails ]); */
 
 
         const onSubmit: BookingProps[ 'onSubmit' ] = useCallback(() => {
-            console.log(reservation, details);
-        }, [ reservation, details ]);
+            console.log(reservation, billingInfo);
+        }, [ reservation, billingInfo ]);
         /*  useCallback(() => {
             console.log(reservation, details);
         }, []); */
@@ -50,8 +67,8 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
         return (
             <BookingContext.Provider value={context}>
                 <BookingComponent {...reservation}
-                    onReservationChange={onReservationChange}
-                    onReservationDetailsChange={onReservationDetailsChange}
+                    /* onReservationChange={onReservationChange}
+                    onBillingInfoChange={onBillingInfoChange} */
                     onSubmit={onSubmit} />
             </BookingContext.Provider>
         );

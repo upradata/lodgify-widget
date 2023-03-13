@@ -165,7 +165,7 @@ export const debounce = <Fn extends Function>(fn: Fn, wait: number = 0, immediat
     let timeout: number;
 
     function debouncedFn(...args: unknown[]) {
-        const context = null; // this;
+        const context = this;
 
         const later = () => {
             timeout = null;
@@ -174,6 +174,7 @@ export const debounce = <Fn extends Function>(fn: Fn, wait: number = 0, immediat
         };
 
         const callNow = immediate && !timeout;
+        
         clearTimeout(timeout);
         timeout = window.setTimeout(later, wait);
 

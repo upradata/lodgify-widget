@@ -8,7 +8,7 @@ import { Reservation, ReservationQuote, ReservationQuoteRoomPriceDetails, Reserv
 
 import type { Omit } from '../../util.types';
 import type { RoomData } from '../../rooms.data';
-import { cp } from 'fs';
+import { RoomsState } from '../../rooms.state';
 
 
 type SetReservation = React.Dispatch<React.SetStateAction<Reservation>>;
@@ -49,8 +49,8 @@ const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> 
                     const { startDate, endDate } = value as BookingDataValueOf<'dates'>;
 
                     const dates = {
-                        startDate: startDate ? momentToLodgifyDate(startDate) : reservation.startDate,
-                        endDate: endDate ? momentToLodgifyDate(endDate) : reservation.endDate
+                        startDate: momentToLodgifyDate(startDate),
+                        endDate: momentToLodgifyDate(endDate)
                     };
 
                     const nbOfNights = () => {
@@ -197,15 +197,21 @@ const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> 
 };
 
 
-export const useReservation = (initRoom: RoomData) => {
+export const useReservation = (initRoom: RoomData, rooms: RoomsState) => {
     const [ reservation, setReservation ] = useState<Reservation>({ ...new ReservationDebug(), /* nbGuests: 1, roomValue: initRoom.value, */ isLoading: false });
 
-    const updateReservation = useCallback((name: keyof BookingData, value: BookingData[ keyof BookingData ], room: RoomData) => {
+    const updateReservation = useCallback((name: keyof BookingData, value: BookingData[ keyof BookingData ]) => {
         setReservation(reservation => {
             const newReservation = reservationReducer(reservation, { type: 'change-input', name, value });
-            return reservationReducer(newReservation, { type: 'request-accomodation-price', room, previousReservation: reservation, setReservation });
+
+            return reservationReducer(newReservation, {
+                type: 'request-accomodation-price',
+                room: rooms[ newReservation.roomValue ],
+                previousReservation: reservation,
+                setReservation
+            });
         });
-    }, [ setReservation ]);
+    }, []);
 
     return { setReservation: updateReservation, reservation };
 };

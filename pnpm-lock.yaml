@@ -9,6 +9,7 @@ specifiers:
   '@testing-library/jest-dom': ^5.16.5
   '@testing-library/react': 11.1.2
   '@testing-library/user-event': ^11.4.2
+  '@types/debounce': ^1.2.1
   '@types/jest': ^27.5.2
   '@types/node': ^16.18.11
   '@types/react': ^16
@@ -35,6 +36,7 @@ specifiers:
 
 dependencies:
   '@lodgify/ui': 1.298.0_wrrjcync2b7uri2ifzubktew2m
+  '@types/debounce': 1.2.1
   classnames: 2.3.2
   debounce: 1.2.1
   fast-deep-equal: 3.1.3
@@ -2447,6 +2449,10 @@ packages:
     resolution: {integrity: sha512-cdeYyv4KWoEgpBISTxWvqYsVy444DOqehiF3fM3ne10AmJ62RSyNkUnxMJXHQWRQQX2eR94m5y1IZyDwBjV9FQ==}
     dependencies:
       '@types/node': 16.18.14
+    dev: false
+
+  /@types/debounce/1.2.1:
+    resolution: {integrity: sha512-epMsEE85fi4lfmJUH/89/iV/LI+F5CvNIvmgs5g5jYFPfhO2S/ae8WSsLOKWdwtoaZw9Q2IhJ4tQ5tFCcS/4HA==}
     dev: false
 
   /@types/eslint-scope/3.7.4:

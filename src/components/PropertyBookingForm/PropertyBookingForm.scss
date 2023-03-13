@@ -1,0 +1,139 @@
+.PropertyBookingForm {
+    .ui.form .field {
+        clear: none;
+        margin: unset;
+        flex-grow: 1;
+    }
+
+    .inputs-container {
+        display: flex;
+        align-items: center;
+        column-gap: 0.7rem;
+        row-gap: 0.7rem;
+    }
+
+    &:not(.is-compact) .button-container {
+        margin-top: var(--lodgify-form-item-space, 2.14rem);
+    }
+
+    .button-container > * {
+        margin: 0;
+        width: 100% !important;
+    }
+}
+
+.is-row .PropertyBookingForm,
+.PropertyBookingForm.is-responsive {
+    flex-grow: 1;
+
+    .inputs-container {
+        .input-container.location-input-container {
+            max-width: 400px;
+            min-width: 150px;
+            flex-grow: 1;
+
+            .dropdown-container .ui.selection.dropdown {
+                max-width: none;
+            }
+
+            .ui.selection.dropdown {
+                height: 100%;
+            }
+
+            .ui.selection.dropdown .default.text {
+                display: flex;
+                align-items: center;
+            }
+        }
+
+        .input-container.guests-input-container {
+            min-width: 150px;
+        }
+
+        .input-container > * {
+            max-width: none !important;
+        }
+
+        .button-container .ui.button {
+            height: 100%;
+        }
+    }
+
+    @media only screen and (min-width: 1000px) {
+        .button {
+            height: 42px;
+            white-space: nowrap;
+        }
+    }
+
+    @media only screen and (max-width: 600px) {
+        .ui.segments > .ui.segment {
+            padding: 0;
+        }
+        .ui.grid > .is-row > .is-column:first-child {
+            padding-right: 0;
+        }
+    }
+}
+
+.is-row .PropertyBookingForm {
+    .inputs-container {
+        row-gap: 10px;
+        column-gap: 10px;
+    }
+}
+
+.is-column .PropertyBookingForm,
+.PropertyBookingForm.is-responsive {
+    width: 100%;
+
+    .inputs-container {
+        flex-wrap: wrap;
+
+        .input-container {
+            width: 100%;
+            min-width: none;
+            max-width: none;
+        }
+
+        .dropdown-container .ui.selection.dropdown {
+            max-width: none !important;
+        }
+
+        .button-container,
+        .dates-input-container {
+        }
+    }
+
+    @media (min-width: 560px) /* and (max-width: 1240px) */ {
+        .inputs-container {
+            .location-input-container {
+                // order: 0;
+                width: 100%;
+                // max-width: 100%;
+                /*  min-width: 100%; */
+                // padding-right: 0;
+            }
+
+            .dates-input-container {
+                // order: 1;
+                // flex-basis: auto;
+                flex-grow: 1;
+                width: auto;
+                min-width: 150px;
+            }
+
+            .guests-input-container {
+                // order: 2;
+                flex-grow: 1;
+                width: auto;
+            }
+
+            .button-container {
+                // order: 3;
+                width: 100%;
+                /* flex-grow: 1 */
+            }
+        }
+    }
+}

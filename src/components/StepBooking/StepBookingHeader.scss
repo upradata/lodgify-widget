@@ -1,25 +1,3 @@
-.PropertyBooking {
-    .Bar .ui.container {
-        padding: 0 15px;
-    }
-}
-
-.large .PropertyBookingForm {
-    margin-left: 40px;
-}
-
-.is-fixed .PropertyBookingForm {
-    /* height: 85px; */
-
-    .ui.segments > .ui.segments {
-        margin: 0;
-    }
-}
-
-.small .PropertyBookingForm {
-    margin-top: 35px;
-}
-
 .BookingHeader,
 .BookingSubHeader,
 .BookingHeader__dates {
@@ -32,6 +10,10 @@
 
 .BookingHeader,
 .BookingSubHeader {
+    h3 {
+        margin: 0;
+    }
+    
     &.vertical-center,
     .vertical-center {
         display: flex;
@@ -52,14 +34,14 @@
 }
 
 .BookingHeader__dates {
-    font-size: 0.7em;
+    font-size: 0.8em;
     font-weight: 300;
     margin-left: 20px;
 }
 
 .BookingSubHeader {
     text-transform: none;
-    margin-top: 15px;
+    // margin-top: 15px;
 }
 
 .BookingSubHeader__price {

@@ -3,26 +3,17 @@ import {
     Button,
     CounterDropdown,
     CounterDropdownProps,
-    // DateRangePickerProps,
     Dropdown,
     DropdownProps,
-    LocationOptions,
-    SearchBarFieldsProps
 } from '@lodgify/ui';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { Calendar, CalendarProps } from '../Calendar';
-import { ChangeInputData } from './PropertyBookingForm.type';
 import { Form, FormProps, InputField } from '../Form';
-
+import { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
 
 // import { size } from '@lodgify/ui/lib/es/utils/size';
 
-export type PropertyBookingFormContentProps = Omit<SearchBarFieldsProps, 'locationOptions'> & {
-    locationOptions: LocationOptions[];
-    onSubmit?: (data: ChangeInputData) => void;
-    searchButton?: FormProps[ 'searchButton' ];
-} & Pick<CalendarProps, 'minimumNights'>;
 
 export const PropertyBookingFormContent: React.FunctionComponent<PropertyBookingFormContentProps> = props => {
 
@@ -34,7 +25,7 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         willOpenAbove: props.willLocationDropdownOpenAbove
     };
 
-    const calendarProps: CalendarProps /* DateRangePickerProps */ = {
+    const calendarProps: CalendarProps = {
         endDatePlaceholderText: props.datesCheckOutLabel,
         focusedInput: props.datesInputFocusedInput,
         getIsDayBlocked: props.getIsDayBlocked,
@@ -74,15 +65,14 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
             searchButton={<FormButton isDisabled={false} searchButton={props.searchButton} />}>
 
             <InputField className="input-container location-input-container"><Dropdown icon={ICON_NAMES.MAP_PIN} name="location" {...dropdownProps} /></InputField>
-            <InputField className="input-container dates-input-container">
-                {/* <DateRangePicker name="dates" {...dateRangePickerProps} /> */}
-                <Calendar name="dates" {...calendarProps} />
-            </InputField>
-            <InputField className="input-container guests-input-container"><CounterDropdown name="guests" {...counterDropdownProps} /></InputField>
+            <InputField className="input-container dates-input-container"><Calendar name="dates" {...calendarProps} /></InputField>
+            <InputField className="input-container guests-input-container is-last"><CounterDropdown name="guests" {...counterDropdownProps} /></InputField>
 
         </Form>
     );
 };
+
+
 
 
 const FormButton: React.FunctionComponent<{ isDisabled: boolean; searchButton: FormProps[ 'searchButton' ]; }> = ({ isDisabled, searchButton }) => {

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Icon } from '@lodgify/ui';
-import { plural, /* localizedPrice */ } from '../../util';
+import { plural } from '../../util';
 import { Price, PriceProps } from '../Price';
 
 
-export type PropertyBookingSubHeaderProps = { nbGuest: number; nbNights: number; } & PriceProps;
+export type StepBookingSubHeaderProps = { nbGuest: number; nbNights: number; } & PriceProps;
 
-export const PropertyBookingSubHeader: React.FunctionComponent<PropertyBookingSubHeaderProps> = ({ nbNights,  nbGuest, ...priceProps }) => {
+export const StepBookingSubHeader: React.FunctionComponent<StepBookingSubHeaderProps> = ({ nbNights, nbGuest, ...priceProps }) => {
 
     return (
         <div className="BookingSubHeader vertical-center">
@@ -21,10 +21,9 @@ export const PropertyBookingSubHeader: React.FunctionComponent<PropertyBookingSu
 
             <div className="BookingSubHeader__price vertical-center" style={{ color: '#4b4b4b', marginLeft: 20 }}>
                 {/* <Icon name="caret right" /> */}
-                <span className="BookingSubHeader__price">
-                    {/*  {localizedPrice(price)} */}
+                <div className="BookingSubHeader__price">
                     <Price {...priceProps} />
-                </span>
+                </div>
             </div>
         </div>
     );

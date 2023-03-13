@@ -2,32 +2,33 @@ import React from 'react';
 import { HorizontalGutters, Icon, ModalProps } from '@lodgify/ui';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon/constants';
 import classnames from 'classnames';
-import { Modal as SemanticModal, ModalProps as SemanticModalProps } from 'semantic-ui-react';
-import { partition } from '../../util';
+import { Modal as SemanticModal, StrictModalProps as SemanticModalProps } from 'semantic-ui-react';
+
+import type { Omit } from '../../util.types';
 
 
-export type ModalViewProps = SemanticModalProps & ModalProps;
+export type ModalViewProps = SemanticModalProps & Omit<ModalProps, 'hasCloseIcon' | 'size'>;
 
-export const ModalView: React.FunctionComponent<ModalViewProps> = ({ children, header, ...props }) => {
+export const ModalView: React.FunctionComponent<ModalViewProps> = ({
+    children, header, className, hasPadding, hasRoundedCorners, closeIcon, isClosingOnDimmerClick, isOpen, size, isFullscreen,
+    ...props
+}) => {
 
     const modalProps: SemanticModalProps = {
-        className: classnames(props.className, {
-            'has-padding': props.hasPadding,
-            'has-rounded-corners': props.hasRoundedCorners
+        className: classnames(className, {
+            'has-padding': hasPadding,
+            'has-rounded-corners': hasRoundedCorners
         }),
-        closeIcon: props.hasCloseIcon && props.closeIcon,
-        closeOnDimmerClick: props.isClosingOnDimmerClick,
+        closeIcon: !!closeIcon && closeIcon,
+        closeOnDimmerClick: isClosingOnDimmerClick,
         // dimmer: 'inverted',
-        onClose: props.onClose,
-        open: props.isOpen,
-        size: props.isFullscreen ? 'fullscreen' : props.size,
-        trigger: props.trigger
+        open: isOpen,
+        size: isFullscreen ? 'fullscreen' : size,
+        ...props
     };
 
-    const [ , rest ] = partition(props, modalProps);
-
     return (
-        <SemanticModal {...modalProps} {...rest} className="Modal">
+        <SemanticModal {...modalProps} className="Modal">
             {!!header && (
                 <SemanticModal.Header>
                     <HorizontalGutters>{header}</HorizontalGutters>
@@ -48,7 +49,6 @@ ModalView.defaultProps = {
     }),
     className: null,
     header: null,
-    hasCloseIcon: true,
     hasPadding: false,
     hasRoundedCorners: false,
     isFullscreen: false,

@@ -1,7 +1,6 @@
 import './Modal.scss';
 
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-// import { Modal as LodgifyModal, ModalProps as LodgifyModalProps } from '@lodgify/ui';
 import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
 import { partition } from '../../util';
 import { ModalView, ModalViewProps } from './ModalView';
@@ -12,6 +11,7 @@ class _ModalProps {
     onOpen?: () => void;
     onClose?: () => void;
     onOpenChange?: (isOpen: boolean) => void;
+    size?: ModalViewProps[ 'size' ];
 };
 
 export type ModalProps = /* LodgifyModalProps */ ModalViewProps & _ModalProps;
@@ -55,6 +55,9 @@ const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps
     const breakpoints = useMemo<BP[]>(() => [ { max: 1200, size: 'small' }, { min: 1201, size: 'large' } ], []);
 
     const [ bp, setBp ] = useState<BP>(null);
+
+    if (_props.size)
+        return <ModalView {...modalViewProps} size={props.size}>{children}</ModalView>;
 
     return (
         <MediaQuery breakpoints={breakpoints} onActive={bp => setBp(bp as BP)}>

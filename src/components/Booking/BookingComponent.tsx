@@ -10,7 +10,7 @@ export type BookingData = {
     promotionCode?: string;
 };
 
-export class BookingDetails {
+export class BookingBillingInfo {
     email: string;
     firstName: string;
     lastName: string;
@@ -21,8 +21,8 @@ export class BookingDetails {
 
 
 export type BookingProps = Reservation & {
-    onReservationChange?: (data: Partial<BookingData>) => void;
-    onReservationDetailsChange?: (data: Partial<BookingDetails>) => void;
+    // onReservationChange?: (data: Partial<BookingData>) => void;
+    // onBillingInfoChange?: (data: Partial<BookingBillingInfo>) => void;
     onSubmit?: () => void; // (bookingData: BookingData, details: BookingDetails) => void;
 };
 

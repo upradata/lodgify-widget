@@ -1,4 +1,7 @@
-.BookingDetails {
+.BookingBillingInfo {
+    display: flex;
+    flex-direction: column;
+
     .ui.search.dropdown > .text,
     .ui.search.dropdown > input.search {
         cursor: pointer;

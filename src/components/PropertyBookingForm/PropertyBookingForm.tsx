@@ -1,10 +1,15 @@
 import './PropertyBookingForm.scss';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import classnames from 'classnames';
 // import isEqual from 'fast-deep-equal';
-import { ChangeInputData, InputDataNames, InputDataValues } from './PropertyBookingForm.type';
-import { FormProps } from '../Form';
-import { PropertyBookingFormContent, PropertyBookingFormContentProps } from './PropertyBookingFormContent';
+import { PropertyBookingFormContent } from './PropertyBookingFormContent';
+
+import type { InputDataNames, InputDataValues } from './PropertyBookingForm.type';
+import type { PropertyBookingFormContentProps, PropertyBookingFormProps } from './PropertyBookingForm.props';
+import { ContainerContext } from '../Container/ContainerContext';
+
+
 // import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
 // import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
 // import { usePrevious } from '../../util';
@@ -15,14 +20,11 @@ import { PropertyBookingFormContent, PropertyBookingFormContentProps } from './P
 
 
 
-export type PropertyBookingFormProps = Omit<PropertyBookingFormContentProps, 'onInputChange'> & {
-    onSubmit?: (data: ChangeInputData) => void;
-    onInputChange?: (name: InputDataNames, value: InputDataValues, data: ChangeInputData) => void;
-    searchButton?: FormProps[ 'searchButton' ];
-};
 
+export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = ({
+    onSubmit, onInputChange: onChange, isCompact, ...props
+}) => {
 
-export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = ({ onSubmit, onInputChange: onChange, ...props }) => {
     // const [ isDropdownOpenAbove, setDropdownOpenAbove ] = useState(willLocationDropdownOpenAbove);
 
     /* const ref = useRef<HTMLDivElement>();
@@ -47,24 +49,24 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
         // willLocationDropdownOpenAbove
     });
 
-    const [ stateNameChanged, onStateNameChanged ] = useState<{ name: InputDataNames | null; }>({ name: null });
+    // const [ stateNameChanged, setStateNameChanged ] = useState<{ name: InputDataNames | null; }>({ name: null });
 
     const onInputChange = useCallback((name: InputDataNames, value: InputDataValues) => {
         setState(state => {
             const newState = { ...state, [ name ]: value };
-            // onChange?.(name, value, newState);
+            onChange?.(name, value, newState);
             return newState;
         });
 
-        onStateNameChanged({ name });
-    }, [ /* onChange, */ onStateNameChanged, setState ]);
+        // setStateNameChanged({ name });
+    }, [ onChange /* , setStateNameChanged  */ ]);
 
-    useEffect(() => {
+    /* useEffect(() => {
         const { name } = stateNameChanged;
 
         if (name)
             onChange?.(name, state[ name ], state);
-    }, [ stateNameChanged, onChange ]);
+    }, [ stateNameChanged, onChange ]); */
 
 
     const handleSubmit = useCallback(() => { onSubmit?.(state); }, [ onSubmit, state ]);
@@ -103,8 +105,14 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
         onInputChange: onInputChange
     };
 
+    const { isColumn, isRow } = useContext(ContainerContext);
+
     return (
-        <div className="PropertyBookingForm">
+        <div className={classnames('PropertyBookingForm', {
+            'is-compact': isCompact,
+            'is-not-column': !isColumn,
+            'is-not-row': !isRow
+        })}>
             <PropertyBookingFormContent {...formProps} willLocationDropdownOpenAbove={props.willLocationDropdownOpenAbove ?? true /* || isDropdownOpenAbove */} />
         </div>
     );

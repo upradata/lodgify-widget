@@ -5,12 +5,12 @@ import { dateAsString } from '../../lodgify-info/info';
 import type { LodgifyDate } from '../../lodgify-requests/types';
 
 
-export type PropertyBookingHeaderProps = { roomName: string; startDate: LodgifyDate; endDate: LodgifyDate; };
+export type StepBookingHeaderProps = { roomName: string; startDate: LodgifyDate; endDate: LodgifyDate; };
 
-export const PropertyBookingHeader: React.FunctionComponent<PropertyBookingHeaderProps> = ({ roomName, startDate, endDate }) => {
+export const StepBookingHeader: React.FunctionComponent<StepBookingHeaderProps> = ({ roomName, startDate, endDate }) => {
     return (
         <div className="BookingHeader vertical-baseline">
-            <span className="BookingHeader__location">{roomName}</span>
+            <h3 className="BookingHeader__location">{roomName}</h3>
 
             <div className="BookingHeader__dates vertical-center">
                 <span>{dateAsString(startDate)}</span>

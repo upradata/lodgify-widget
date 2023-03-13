@@ -1,10 +1,10 @@
 // import 'semantic-ui-css/components/accordion.css';
 import './BookingSummary.scss';
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 import {
-    BlockPlaceholder,
-    BlockPlaceholderProps,
+    /* BlockPlaceholder,
+    BlockPlaceholderProps, */
     Button,
     Checkbox,
     FlexContainer,
@@ -15,51 +15,27 @@ import {
 } from '@lodgify/ui';
 import {
     Accordion,
-    AccordionTitleProps,
-    Label,
-    Menu,
+    StrictAccordionTitleProps,
     Placeholder,
     PlaceholderLine,
-    PlaceholderLineProps,
+    StrictPlaceholderLineProps,
     PlaceholderParagraph,
-    PlaceholderParagraphProps,
+    StrictPlaceholderParagraphProps,
     PlaceholderProps,
-    Tab,
-    Table,
-    TabProps
+    Table
 } from 'semantic-ui-react';
 import classnames from 'classnames';
 import { BookingContext } from '../Booking/BookingContext';
-import { BookingData } from '../Booking/BookingComponent';
-import { Card } from '../Card';
-import { CardProps } from '../Card/Card';
 import { Form, FormProps, InputField, RenderInputField } from '../Form';
-import { localizedPrice, partition, plural } from '../../util';
-import { PropertyBookingHeader } from '../PropertyBooking/PropertyBookingHeader';
-import { PropertyBookingSubHeader } from '../PropertyBooking/PropertyBookingSubHeader';
-import { Reservation, ReservationQuote, ReservationQuoteRoomCategoryPrices, ReservationQuoteRoomPriceDetails } from '../Booking/reservation.type';
+import { localizedPrice, plural } from '../../util';
 import { QuotePriceType } from '../../lodgify-requests';
+import { ReservationQuote, ReservationQuoteRoomCategoryPrices, ReservationQuoteRoomPriceDetails } from '../Booking/reservation.type';
 
-
-const panes: TabProps[ 'panes' ] = [
-    {
-        menuItem: { key: 'users', icon: 'users', content: 'Users' },
-        render: () => <Tab.Pane>Tab 1 Content</Tab.Pane>,
-    },
-    {
-        menuItem: (
-            <Menu.Item key='messages'>
-                Messages<Label>15</Label>
-            </Menu.Item>
-        ),
-        render: () => <Tab.Pane>Tab 2 Content</Tab.Pane>,
-    },
-];
 
 type _PlaceholderProps = Pick<PlaceholderProps, 'fluid' | 'inverted' | 'className'>;
 type PlaceHolderProps = |
-    { type: 'paragraph'; nbLines?: number; } & _PlaceholderProps & PlaceholderParagraphProps /* BlockPlaceholderProps */ |
-    { type: 'line'; } & _PlaceholderProps & PlaceholderLineProps /* TextPlaceholderProps */;
+    { type: 'paragraph'; nbLines?: number; } & _PlaceholderProps & StrictPlaceholderParagraphProps /* StrictBlockPlaceholderProps */ |
+    { type: 'line'; } & _PlaceholderProps & StrictPlaceholderLineProps /* TextPlaceholderProps */;
 
 
 const PlaceHolder: React.FunctionComponent<PlaceHolderProps> = ({ fluid, inverted, className, type, ...props }) => {
@@ -303,16 +279,13 @@ const QuoteSummary: React.FunctionComponent<QuoteProps> = ({ roomsPriceDetails, 
 };
 
 
-export type BookingSummaryProps = {
-    onReservationChange?: (data: Partial<BookingData>) => void;
-} & Reservation;
+export type BookingSummaryProps = { onSubmit?: () => void; buttonText?: string; };
 
 
-export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = props => {
-    const { getRoom, } = useContext(BookingContext);
-    const [ reservation, { onReservationChange } ] = partition(props, Reservation);
 
-    const room = getRoom(reservation.roomValue);
+export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = ({ onSubmit: handleSubmit, buttonText }) => {
+    const { reservation, setReservation } = useContext(BookingContext);
+    // const [ reservation, { onReservationChange } ] = partition(props, Reservation);
 
     /* return (
         <Tab panes={panes} menu={{ fluid: true, vertical: true, borderless: true, attached: false }} menuPosition='right' />
@@ -322,6 +295,7 @@ export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = prop
     const [ formState, setFormState ] = useState({ hasCoupon: false, coupon: null as string });
 
     const onSubmit: FormProps<{}>[ 'onSubmit' ] = useCallback((values => {
+        handleSubmit?.();
         // const data = Object.entries(values).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as FormValues);
         // handleSummit?.(data);
     }), [ /* handleSummit */ ]);
@@ -334,24 +308,23 @@ export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = prop
 
     const onCouponApply = useCallback(() => {
         if (formState.coupon)
-            onReservationChange?.({ promotionCode: formState.coupon });
-    }, [ onReservationChange, formState.coupon ]);
+            setReservation({ promotionCode: formState.coupon });
+    }, [ setReservation, formState.coupon ]);
 
     // const [ isLoading, setIsLoading ] = useState(reservation.isLoading);
 
     return (
-        <Card
-            className="BookingSummary"
-            header={<PropertyBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
-            subHeader={<PropertyBookingSubHeader price={quote?.totalGross} isLoading={reservation.isLoading}
-                nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />}
-            /* {...cardProps} */>
+        <div className="BookingSummary">
+
+            {/* <PropertyBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />
+            <PropertyBookingSubHeader price={quote?.totalGross} isLoading={reservation.isLoading} nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} /> */}
+
 
             {/* <Button onClick={() => setIsLoading(!isLoading)}>Enable Loading</Button> */}
 
             <QuoteSummary {...quote} isLoading={/* isLoading */reservation.isLoading} />
 
-            <Form submitButtonText="Proceed to payment" /* validation={validation} */ onSubmit={onSubmit} onInputChange={onInputChange} >
+            <Form submitButtonText={buttonText} /* validation={validation} */ onSubmit={onSubmit} onInputChange={onInputChange} className="BookingSummary__form">
 
                 <Checkbox label={"Do you have any coupon?"} name="hasCoupon" />
                 {formState.hasCoupon && <RenderInputField name="coupon">
@@ -364,11 +337,23 @@ export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = prop
                 </RenderInputField>
                 }
             </Form>
-        </Card>
+        </div>
+
     );
 };
 
+BookingSummary.defaultProps = {
+    buttonText: "Proceed to payment"
+};
 
+
+{/* <Card */ }; /* {...cardProps} */
+/* </Card> */
+/* 
+header={<PropertyBookingHeader roomName={room.name} startDate={reservation.startDate} endDate={reservation.endDate} />}
+            subHeader={<PropertyBookingSubHeader price={quote?.totalGross} isLoading={reservation.isLoading}
+                nbGuest={reservation.nbGuests} nbNights={reservation.nbOfNights} />
+*/
 
 /* export type BookingSummaryHeaderProps = {roomName: string; startDate: LodgifyDate; endDate: LodgifyDate; };
 
@@ -389,13 +374,13 @@ export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = prop
 type AccordeonSegmentProps = {
     activeIndex: number;
     index: number;
-    onClick: (accordeonTitleProps: AccordionTitleProps) => void;
+    onClick: (accordeonTitleProps: StrictAccordionTitleProps) => void;
     title: string | React.ReactNode;
 };
 
 const AccordeonSegment: React.FunctionComponent<AccordeonSegmentProps> = ({ onClick, activeIndex, index, title, children }) => {
 
-    const handleClick: AccordionTitleProps[ 'onClick' ] = useCallback((_event, data) => onClick(data), [ onClick ]);
+    const handleClick: StrictAccordionTitleProps[ 'onClick' ] = useCallback((_event, data) => onClick(data), [ onClick ]);
 
     return (
         <React.Fragment>

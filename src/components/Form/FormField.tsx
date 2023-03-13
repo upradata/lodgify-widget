@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { FormValue, FormValues, InputControllerProps, InputGroup, InputProps } from '@lodgify/ui';
 // import { getInputWidth } from '@lodgify/ui/lib/es/components/collections/Form/utils/getInputWidth';
 import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
-import SemanticForm from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-import { FormProps } from './Form.state';
+import { Form as SemanticForm, SemanticWIDTHS, StrictFormFieldProps } from 'semantic-ui-react';
+
+import type { FormProps } from './Form.props';
 
 
-export const InputField = React.memo(SemanticForm.Field);
+export const InputField: React.FunctionComponent<PropsWithStyle<StrictFormFieldProps>> = React.memo(SemanticForm.Field);
 
 type RenderInputFieldOptions<V = any> = {
     onBlur: () => void;
@@ -80,7 +81,7 @@ export const FormField: React.FunctionComponent<FormFieldProps> = ({ children, .
 };
 
 
-type InputChildProps = InputControllerProps & { onBlur?: InputProps[ 'onBlur' ]; width?: number; };
+type InputChildProps = InputControllerProps & { onBlur?: InputProps[ 'onBlur' ]; width?: SemanticWIDTHS; };
 
 type InputFieldChild = Exclude<
     React.ReactElement<InputChildProps & RenderInputFieldProps>,
@@ -158,11 +159,6 @@ export const _InputField: React.FunctionComponent<{
 
 
     const inputFieldChildren = useMemo(() => !isInputField && React.cloneElement(inputOrField, {
-        /* onBlur: () => parent.handleInputBlur(name),
-        onChange: (name: string, value: unknown) => {
-            parent.handleInputChange(name, value);
-            input.props.onChange?.(name, value);
-        }, */
         onBlur,
         onChange,
         ...inputState

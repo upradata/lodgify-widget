@@ -4,13 +4,15 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { Dropdown, DropdownProps } from '@lodgify/ui';
 import { getDiallingCode } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getDiallingCode.js';
 import { getOptionsWithSearch } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getOptionsWithSearch.js';
-// import parsePhoneNumber from 'libphonenumber-js';
-import { CountryCode } from 'libphonenumber-js/core';
-import { InputProps as SemanticInputProps } from 'semantic-ui-react';
 // import { FlagComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/FlagComponent';
 // import { CountrySelectComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/CountrySelectComponent';
 // import { getAllOptions } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getAllOptions.js';
 import CountryIcon from '../../../node_modules/react-phone-number-input/modules/CountryIcon.js';
+
+// import parsePhoneNumber from 'libphonenumber-js';
+import type { CountryCode } from 'libphonenumber-js/core';
+import type { StrictInputProps as SemanticInputProps } from 'semantic-ui-react';
+import type { Omit } from '../../util.types';
 
 
 export type CountrySelectComponentProps = {
@@ -19,7 +21,8 @@ export type CountrySelectComponentProps = {
         value?: CountryCode;
     }[];
     value?: string;
-} & Omit<SemanticInputProps, 'name'>;
+    onChange?: (value: CountryCode) => void;
+} & Omit<SemanticInputProps, 'onChange' | 'label'>;
 
 /* const getIconOrFlag = (country: CountryCode) => {
     const flagName = country.toLowerCase();

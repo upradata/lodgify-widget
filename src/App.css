@@ -53,7 +53,10 @@ body .ui.inverted::-webkit-scrollbar-thumb:hover {
     position: unset;
 }
 
-
+.ui.fullscreen.modal>.content {
+    display: flex;
+    justify-content: center;
+}
 
 
 .ui.form .ui.input .PhoneInput .dropdown-container .ui.search.selection.dropdown input.search,
@@ -79,4 +82,33 @@ body .ui.inverted::-webkit-scrollbar-thumb:hover {
     border-right-color: transparent;
     border-bottom-color: transparent;
     border-left-color: transparent;
+}
+
+.ui.attached.segment {
+    width: 100%;
+    max-width: 100%;
+}
+
+
+
+
+:root {
+    --lodgify-form-item-space: 1.8rem;
+}
+
+
+.ui.form .fields {
+    display: flex;
+    flex-direction: row;
+    column-gap: 1.42rem;
+    margin: 0 0 var(--lodgify-form-item-space, 2rem);
+}
+
+.ui.form .field {
+    clear: both;
+    margin: 0 0 var(--lodgify-form-item-space, 2rem);
+}
+
+.ui.form .fields>.field.field {
+    padding: 0;
 }

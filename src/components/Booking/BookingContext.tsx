@@ -1,11 +1,17 @@
 import { createContext } from 'react';
 
-import type { RoomData, RoomsData } from '../../rooms.data';
+import type { BookingBillingInfo, BookingData } from './BookingComponent';
 import type { Reservation } from './reservation.type';
+import { RoomsState, RoomState } from '../../rooms.state';
 
 
-export const BookingContext = createContext<{
-    getRoom: (roomValue: string) => RoomData;
-    rooms: RoomsData;
+export type BookingContextType = {
+    getRoom: (roomValue: string) => RoomState;
+    rooms: RoomsState;
     reservation: Reservation;
-}>(null);
+    setReservation: (data: Partial<BookingData>) => void;
+    setBillingInfo: (data: Partial<BookingBillingInfo>) => void;
+    billingInfo: BookingBillingInfo;
+};
+
+export const BookingContext = createContext<BookingContextType>(null);

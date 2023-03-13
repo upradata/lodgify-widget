@@ -21,6 +21,7 @@ export type MediaQueryProps<P = unknown, D = {}> = {
     onInactive?: (bp?: BreakPoint<P, D>) => void;
     className?: string;
     parentProps?: P;
+    as?: React.ElementType;
 };
 
 const makeCssMatchMedia = (bp: Pick<BreakPoint, 'min' | 'max'>) => {
@@ -79,8 +80,10 @@ export const MediaQuery: React.FunctionComponent<MediaQueryProps> = props => {
 
     const activeBreakPoints = getValues(breakpoints).filter(Boolean);
 
-    return <div className={classnames(props.className, getClasses(activeBreakPoints))}>
+    const As = props.as || 'div';
+
+    return <As className={classnames(props.className, getClasses(activeBreakPoints))}>
         {props.children}
         {activeBreakPoints.flatMap(bp => bp.children?.(bp.parentProps || props.parentProps))}
-    </div>;
+    </As>;
 };
