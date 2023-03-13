@@ -1,19 +1,33 @@
-import React from 'react';
-import {
-    Button,
-    CounterDropdown,
-    CounterDropdownProps,
-    Dropdown,
-    DropdownProps,
-} from '@lodgify/ui';
+import React, { useCallback } from 'react';
+import { Button, CounterDropdown, CounterDropdownProps, Dropdown, DropdownProps, FormValues, FormValue } from '@lodgify/ui';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { Calendar, CalendarProps } from '../Calendar';
 import { Form, FormProps, InputField } from '../Form';
-import { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
+
+import type { ChangeInputData } from './PropertyBookingForm.type';
+import type { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
+
 
 // import { size } from '@lodgify/ui/lib/es/utils/size';
 
+type InputNames = keyof ChangeInputData;
+type InputValues = ChangeInputData[ InputNames ];
+
+const isDefinedInputValue = <N extends InputNames>(name: N, value: ChangeInputData[ N ]) => {
+    if (name === 'dates') {
+        const dates = value as ChangeInputData[ 'dates' ];
+        return !!dates?.startDate && !!dates?.endDate;
+    }
+
+    return !!value;
+};
+
+const isSubmitDisabled = (inputsState: FormValues<InputNames, InputValues>) => {
+    return Object.entries<FormValue<InputValues>>(inputsState).some(([ name, { error, value } ]) => {
+        return !!error || !isDefinedInputValue(name as InputNames, value);
+    });
+};
 
 export const PropertyBookingFormContent: React.FunctionComponent<PropertyBookingFormContentProps> = props => {
 
@@ -49,20 +63,12 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
     };
 
 
-    /* const searchButton: FormProps[ 'searchButton' ] = useCallback(({ isDisabled }) => (
-        <Button isDisabled={isDisabled} isFormSubmit isPositionedRight isRounded>
-            Search
-        </Button>
-    ), []);
-
-
-    const button = <div className="button-container">{props.searchButton || searchButton}</div>; */
-
     return (
         <Form className="inputs-container"
             onSubmit={props.onSubmit}
             onInputChange={props.onInputChange}
-            searchButton={<FormButton isDisabled={false} searchButton={props.searchButton} />}>
+            isSubmitDisabled={isSubmitDisabled}
+            searchButton={<FormButton searchButton={props.searchButton} />} >
 
             <InputField className="input-container location-input-container"><Dropdown icon={ICON_NAMES.MAP_PIN} name="location" {...dropdownProps} /></InputField>
             <InputField className="input-container dates-input-container"><Calendar name="dates" {...calendarProps} /></InputField>
@@ -75,11 +81,12 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
 
 
 
-const FormButton: React.FunctionComponent<{ isDisabled: boolean; searchButton: FormProps[ 'searchButton' ]; }> = ({ isDisabled, searchButton }) => {
+const FormButton: React.FunctionComponent<{ searchButton: FormProps[ 'searchButton' ]; isDisabled?: boolean; }> = ({ searchButton, isDisabled }) => {
     return (
         <div className="button-container">{
-            searchButton ||
-            <Button isDisabled={isDisabled} isFormSubmit isPositionedRight isRounded>
+            /* It is bad, but I cannot for now use a render function searchButton({ isDisabled }) */
+            searchButton && React.cloneElement(searchButton, { isDisabled }) ||
+            <Button isFormSubmit isPositionedRight isRounded>
                 Search
             </Button>
         }

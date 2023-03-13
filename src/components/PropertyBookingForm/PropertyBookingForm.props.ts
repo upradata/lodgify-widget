@@ -16,4 +16,5 @@ export type PropertyBookingFormContentProps = Omit<SearchBarFieldsProps, 'locati
     locationOptions: LocationOptions[];
     onSubmit?: (data: ChangeInputData) => void;
     searchButton?: FormProps[ 'searchButton' ];
+    buttonText?: string;
 } & Pick<CalendarProps, 'minimumNights'>;

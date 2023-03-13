@@ -2,7 +2,7 @@ import './Form.scss';
 
 import React, { memo, useCallback, useImperativeHandle, useMemo } from 'react';
 import { getEmptyRequiredInputs as _getEmptyRequiredInputs } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyRequiredInputs';
-import { getIsSubmitButtonDisabled as _getIsSubmitButtonDisabled } from '@lodgify/ui/lib/es/components/collections/Form/utils/getIsSubmitButtonDisabled';
+// import { getIsSubmitButtonDisabled as _getIsSubmitButtonDisabled } from '@lodgify/ui/lib/es/components/collections/Form/utils/getIsSubmitButtonDisabled';
 import { getValidationWithDefaults as _getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 // import Card from 'semantic-ui-react/dist/es/views/Card/Card.js';
 import { Button, FormValue, FormValues, Link, Validation } from '@lodgify/ui';
@@ -21,7 +21,10 @@ import type { FormProps } from './Form.props';
 type GetEmptyRequiredInputs = (validation: FormProps[ 'validation' ], state: FormValues) => Record<string, boolean>;
 const getEmptyRequiredInputs = _getEmptyRequiredInputs as GetEmptyRequiredInputs;
 
-const getIsSubmitButtonDisabled = _getIsSubmitButtonDisabled as (state: FormValues) => boolean;
+const getIsSubmitButtonDisabled = (inputsState: FormValues) => {
+    return Object.values<FormValue>(inputsState).some(({ error }) => !!error);
+};
+// _getIsSubmitButtonDisabled as (state: FormValues) => boolean;
 
 const getValidationWithDefaults = _getValidationWithDefaults as (validation: Partial<Validation>) => Validation;
 
@@ -31,7 +34,7 @@ export type FormImperativeAPI = {
 };
 
 
-const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, submitButtonText, ...props }, ref) => {
+const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, submitButtonText, isSubmitDisabled, ...props }, ref) => {
     const { state, setInputState } = useFormState(props);
 
     useImperativeHandle(ref, () => ({ setInputState }), [ setInputState ]);
@@ -79,16 +82,13 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
 
     return (
         <SemanticForm autoComplete={autoComplete} error={!!errorMessage} success={!!successMessage} onSubmit={handleSubmit} className={classnames('Form', className)}>
-            {React.Children.map(props.children as FormProps[ 'children' ], child => <FormField {...imperativeInterfaceForChildren}>{child}</FormField>
-                /* getFormField(child, imperativeInterfaceForChildren) */
-            )}
-            {/* {props.children} */}
+            {React.Children.map(props.children as FormProps[ 'children' ], child => <FormField {...imperativeInterfaceForChildren}>{child}</FormField>)}
 
             {successMessage && <Message content={successMessage} success />}
             {errorMessage && <Message content={errorMessage} error />}
             {actionLink && <Link onClick={actionLink.onClick}>{actionLink.text}</Link>}
 
-            <FormButton searchButton={searchButton} submitButtonText={submitButtonText} isDisabled={getIsSubmitButtonDisabled(state)} />
+            <FormButton searchButton={searchButton} submitButtonText={submitButtonText} isDisabled={isSubmitDisabled(state)} />
         </SemanticForm>
     );
 };
@@ -105,10 +105,14 @@ const _FormButton: React.FunctionComponent<Pick<FormProps, 'searchButton' | 'sub
         );
     }
 
-    if (typeof searchButton === 'function')
-        return searchButton({ isDisabled });
+    /* It is bad, but I cannot for now use a render function searchButton({ isDisabled }) */
 
-    return searchButton;
+    return (
+        <React.Fragment>
+            {React.cloneElement(searchButton, { isDisabled })}
+            {/* {typeof searchButton === 'function' ? searchButton({ isDisabled }) : searchButton} */}
+        </React.Fragment>
+    );
 };
 
 _FormButton.displayName = 'FormButton';
@@ -128,5 +132,6 @@ Form.defaultProps = {
     actionLink: null,
     submitButtonText: SEND,
     successMessage: '',
-    validation: {}
+    validation: {},
+    isSubmitDisabled: getIsSubmitButtonDisabled
 };

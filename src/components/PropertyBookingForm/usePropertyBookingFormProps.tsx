@@ -8,7 +8,6 @@ import type { Moment } from 'moment';
 import { BookingContext } from '../Booking/BookingContext';
 import { PropertyBookingFormProps } from './PropertyBookingForm.props';
 
-
 export type UsePropertyBookingFormProps = { buttonText?: string; };
 
 export const usePropertyBookingFormProps = ({ buttonText = 'Book' }: UsePropertyBookingFormProps = {}) => {
@@ -28,8 +27,8 @@ export const usePropertyBookingFormProps = ({ buttonText = 'Book' }: UseProperty
 
     const { nbGuests, isLoading, quote, roomValue, startDate, endDate } = reservation;
 
-    const bookButton = (
-        <PropertyBookingFormButton loaderInverted price={quote ? nbGuests * quote.totalGross : undefined} isFormSubmit isLoading={isLoading}>
+    const searchButton: PropertyBookingFormProps[ 'searchButton' ] = /* ({ isDisabled }) => */ (
+        <PropertyBookingFormButton loaderInverted price={quote?.totalGross} isFormSubmit isLoading={isLoading} /* isDisabled={isDisabled} */>
             {buttonText}
         </PropertyBookingFormButton>
     );
@@ -37,7 +36,7 @@ export const usePropertyBookingFormProps = ({ buttonText = 'Book' }: UseProperty
     const searchProps: PropertyBookingFormProps = {
         // isFixed: true,
         // isStackable: true,
-        searchButton: bookButton,
+        searchButton,
         getIsDayBlocked,
         minimumNights: room.minStay,
         // modalTrigger: <Button isPositionedRight isRounded isCompact>Check Availability</Button>,
