@@ -1,3 +1,6 @@
+import { kebabCase } from './util';
+import type { Omit } from './util.types';
+
 export type RoomData = {
     name: string;
     propertyId: number;
@@ -6,8 +9,7 @@ export type RoomData = {
     value: string;
 };
 
-const kebabCase = (s: string) => s.trim().replaceAll(/(\s+)/g, '-').toLowerCase();
-const makeRoomData = (data: Omit<RoomData, 'value'>): RoomData => ({ ...data, value: kebabCase(data.name) });
+const makeRoomData = (data: Omit<RoomData, 'value'>): RoomData => ({ ...data, value: kebabCase(data.name, '-') });
 
 export const roomsData = ([
     makeRoomData({ name: 'Za Rohom', propertyId: 432806, roomId: 498935, image: 'https://l.icdbcdn.com/oh/b47d66b2-8d36-4e13-91a5-6c1624c9d27d.jpg?w=1040' }),

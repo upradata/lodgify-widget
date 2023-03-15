@@ -9,6 +9,8 @@ import { BreakPoint } from '../MediaQuery/BreakPoint';
 import { fragments } from '../../util';
 import { ModalProps } from '../../@types/@lodgify/ui/types';
 
+import type { Omit } from '../../util.types';
+
 
 // import { PropertyBooking, PropertyBookingForm } from '../PropertyBooking';
 

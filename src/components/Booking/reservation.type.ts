@@ -7,10 +7,19 @@ export class Reservation {
     startDate?: LodgifyDate;
     endDate?: LodgifyDate;
     // price?: number;
-    nbGuests: number;
+    nbGuests?: number;
     isLoading?: boolean;
     promotionCode?: string;
     quote?: ReservationQuote;
+    bookings?: BookingReservation[];
+};
+
+
+export type BookingReservation = {
+    isBooked: boolean;
+    startDate: LodgifyDate;
+    endDate: LodgifyDate;
+    isPayed: boolean;
 };
 
 

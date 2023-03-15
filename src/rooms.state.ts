@@ -1,9 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import moment from 'moment';
-import { getAvailability, GetAvailibityOptions, getDailyRates, getPropertyInfo, GetPropertyInfoOptions, getRatesSettings, getRoomInfo } from './lodgify-requests';
+import { AppContext } from './App/AppContext';
+import { GetAvailibityOptions, GetPropertyInfoOptions, requests } from './lodgify-requests';
 import { getPeriodsNonAvailable, momentToLodgifyDate } from './lodgify-info/info';
 
 import type { Moment } from 'moment';
+import type { Omit } from './util.types';
 import type { RoomData, RoomsData, RoomValue } from './rooms.data';
 
 
@@ -62,6 +64,9 @@ export type UpdateRoomAction = |
 
 export const useRoomState = (roomsList: RoomData[]) => {
     const [ rooms, _setRooms ] = useState<RoomsState>(initialRoomsState(roomsList));
+    const appContext = useContext(AppContext);
+
+    const { getAvailability, getPropertyInfo, getRoomInfo, getDailyRates, getRatesSettings } = requests(appContext);
 
     const updateRoom = useCallback(async (action: UpdateRoomAction) => {
 
@@ -127,24 +132,24 @@ export const useRoomState = (roomsList: RoomData[]) => {
                     if (propertyInfo) {
                         setRoom({
                             price: {
-                                minPrice: propertyInfo.min_price,
-                                maxPrice: propertyInfo.max_price
+                                minPrice: propertyInfo.minPrice,
+                                maxPrice: propertyInfo.maxPrice
                             },
                             rating: propertyInfo.rating,
-                            image: rooms[ roomValue ].image || propertyInfo.image_url,
-                            minStay: propertyInfo.price_unit_in_days,
+                            image: rooms[ roomValue ].image || propertyInfo.imageUrl,
+                            minStay: propertyInfo.priceUnitInDays,
                         });
                     }
 
                     if (roomInfo) {
-                        setRoom({ maxGuests: roomInfo.max_people });
+                        setRoom({ maxGuests: roomInfo.maxPeople });
                     }
 
                     if (dailyRates) {
-                        const defaultRates = dailyRates.calendar_items.find(item => item.is_default)?.prices.map(price => ({
-                            minStay: price.min_stay || 0,
-                            maxStay: price.max_stay || Infinity,
-                            pricePerDay: price.price_per_day
+                        const defaultRates = dailyRates.calendarItems.find(item => item.isDefault)?.prices.map(price => ({
+                            minStay: price.minStay || 0,
+                            maxStay: price.maxStay || Infinity,
+                            pricePerDay: price.pricePerDay
                         }));
 
                         if (defaultRates) {

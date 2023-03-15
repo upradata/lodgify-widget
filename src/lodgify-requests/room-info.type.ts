@@ -1,63 +1,65 @@
+import { CamelObject } from '../util.types';
 import { Currency } from './common.type';
 
-export interface RoomInfo {
-    images: Image[];
-    amenities: Amenities;
-    description?: any;
-    breakfast_included: boolean;
-    has_parking: boolean;
-    adults_only: boolean;
-    pets_allowed?: any;
-    show_additional_key_facts: boolean;
-    id: number;
-    name: string;
-    image_url: string;
-    max_people: number;
-    units: number;
-    has_wifi: boolean;
-    has_meal_plan: boolean;
-    bedrooms: number;
-    bathrooms: number;
-    area_unit: string;
-    area: number;
-    min_price: number;
-    original_min_price: number;
-    max_price: number;
-    original_max_price: number;
-    price_unit_in_days: number;
-    currency: Currency;
+export interface LodgifyRoomInfo {
+  images: Image[];
+  amenities: Amenities;
+  description?: any;
+  breakfast_included: boolean;
+  has_parking: boolean;
+  adults_only: boolean;
+  pets_allowed?: any;
+  show_additional_key_facts: boolean;
+  id: number;
+  name: string;
+  image_url: string;
+  max_people: number;
+  units: number;
+  has_wifi: boolean;
+  has_meal_plan: boolean;
+  bedrooms: number;
+  bathrooms: number;
+  area_unit: string;
+  area: number;
+  min_price: number;
+  original_min_price: number;
+  max_price: number;
+  original_max_price: number;
+  price_unit_in_days: number;
+  currency: Currency;
 }
 
 
-
 export interface Amenities {
-    room: any[];
-    'further-info': any[];
-    cooking: any[];
-    entertainment: any[];
-    heating: any[];
-    laundry: any[];
-    livingroom: any[];
-    miscellaneous: any[];
-    outside: any[];
-    parking: any[];
-    sanitary: any[];
-    sleeping: Sleeping[];
+  room: any[];
+  'further-info': any[];
+  cooking: any[];
+  entertainment: any[];
+  heating: any[];
+  laundry: any[];
+  livingroom: any[];
+  miscellaneous: any[];
+  outside: any[];
+  parking: any[];
+  sanitary: any[];
+  sleeping: Sleeping[];
 }
 
 
 export interface Sleeping {
-    name: string;
-    prefix: string;
-    bracket?: any;
-    text: string;
+  name: string;
+  prefix: string;
+  bracket?: any;
+  text: string;
 }
 
 interface Image {
-    text: string;
-    url: string;
+  text: string;
+  url: string;
 }
 
+
+export type RoomInfo = CamelObject<LodgifyRoomInfo>;
 
 /* 
 

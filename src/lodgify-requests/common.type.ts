@@ -1,4 +1,6 @@
-export interface Currency {
+import type { CamelObject } from '../util.types';
+
+export interface LodgifyCurrency {
     id: number;
     code: string;
     name: string;
@@ -6,6 +8,17 @@ export interface Currency {
     symbol: string;
 }
 
+
+export type Currency = CamelObject<LodgifyCurrency>;
+
+
+type Digit = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9';
+
+type Year = `20${Digit}${Digit}`;
+type Month = `${'0' | '1'}${Digit}`;
+type Day = `${'0' | '1' | '2' | '3'}${Digit}`;
+
+export type LodgifyDate = `${Year}-${Month}-${Day}`;
 
 /* 
 

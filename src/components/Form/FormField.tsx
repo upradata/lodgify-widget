@@ -5,6 +5,7 @@ import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collect
 import { Form as SemanticForm, SemanticWIDTHS, StrictFormFieldProps } from 'semantic-ui-react';
 
 import type { FormProps } from './Form.props';
+import type { Omit } from '../../util.types';
 
 
 export const InputField: React.FunctionComponent<PropsWithStyle<StrictFormFieldProps>> = React.memo(SemanticForm.Field);

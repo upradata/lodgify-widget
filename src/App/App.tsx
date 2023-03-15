@@ -1,9 +1,11 @@
 import './App.css';
 
-import React, { Profiler, useState } from 'react';
+import React from 'react';
 import { Viewport } from '@lodgify/ui';
-import { Booking } from './components/Booking';
-import { roomsData } from './rooms.data';
+import { Booking } from '../components/Booking';
+import { roomsData } from '../rooms.data';
+import { AppContext, AppContextType } from './AppContext';
+import { PropertyContext, PropertyContextType } from './PropertyContext';
 
 
 // window.global = { process: { env: {} } as any } as any; // NodeJS.ProcessEnv
@@ -12,17 +14,31 @@ import { roomsData } from './rooms.data';
 
 // import('@lodgify/websites-service-client').then(({ getAvailability }) => {
 
+const appContext: AppContextType = {
+    mode: 'dev',
+    isDebug: true,
+    log: console.log
+};
+
+
+const propertyContext: PropertyContextType = {
+    websiteId: 391077
+};
+
+
+
 const App: React.FunctionComponent = () => {
-    return <div className="App">
-        <Viewport>
-            <Booking rooms={roomsData} />
-        </Viewport>
-    </div>;
-    /*  return <Profiler id="App" onRender={console.log}><div className="App">
-         <Viewport>
-             <Booking rooms={roomsData} />
-         </Viewport>
-     </div> </Profiler>; */
+    return (
+        <div className="App">
+            <AppContext.Provider value={appContext}>
+                <PropertyContext.Provider value={propertyContext}>
+                    <Viewport>
+                        <Booking rooms={roomsData} />
+                    </Viewport>
+                </PropertyContext.Provider>
+            </AppContext.Provider>
+        </div>
+    );
 };
 
 App.displayName = 'App';

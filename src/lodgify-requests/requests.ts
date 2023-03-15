@@ -1,121 +1,23 @@
-import { Addon, Availibity, DailyRates, LodgifyDate, PropertyInfo, Quote } from './types';
-import { Range } from '../types';
-import { RatesSettings } from './rates-settings';
-import { RoomInfo } from './room-info.type';
+import { arrayToOption, createRequestV1, createRequestV2, makeRequest, Options } from './create-request';
+import { toCasedObject, map } from '../util';
 
-
-// API at https://docs.lodgify.com/reference/
-
-const arrayToOption = <T extends {}>(options: T[], baseKey: string, map?: (key: keyof T) => string) => {
-    if (!options)
-        return {};
-
-    const mapping = map || ((k: string) => k);
-
-    return options.reduce((o, item, i) => {
-        const option = Object.fromEntries(
-            Object.entries(item)
-                .map(([ k, v ]) => [ `${baseKey}[${i}].${mapping(k as keyof T & string)}`, v ])
-                .filter(([ , v ]) => !!v)
-        );
-
-        return {
-            ...o,
-            ...option
-        };
-    }, {});
-};
-
-
-type LodgifyVersion = 'v1' | 'v2';
-
-const corsProxy = `http://localhost:8080`;
-const lodgifyApi = (version: LodgifyVersion) => `https://api.lodgify.com/${version}`;
-
-const lodgifyOptions: RequestInit = {
-    method: 'GET',
-    headers: {
-        accept: 'application/json',
-        'X-ApiKey': '+BvSxGGZ/ay5H3lVshlgJvyDwSqRXAnhU4/kjvRdECoPHGTbKZ3pngf3MgEVv2K/',
-        // mode: 'same-origin'
-    }
-};
-
-export type RequestSuccess<T = unknown> = {
-    type: 'success';
-    json: T;
-};
-
-export type RequestError = {
-    type: 'error';
-    error: Error;
-};
-
-type LodgifyError = {
-    message: string;
-    code: number;
-    correlation_id: string;
-    event_id: string;
-};
-
-type Primitive = boolean | string | number;
-type Options = Record<string, Primitive> & { propertyId?: number; roomTypeId?: number; };
-
-
-const join = (...paths: Primitive[]) => paths.filter(s => !!s).join('/');
-
-const sep = (char: string) => (s1: string, s2: string) => {
-    if (s1 === '' && s2 !== '')
-        return s2;
-
-    if (s1 !== '' && s2 === '')
-        return s1;
-
-    return `${s1}${char}${s2}`;
-};
-
-const seps = {
-    '&': sep('&'),
-    '?': sep('?')
-};
-
-const lodgifyREST = (verb: string, options: Record<string, Primitive> = {}) => {
-    const { propertyId, roomTypeId, ...opts } = options;
-
-    const opt = Object.entries(opts).reduce((s, [ k, v ]) => seps[ '&' ](s, `${k}=${v}`), '');
-    return seps[ '?' ](join(verb, propertyId, roomTypeId), opt);
-};
-
-
-const createRequest = <T = unknown>(verb: string, options: Options, version: LodgifyVersion): Promise<RequestSuccess<T> | RequestError> => {
-    console.log(`${corsProxy}/${lodgifyApi(version)}/${lodgifyREST(verb, options)}`);
-
-    const requestUrl = `${corsProxy}/${lodgifyApi(version)}/${lodgifyREST(verb, options)}`;
-
-    return fetch(
-        requestUrl,
-        lodgifyOptions
-    ).then(response => response.json()).then(json => {
-        if (json.code) {
-            const { code, message } = json as LodgifyError;
-            console.error(`Lodgify request error. Request -> ${requestUrl}`);
-            console.error(json);
-            return { type: 'error' as const, error: new Error(`Lodgify request error "${message}" with code (${code})`) };
-        }
-
-        return { type: 'success' as const, json };
-    })
-        // .then(response => console.log(response))
-        .catch(e => {
-            console.error(`Lodgify request error. Request -> ${requestUrl}`);
-            console.error(e);
-            return { type: 'error' as const, error: e instanceof Error ? e : new Error(JSON.stringify(e)) };
-        });
-};
-
-
-const createRequestV1 = <T = unknown>(verb: string, options: Options = {}) => createRequest<T>(verb, options, 'v1');
-const createRequestV2 = <T = unknown>(verb: string, options: Options = {}) => createRequest<T>(verb, options, 'v2');
+import type {
+    Addon,
+    Availibity,
+    BookingId,
+    CreateBookingOptions,
+    CreateQuoteOptions,
+    DailyRates,
+    LodgifyDate,
+    PropertyInfo,
+    Quote,
+    QuoteId,
+    RatesSettings,
+    RoomInfo,
+    UpdateBookingOptions
+} from './types';
+import type { CamelObject, SelectType } from '../util.types';
+import type { Range } from '../types';
 
 
 export type DateRange = Range<LodgifyDate>;
@@ -130,32 +32,32 @@ export type DateRange = Range<LodgifyDate>;
 export type GetAllAvailibitiesOptions = DateRange & { includeDetails?: boolean; };
 
 // 'https://api.lodgify.com/v2/availability?start=2023-02-01&end=2023-02-15&includeDetails=false'
-export const getAllAvailabilities = (options: GetAllAvailibitiesOptions) => createRequestV2('availability', options);
+export const getAllAvailabilities = makeRequest((options: GetAllAvailibitiesOptions) => createRequestV2('availability', { ...options, type: 'url-parameters' }));
 
 
 export type GetAvailibityOptions = DateRange & { includeDetails?: boolean; } & Required<Pick<Options, 'propertyId'>> & Pick<Options, 'roomTypeId'>;
-export const getAvailability = (options: GetAvailibityOptions) => createRequestV2<Availibity[]>(`availability`, options);
+export const getAvailability = makeRequest((options: GetAvailibityOptions) => createRequestV2<Availibity[]>(`availability`, { ...options, type: 'url-parameters' }));
 
 
 export type getDailyRatesOptions = DateRange & Required<Pick<Options, 'propertyId' | 'roomTypeId'>>;
 
 // 'https://api.lodgify.com/v2/rates/calendar?RoomTypeId=498935&HouseId=432806&StartDate=2023-05-02&EndDate=2023-05-12'
-export const getDailyRates = ({ propertyId, roomTypeId, start, end, ...options }: getDailyRatesOptions) => createRequestV2<DailyRates>(
+export const getDailyRates = makeRequest(({ propertyId, roomTypeId, start, end, ...options }: getDailyRatesOptions) => createRequestV2<DailyRates>(
     `rates/calendar`,
-    { ...options, HouseId: propertyId, RoomTypeId: roomTypeId, StartDate: start, EndDate: end }
-);
+    { ...options, HouseId: propertyId, RoomTypeId: roomTypeId, StartDate: start, EndDate: end, type: 'url-parameters' }
+));
 
 
 export type GetPropertyInfoOptions = { includeInOut?: boolean; } & Required<Pick<Options, 'propertyId'>>;
 
 // 'https://api.lodgify.com/v2/properties/432806?includeInOut=false'
-export const getPropertyInfo = (options: GetPropertyInfoOptions) => createRequestV2<PropertyInfo>(`properties`, options);
+export const getPropertyInfo = makeRequest((options: GetPropertyInfoOptions) => createRequestV2<PropertyInfo>(`properties`, { ...options, type: 'url-parameters' }));
 
 
 export type GetRoomInfoProps = Required<Pick<Options, 'propertyId' | 'roomTypeId'>>;
 
 // 'https://api.lodgify.com/v2/properties/432806?includeInOut=false'
-export const getRoomInfo = ({ propertyId, roomTypeId }: GetRoomInfoProps) => createRequestV1<RoomInfo>(`properties/${propertyId}/rooms/${roomTypeId}`);
+export const getRoomInfo = makeRequest(({ propertyId, roomTypeId }: GetRoomInfoProps) => createRequestV1<RoomInfo>(`properties/${propertyId}/rooms/${roomTypeId}`));
 
 
 export type GetQuoteOptions = DateRange & Required<Pick<Options, 'propertyId'>> & {
@@ -165,7 +67,7 @@ export type GetQuoteOptions = DateRange & Required<Pick<Options, 'propertyId'>> 
 };
 
 // 'https://api.lodgify.com/v2/quote/{propertyId}?arrival={arrival}&departure={departure}&roomTypes[0].id={roomTypeId}&roomTypes[0].people={people}&addOns[0].id={addOnId}&addOns[0].units={addOnUnits}&promotionCode={promotionCode}'
-export const getQuote = ({ start, end, roomTypes, addOns, ...opts }: GetQuoteOptions) => {
+export const getQuote = makeRequest(({ start, end, roomTypes, addOns, ...opts }: GetQuoteOptions) => {
     const options = {
         arrival: start,
         departure: end,
@@ -178,20 +80,68 @@ export const getQuote = ({ start, end, roomTypes, addOns, ...opts }: GetQuoteOpt
             throw new Error(`Bad roomTypes typing => key="${k}" not recognized.`);
         }),
         ...arrayToOption(addOns, 'addOns'),
-        ...opts
+        ...opts,
+        type: 'url-parameters' as const
     };
 
     return createRequestV2<Quote[]>(`quote`, options);
-};
+});
 
 
 // 'https://api.lodgify.com/v1/properties/436901/rates/addons?start=2023-03-01&end=2023-03-08'
 
 export type GetAddonsOptions = DateRange & Required<Pick<Options, 'propertyId'>>;
-export const getAddons = (options: GetAddonsOptions) => createRequestV1<Addon[]>(`properties`, options);
+export const getAddons = makeRequest((options: GetAddonsOptions) => createRequestV1<Addon[]>(`properties`, { ...options, type: 'url-parameters' }));
 
 
 export type GetRatesSettingsOptions = Required<Pick<Options, 'propertyId'>>;
 
 // fetch('https://api.lodgify.com/v2/rates/settings?houseId=436901', options)
-export const getRatesSettings = (options: GetRatesSettingsOptions) => createRequestV2<RatesSettings>(`rates/settings`, { houseId: options.propertyId });
+export const getRatesSettings = makeRequest((options: GetRatesSettingsOptions) => {
+    return createRequestV2<RatesSettings>(`rates/settings`, { houseId: options.propertyId, type: 'url-parameters' });
+});
+
+
+
+// fetch('https://api.lodgify.com/v1/reservation/booking', options)
+export const createBooking = makeRequest((options: CreateBookingOptions) => createRequestV1<BookingId>(`reservation/booking`, { ...options, type: 'body-parameters' }));
+
+
+// fetch('https://api.lodgify.com/v1/reservation/booking/1234/quote', options)
+export const createQuote = makeRequest(({ bookingId, ...options }: CreateQuoteOptions) => {
+    return createRequestV1<QuoteId>(`reservation/booking/${bookingId}/quote`, { ...options, type: 'body-parameters' });
+});
+
+
+export type AnyUpdateBookingOptions =
+    | { type: 'status-booked', bookingId: BookingId; requestPayment?: boolean; }
+    | { type: 'status-tentative', bookingId: BookingId; requestPayment?: boolean; }
+    | { type: 'status-declined', bookingId: BookingId; }
+    | { type: 'any-field', bookingId: BookingId; } & CamelObject<UpdateBookingOptions>;
+
+
+
+
+// fetch('https://api.lodgify.com/v1/reservation/booking/1111', options)
+// fetch('https://api.lodgify.com/v1/reservation/booking/111/tentative?requestPayment=false', options)
+// fetch('https://api.lodgify.com/v1/reservation/booking/111/book?requestPayment=false', options)
+// fetch('https://api.lodgify.com/v1/reservation/booking/111/decline', options)
+export const updateBooking = makeRequest(({ type, bookingId, ...options }: AnyUpdateBookingOptions) => {
+    const url = `reservation/booking/id`;
+    type AnyFieldOptions = SelectType<AnyUpdateBookingOptions, 'any-field'>;
+
+    const opts = toCasedObject(options, 'kebab');
+
+    if (type === 'any-field')
+        return createRequestV1<void>(url, { ...(opts as AnyFieldOptions), type: 'body-parameters' });
+
+    const getVerb = () => {
+        switch (type) {
+            case 'status-booked': return 'book';
+            case 'status-tentative': return 'tentative';
+            case 'status-declined': return 'declined';
+        }
+    };
+
+    return createRequestV1<void>(`${url}/${getVerb()}`, { ...(opts as Exclude<AnyUpdateBookingOptions, AnyFieldOptions>), type: 'url-parameters' });
+});

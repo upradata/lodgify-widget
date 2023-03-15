@@ -1,34 +1,39 @@
+import type { CamelObject } from '../util.types';
 
-export interface DailyRates {
-    calendar_items: CalendarItem[];
-    rate_settings: RateSettings;
+
+export interface LodgifyDailyRates {
+  calendar_items: CalendarItem[];
+  rate_settings: RateSettings;
 }
 
 export interface RateSettings {
-    bookability: number;
-    check_in_hour: number;
-    check_out_hour: number;
-    booking_window_days: number;
-    advance_notice_days: number;
-    advance_notice_hours: number;
-    preparation_time_days: number;
-    currency_code: string;
-    vat: number;
-    is_vat_exclusive: boolean;
+  bookability: number;
+  check_in_hour: number;
+  check_out_hour: number;
+  booking_window_days: number;
+  advance_notice_days: number;
+  advance_notice_hours: number;
+  preparation_time_days: number;
+  currency_code: string;
+  vat: number;
+  is_vat_exclusive: boolean;
 }
 
 export interface CalendarItem {
-    date?: string;
-    is_default: boolean;
-    prices: DailyPrice[];
+  date?: string;
+  is_default: boolean;
+  prices: DailyPrice[];
 }
 
 
 export interface DailyPrice {
-    min_stay: number;
-    max_stay: number;
-    price_per_day: number;
+  min_stay: number;
+  max_stay: number;
+  price_per_day: number;
 }
+
+
+export type DailyRates = CamelObject<LodgifyDailyRates>;
 
 
 /* 

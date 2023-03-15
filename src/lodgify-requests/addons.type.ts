@@ -1,6 +1,8 @@
-import { Currency } from './common.type';
+import type { Currency } from './common.type';
+import type { CamelObject } from '../util.types';
 
-export interface Addon {
+
+export interface LodgifyAddon {
     id: number;
     name: string;
     description: string;
@@ -16,6 +18,7 @@ export interface Addon {
 }
 
 
+export type Addon = CamelObject<LodgifyAddon>;
 
 
 /* 

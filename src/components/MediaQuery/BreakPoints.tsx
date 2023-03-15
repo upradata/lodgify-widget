@@ -1,6 +1,8 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { BreakPoint, BreakPointChildren, BreakPointProps } from './BreakPoint';
 
+import type { Omit } from '../../util.types';
+
 
 // type Children = React.ReactNode | React.ReactNode[];
 

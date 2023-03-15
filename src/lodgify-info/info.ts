@@ -54,12 +54,12 @@ export const getReservationPrice = (rates: DailyRates, dateRange: Range<Moment>)
     const { start, end } = dateRange;
     const nbOfNights = moment.duration(end.startOf('day').diff(start.startOf('day'))).asDays();
 
-    const totalPrice = rates.calendar_items.reduce((price, item) => {
-        if (item.is_default)
+    const totalPrice = rates.calendarItems.reduce((price, item) => {
+        if (item.isDefault)
             return price;
 
-        const dayPrice = item.prices.find(p => p.min_stay <= nbOfNights && (p.max_stay === 0 || nbOfNights <= p.max_stay));
-        return price + dayPrice.price_per_day;
+        const dayPrice = item.prices.find(p => p.minStay <= nbOfNights && (p.maxStay === 0 || nbOfNights <= p.maxStay));
+        return price + dayPrice.pricePerDay;
     }, 0);
 
     return round(totalPrice, 2);

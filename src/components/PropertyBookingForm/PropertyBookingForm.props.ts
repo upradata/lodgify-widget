@@ -2,7 +2,7 @@ import type { LocationOptions, SearchBarFieldsProps } from '@lodgify/ui';
 import type { CalendarProps } from '../Calendar';
 import type { ChangeInputData, InputDataNames, InputDataValues } from './PropertyBookingForm.type';
 import type { FormProps } from '../Form';
-
+import type { Omit } from '../../util.types';
 
 export type PropertyBookingFormProps = Omit<PropertyBookingFormContentProps, 'onInputChange'> & {
     onSubmit?: (data: ChangeInputData) => void;

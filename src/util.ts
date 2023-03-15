@@ -1,5 +1,6 @@
 import moment, { Moment } from 'moment';
 import { useEffect, useRef, useState } from 'react';
+import { Key, KeyOf, ValueOf } from './util.types';
 
 
 export const isInRange = (min: number, max: number) => (v: number) => min <= v && v <= max;
@@ -206,3 +207,39 @@ export const isSame = <T, U>(value1: T, value2: U): boolean => {
 
 
 export const plural = (n: number, s: string) => `${s}${n > 1 ? 's' : ''}`;
+
+
+export const map = <T, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, unknown ]>(
+    o: T, mapping: M
+): { [ K in ReturnType<M>[ 0 ] ]: ReturnType<M>[ 1 ]; } => {
+
+    const next = (value: unknown) => {
+        if (typeof value === 'object') {
+            if (Array.isArray(value))
+                return value.map(v => map(v, mapping));
+
+            return map(value, mapping);
+        }
+
+        return value;
+    };
+
+    return Object.entries(o).reduce((mappedO, [ k, v ]) => {
+        const [ mappedK, mappedV ] = mapping(k as KeyOf<T>, v);
+
+        if (typeof mappedK === 'undefined' || mappedK === null)
+            return mappedO;
+
+        return { ...mappedO, [ mappedK ]: next(mappedV) };
+    }, {}) as any;
+};
+
+
+export const kebabCase = (s: string, sep: '-' | '_' = '_') => s.trim().replaceAll(/(\s+)/g, sep).toLowerCase();
+export const camelCase = (s: string) => s.trim().toLowerCase().replaceAll(/_./g, s => s[ 1 ].toUpperCase());
+
+
+export const toCasedObject = <O>(o: O, type: 'kebab' | 'camel') => {
+    const casing = type === 'camel' ? camelCase : kebabCase;
+    return map(o, (k, v) => [ casing(k as string), v ]);
+};

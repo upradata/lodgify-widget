@@ -1,37 +1,74 @@
-import React, { useCallback, useState } from 'react';
-import { BookingData, BookingDataValueOf } from './BookingComponent';
+import React, { useCallback, useContext, useState } from 'react';
+import { AppContext, AppContextType } from '../../App/AppContext';
 import { getNbOfNights } from '../../util';
-import { getQuote, GetQuoteOptions } from '../../lodgify-requests';
+import { GetQuoteOptions, requests } from '../../lodgify-requests';
 import { lodgifyDateToMoment, momentToLodgifyDate } from '../../lodgify-info/info';
-import { PriceType, QuotePrice, QuotePriceType } from '../../lodgify-requests/quote.type';
-import { Reservation, ReservationQuote, ReservationQuoteRoomPriceDetails, ReservationQuoteRoomCategoryPrices, ReservationDebug } from './reservation.type';
+import { BookingReservation, Reservation, ReservationDebug, ReservationQuote, ReservationQuoteRoomCategoryPrices, ReservationQuoteRoomPriceDetails } from './reservation.type';
 
-import type { Omit } from '../../util.types';
+import type { BookingBillingInfo, BookingData, BookingDataValueOf } from './BookingComponent';
+import type { Omit, SelectType } from '../../util.types';
+import { PriceType, QuotePrice, QuotePriceType } from '../../lodgify-requests/quote.type';
 import type { RoomData } from '../../rooms.data';
-import { RoomsState } from '../../rooms.state';
+import type { RoomsState } from '../../rooms.state';
+import { PropertyContext, PropertyContextType } from '../../App/PropertyContext';
+
+
+
+const helpers = (() => {
+    type OptionalProp<T> = { optional?: boolean; prop: keyof T; };
+    type OptionalPropOptions<T> = keyof T | OptionalProp<T>;
+
+
+    const toOptionalProps = <T>(props: OptionalPropOptions<T>[]) => {
+        return props.map(p => typeof p === 'object' ? p : { optional: false, prop: p });
+    };
+
+    const isAllDefined = <T>(keys: OptionalProp<T>[], o: T) => keys.every(k => k.optional || !!o[ k.prop ]);
+
+    const reservationProps = toOptionalProps<Reservation>([
+        'nbOfNights', 'startDate', 'endDate', 'nbGuests', 'roomValue', { optional: true, prop: 'promotionCode' }
+    ]);
+
+    const billingInfoProps = toOptionalProps<BookingBillingInfo>([
+        'email', 'firstName', 'lastName', 'phoneNumber', 'country'
+    ]);
+
+    return {
+        hasReservationNewProps: (previousReservation: Reservation, reservation: Reservation) => {
+            return reservationProps.some(({ prop }) => {
+                return reservation[ prop ] !== previousReservation[ prop ];
+            });
+        },
+        isReservationValid: (reservation: Reservation) => {
+            return isAllDefined(reservationProps, reservation) && lodgifyDateToMoment(reservation.startDate).isBefore(lodgifyDateToMoment(reservation.endDate));
+        },
+        isBillingInfoValid: (billingInfo: BookingBillingInfo) => {
+            return isAllDefined(billingInfoProps, billingInfo);
+        }
+    };
+})();
 
 
 type SetReservation = React.Dispatch<React.SetStateAction<Reservation>>;
 
-
-export type ReservationReducerPayload = |
-{
-    type: 'change-input'; name: keyof BookingData; value: BookingData[ keyof BookingData ];
-} |
-    // { type: 'request-info'; room: RoomData; previousReservation: Reservation; setReservation: SetReservation; } |
-    {
+export type ReservationReducerPayload =
+    | {
+        type: 'change-input'; name: keyof BookingData; value: BookingData[ keyof BookingData ];
+    }
+    | {
         type: 'request-accomodation-price'; previousReservation: Reservation; setReservation: SetReservation; room: RoomData;
-    } & Omit<GetQuoteOptions, 'propertyId' | 'roomTypes' | 'start' | 'end'>;
+    } & Omit<GetQuoteOptions, 'propertyId' | 'roomTypes' | 'start' | 'end'>
+    | {
+        type: 'create-booking'; room: RoomData; billingInfo: BookingBillingInfo; setReservation: SetReservation;
+    };
 
 
-type Payload<Type extends ReservationReducerPayload[ 'type' ]> = ReservationReducerPayload extends infer P ?
-    P extends ReservationReducerPayload ? Type extends P[ 'type' ] ? Omit<P, 'type'> : never : never :
-    never;
+type Payload<Type extends ReservationReducerPayload[ 'type' ]> = SelectType<ReservationReducerPayload, Type>;
 
+type Rreducer = (prevState: Reservation, action: ReservationReducerPayload, context: { app: AppContextType, property: PropertyContextType; }) => Reservation;
 
-
-const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> = (
-    reservation, { type, ...payload }
+const reservationReducer: Rreducer /* React.Reducer<Reservation, ReservationReducerPayload> */ = (
+    reservation, { type, ...payload }, context
 ) => {
 
     const setState = (newState: Partial<Reservation>) => ({ ...reservation, ...newState });
@@ -118,22 +155,9 @@ const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> 
         case 'request-accomodation-price': {
             const { previousReservation, setReservation, room, ...options } = payload as Payload<'request-accomodation-price'>;
 
-            const isSomeNewAndAllDefined = (...props: (keyof Reservation | { optional?: boolean; prop: keyof Reservation; })[]) => {
-                const keys = props.map(p => typeof p === 'object' ? p : { optional: false, prop: p });
+            if (helpers.hasReservationNewProps(previousReservation, reservation) && helpers.isReservationValid(reservation)) {
 
-                const hasSomeNewProps = keys.some(({ prop }) => {
-                    return reservation[ prop ] !== previousReservation[ prop ];
-                });
-
-                return hasSomeNewProps && keys.every(k => k.optional || !!reservation[ k.prop ]);
-            };
-
-            if (
-                isSomeNewAndAllDefined('nbOfNights', 'startDate', 'endDate', 'nbGuests', 'roomValue', { optional: true, prop: 'promotionCode' }) &&
-                lodgifyDateToMoment(reservation.startDate).isBefore(lodgifyDateToMoment(reservation.endDate))
-            ) {
-
-                getQuote({
+                requests(context.app).getQuote({
                     propertyId: room.propertyId,
                     roomTypes: [ { roomTypeId: room.roomId, nbGuests: reservation.nbGuests } ],
                     start: reservation.startDate,
@@ -191,6 +215,60 @@ const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> 
             return reservation;
         }
 
+        case 'create-booking': {
+            const { room, billingInfo, setReservation } = payload as Payload<'create-booking'>;
+
+            if (helpers.isReservationValid(reservation) && helpers.isBillingInfoValid(billingInfo)) {
+                requests(context.app).createBooking({
+                    propertyId: room.propertyId,
+                    rooms: [ { roomTypeId: room.roomId, people: reservation.nbGuests } ],
+                    guest: {
+                        name: `${billingInfo.firstName} ${billingInfo.lastName}`,
+                        email: billingInfo.email,
+                        countryCode: billingInfo.country,
+                        phone: billingInfo.phoneNumber,
+                    },
+                    messages: billingInfo.comment ? [
+                        { subject: 'Message from website', message: billingInfo.comment, type: 'Renter' }
+                    ] : undefined,
+                    source: 'Manual',
+                    sourceText: 'personal-website',
+                    arrival: reservation.startDate,
+                    departure: reservation.endDate,
+                    status: 'Open', // '',
+                    // payment_type?: '',
+                    // payment_address?: '',
+                    currencyCode: 'eur',
+                    bookability: 'InstantBooking',
+                    // origin?: '',
+                    paymentWebsiteId: context.property.websiteId
+                }).then(() => {
+                    setReservation(prev => {
+                        const bookings = prev.bookings || [];
+                        return {
+                            ...prev,
+                            isLoading: false,
+                            bookings: [
+                                ...bookings, {
+                                    isBooked: true,
+                                    isPayed: false,
+                                    startDate: reservation.startDate,
+                                    endDate: reservation.endDate
+                                }
+                            ]
+                        };
+                    });
+                }).catch(err => {
+                    console.error(err);
+                    setReservation(prev => ({ ...prev, isLoading: false }));
+                });
+
+                return setState({ isLoading: true });
+            }
+
+            return reservation;
+        }
+
         default:
             throw new Error(`Reducer action type "${type as string}" is not handled!`);
     }
@@ -200,16 +278,20 @@ const reservationReducer: React.Reducer<Reservation, ReservationReducerPayload> 
 export const useReservation = (initRoom: RoomData, rooms: RoomsState) => {
     const [ reservation, setReservation ] = useState<Reservation>({ ...new ReservationDebug(), /* nbGuests: 1, roomValue: initRoom.value, */ isLoading: false });
 
+    const appContext = useContext(AppContext);
+    const propertyContext = useContext(PropertyContext);
+    const context = { app: appContext, property: propertyContext };
+
     const updateReservation = useCallback((name: keyof BookingData, value: BookingData[ keyof BookingData ]) => {
         setReservation(reservation => {
-            const newReservation = reservationReducer(reservation, { type: 'change-input', name, value });
+            const newReservation = reservationReducer(reservation, { type: 'change-input', name, value }, context);
 
             return reservationReducer(newReservation, {
                 type: 'request-accomodation-price',
                 room: rooms[ newReservation.roomValue ],
                 previousReservation: reservation,
                 setReservation
-            });
+            }, context);
         });
     }, []);
 

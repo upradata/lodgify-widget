@@ -1,125 +1,129 @@
-export interface Quote {
-    total_including_vat: number;
-    total_excluding_vat?: number;
-    total_vat?: number;
-    property_id: number;
-    date_arrival: string;
-    date_departure: string;
-    currency_code: string;
-    room_types: RoomType[];
-    add_ons: any[];
-    other_items: any[];
-    add_ons_subtotal: number;
-    rate_policy_user_id?: any;
-    scheduled_payments: ScheduledPayment[];
-    scheduled_damage_protection: any[];
-    security_deposit: number;
-    total_scheduled_payments: number;
-    total_to_collect_manually: number;
-    amount_gross: number;
-    rental_agreement: string;
-    cancellation_policy_text: string;
-    security_deposit_text: string;
-    is_verification: boolean;
+import { CamelObject } from '../util.types';
+
+export interface LodgifyQuote {
+  total_including_vat: number;
+  total_excluding_vat?: number;
+  total_vat?: number;
+  property_id: number;
+  date_arrival: string;
+  date_departure: string;
+  currency_code: string;
+  room_types: RoomType[];
+  add_ons: any[];
+  other_items: any[];
+  add_ons_subtotal: number;
+  rate_policy_user_id?: any;
+  scheduled_payments: ScheduledPayment[];
+  scheduled_damage_protection: any[];
+  security_deposit: number;
+  total_scheduled_payments: number;
+  total_to_collect_manually: number;
+  amount_gross: number;
+  rental_agreement: string;
+  cancellation_policy_text: string;
+  security_deposit_text: string;
+  is_verification: boolean;
 }
 
 export interface ScheduledPayment {
-    type: string;
-    date_due: string;
-    amount: number;
-    is_current: boolean;
+  type: string;
+  date_due: string;
+  amount: number;
+  is_current: boolean;
 }
 
 export interface RoomType {
-    room_type_id: number;
-    name: string;
-    people: number;
-    price_types: PriceType[];
-    subtotal: number;
+  room_type_id: number;
+  name: string;
+  people: number;
+  price_types: PriceType[];
+  subtotal: number;
 }
 
 export enum QuotePriceType {
-    RoomRate = 0,
-    Promotion = 1,
-    Fee = 2,
-    AddOn = 3,
-    Tax = 4,
-    Other = 5
+  RoomRate = 0,
+  Promotion = 1,
+  Fee = 2,
+  AddOn = 3,
+  Tax = 4,
+  Other = 5
 }
 
 export enum RoomRateType {
-    Stay = 0,
-    ShortStayPremium = 1
+  Stay = 0,
+  ShortStayPremium = 1
 }
 
 
 export enum FeeType {
-    Cleaning = 0,
-    Miscellaneous,
-    DamageProtectionInsurance,
-    ManagementFee,
-    ServiceFee,
-    Wood,
-    DrinkingWater,
-    WaterCraftMooring,
-    WaterCraft,
-    Water,
-    Vehicle,
-    FoodUtensils,
-    UtensilsCleaning,
-    Transportation,
-    Tour,
-    Toiletries,
-    Spa,
-    Resort,
-    Rent,
-    Parking,
-    Phone,
-    OnSitePaymentMethod,
-    Oil,
-    LinensBed,
-    LinensBath,
-    Linens,
-    Laundry,
-    Labor,
-    Internet,
-    TravelInsurance,
-    HotTub,
-    HighChair,
-    Heating,
-    Gas,
-    Gardening,
-    Food,
-    Equipment,
-    Electricity,
-    Concierge,
-    PoolHeating,
-    Pool,
-    Class,
-    BabyBed,
-    PropertyAssociation,
-    AirConditioning,
-    AdditionalBed,
-    PetFee
+  Cleaning = 0,
+  Miscellaneous,
+  DamageProtectionInsurance,
+  ManagementFee,
+  ServiceFee,
+  Wood,
+  DrinkingWater,
+  WaterCraftMooring,
+  WaterCraft,
+  Water,
+  Vehicle,
+  FoodUtensils,
+  UtensilsCleaning,
+  Transportation,
+  Tour,
+  Toiletries,
+  Spa,
+  Resort,
+  Rent,
+  Parking,
+  Phone,
+  OnSitePaymentMethod,
+  Oil,
+  LinensBed,
+  LinensBath,
+  Linens,
+  Laundry,
+  Labor,
+  Internet,
+  TravelInsurance,
+  HotTub,
+  HighChair,
+  Heating,
+  Gas,
+  Gardening,
+  Food,
+  Equipment,
+  Electricity,
+  Concierge,
+  PoolHeating,
+  Pool,
+  Class,
+  BabyBed,
+  PropertyAssociation,
+  AirConditioning,
+  AdditionalBed,
+  PetFee
 }
 
 
 export interface PriceType {
-    type: QuotePriceType;
-    is_negative: boolean;
-    description: string;
-    prices: QuotePrice[];
-    subtotal: number;
+  type: QuotePriceType;
+  is_negative: boolean;
+  description: string;
+  prices: QuotePrice[];
+  subtotal: number;
 }
 
 
 export interface QuotePrice {
-    uid: string;
-    description: string;
-    amount: number;
-    fee_type?: null | FeeType;
-    room_rate_type: null | RoomRateType;
+  uid: string;
+  description: string;
+  amount: number;
+  fee_type?: null | FeeType;
+  room_rate_type: null | RoomRateType;
 }
+
+export type Quote = CamelObject<LodgifyQuote>;
 
 
 /* 

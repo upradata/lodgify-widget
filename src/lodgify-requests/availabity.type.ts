@@ -1,7 +1,8 @@
+import type { CamelObject } from '../util.types';
+import type { Range } from '../types';
 
-import { Range } from '../types';
 
-export interface Availibity {
+export interface LodgifyAvailibity {
     user_id: number;
     property_id: number;
     room_type_id: number;
@@ -20,6 +21,9 @@ export interface Booking {
     id: number;
     status?: any;
 }
+
+
+export type Availibity = CamelObject<LodgifyAvailibity>;
 
 
 /* 

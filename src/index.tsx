@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 // import './css/semantic-placeholder.css';
 import '@lodgify/ui/lib/styles/lodgify-ui.css';
 // import './override.css';
-import App from './App';
+import App from './App/App';
 import './index.css';
 
 
