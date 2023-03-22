@@ -9,7 +9,9 @@ type Value = boolean | number | string;
 type ValueOf<T> = T extends ReadonlyArray<infer U> ? U : T;
 
 // value: Value | Value[] can be an array for multiple selection if enabled
-export class LodgifyDropdownProps<V extends Value | Value[] = Value | Value[], ItemProps = {}> extends (InputProps as (new () => Partial<MyOmit<InputProps, 'value'>>)) {
+export class LodgifyDropdownProps<V extends Value | Value[] = Value | Value[], ItemProps = {}> extends (
+    InputProps as (new () => Partial<MyOmit<InputProps, 'value' | 'onChange' | 'onBlur'>>)
+) {
     style?: React.CSSProperties;
     className?: string;
     error?: boolean | string;
@@ -36,8 +38,10 @@ export class LodgifyDropdownProps<V extends Value | Value[] = Value | Value[], I
     }[];
     value?: V;
     willOpenAbove?: boolean;
-    onFocus?: (name?: string) => void;
-    onBlur?: (name: string) => void;
+    onFocus?: (name: string, event: React.SyntheticEvent) => void;
+    onBlur?: (name: string, event: React.SyntheticEvent) => void;
+    onChange?: (name: string, value: V, event: React.SyntheticEvent) => void;
+    autoComplete?: string;
     ref?: React.ForwardedRef<DropdownRef<V, ItemProps>>;
 };
 
@@ -70,12 +74,40 @@ export type DropdownRef<V extends Value | Value[] = Value | Value[], ItemProps =
 export type DropdownItemProps<V extends Value = Value, P = {}> = Omit<StrictDropdownItemProps, 'value'> & { value?: V; } & P;
 export type DropdownSearchOptionsFn<V extends Value = Value, P = {}> = (options: DropdownItemProps<V, P>[], value: V) => DropdownItemProps<V, P>[];
 
+
+export type SemanticDropdownProps<V extends Value | Value[] = Value | Value[], ItemProps = {}> = MyOmit<
+    StrictDropdownProps, 'onSearchChange' | 'onSearchChange' | 'search'
+//Exclude<keyof LodgifyDropdownProps | 'onSearchChange' | 'search', 'ref' | 'onChange' | 'onBlur' | 'icon' | 'options' |'value'>
+> & {
+    onSearchChange?: (
+        event: React.SyntheticEvent<HTMLElement, InputEvent>,
+        data: MyOmit<DropdownOnSearchChangeData, 'value'> & { value?: V; }
+    ) => void;
+    search?: boolean | LodgifyDropdownProps<V, ItemProps>[ 'getOptionsWithSearch' ];
+    ref?: LodgifyDropdownProps<V, ItemProps>[ 'ref' ];
+};
+
 export type DropdownProps<V extends Value | Value[] = Value | Value[], ItemProps = {}> =
     LodgifyDropdownProps<V, ItemProps> &
-    Omit<StrictDropdownProps, keyof LodgifyDropdownProps | 'onSearchChange' | 'search'> & {
-        onSearchChange?: (
-            event: React.SyntheticEvent<HTMLElement, InputEvent>,
-            data: MyOmit<DropdownOnSearchChangeData, 'value'> & { value?: V; }
-        ) => void;
-        search?: boolean | LodgifyDropdownProps<V>[ 'getOptionsWithSearch' ];
-    };
+    MyOmit<SemanticDropdownProps<V, ItemProps>, 'onChange' | 'onFocus' | 'onBlur'>;
+
+
+export type DropdownSearchInput = {
+    /** An element type to render as (string or function). */
+    as?: React.ComponentType;
+
+    /** An input can have the auto complete. */
+    autoComplete?: string;
+
+    /** Additional classes. */
+    className?: string;
+
+    /** An input can receive focus. */
+    tabIndex?: number | string;
+
+    /** The HTML input type. */
+    type?: string;
+
+    /** Stored value. */
+    value?: number | string;
+};

@@ -10,13 +10,17 @@ import { Input, StrictInputProps } from 'semantic-ui-react';
 import type { Omit } from '../../util.types';
 
 
-export type InputControllerProps = LodgifyInputControllerProps & Omit<StrictInputProps, 'className' | 'fluid' | 'error' | 'onChange'>;
+export type InputControllerProps =
+    LodgifyInputControllerProps & { isDirty?: boolean; className?: string; } &
+    Omit<StrictInputProps, 'className' | 'fluid' | 'error' | 'onChange'>;
 
 
 const _InputController: React.FunctionComponent<InputControllerProps> = ({
     onChange, error, isCompact, isFocused, isValid, isFluid, name, value, icon,
-    adaptOnChangeEvent, inputOnChangeFunctionName, mapValueToProps, children, ...inputProps
+    adaptOnChangeEvent, inputOnChangeFunctionName, mapValueToProps, children, className: klass, ...props
 }) => {
+    const { isDirty, ...inputProps } = props;
+
     const showError = !!error && typeof error === 'string';
     const inputRef = createRef();
 
@@ -25,12 +29,12 @@ const _InputController: React.FunctionComponent<InputControllerProps> = ({
     }, [ name, onChange, adaptOnChangeEvent ]);
 
     const className = classnames({
-        dirty: some(value),
+        dirty: 'isDirty' in props ? isDirty : some(value),
         compact: isCompact,
         error: !!error,
         focus: isFocused,
         valid: isValid
-    });
+    }, klass);
 
     return (
         <Input className={className} fluid={isFluid} iconPosition={icon ? 'left' : undefined} value={value} name={name} {...inputProps}>
@@ -38,7 +42,7 @@ const _InputController: React.FunctionComponent<InputControllerProps> = ({
             {cloneElement(children, {
                 [ inputOnChangeFunctionName ]: handleChange,
                 ref: inputRef,
-                ...mapValueToProps(value)
+                ...(mapValueToProps(value) || {})
             })}
 
             {showError && <ErrorMessage errorMessage={error}>{icon}</ErrorMessage>}

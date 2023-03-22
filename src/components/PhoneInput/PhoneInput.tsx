@@ -86,7 +86,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         value: getControlledInputValue(props.value, props.initialValue, props.value),
         countryISO: props.defaultCountry
     });
-   
+
 
     const handleChange: PhoneIputProps[ 'onChange' ] = useCallback((name, value) => {
         setState(state => {
@@ -131,6 +131,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         numberInputProps: useMemo(() => ({
             placeholder: label
         }), [ label ]),
+        className: 'phone-number-input',
         ...reactPhoneInputProps,
         onCountryChange: useCallback((countryISO: CountryCode) => {
             console.log({ onCountryChange: countryISO });

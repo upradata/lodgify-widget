@@ -1,4 +1,6 @@
-import React, { memo, useEffect, useState } from 'react';
+import './Dropdown.scss';
+
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { adaptOptions } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/adaptOptions';
 import { ErrorMessage, Icon } from '@lodgify/ui';
 import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
@@ -12,8 +14,9 @@ import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { NO_RESULTS } from '@lodgify/ui/lib/es/utils/default-strings';
 import { some } from '@lodgify/ui/lib/es/utils/some';
 import classnames from 'classnames';
-import { Dropdown as SemanticDropdown, StrictDropdownProps } from 'semantic-ui-react';
-import { DropdownProps, DropdownRef, LodgifyDropdownProps } from './Dropdown.props';
+import { Dropdown as SemanticDropdown } from 'semantic-ui-react';
+import { DropdownProps, DropdownRef, DropdownSearchInput, LodgifyDropdownProps, SemanticDropdownProps } from './Dropdown.props';
+import { getOptionsWithSearch } from '../PhoneInput/CountrySelectComponent';
 import { partition, usePrevious } from '../../util';
 
 
@@ -23,54 +26,47 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     type State = {
         isBlurred: boolean;
         isOpen: boolean;
-        value: unknown;
+        value: DropdownProps[ 'value' ];
+        searchQuery: string;
+        autofilled: 'processing' | 'done' | 'idle';
     };
 
     const [ state, _setState ] = useState<State>({
         isBlurred: true,
         isOpen: false,
-        value: getControlledInputValue(cmpProps.value, cmpProps.initialValue)
+        value: getControlledInputValue(cmpProps.value, cmpProps.initialValue),
+        searchQuery: semanticProps.searchQuery,
+        autofilled: 'idle'
     });
 
-    const setState = (partialState: Partial<State>) => _setState(state => {
-        const newState = { ...state, ...partialState };
+    /* 
+       const [ isOpen, setIsOpen ] = useState(false);
+    const [ value, setValue ] = useState(props.value);
+    const [ searchQuery, setSearchQuery ] = useState(props.searchQuery);
+    */
+
+    const setState = (partialState: Partial<State>, event?: React.SyntheticEvent) => _setState(state => {
+        const s: State = { ...state, ...partialState };
+
+        const autofilled = partialState.autofilled === 'done' ? 'idle' : s.autofilled;
+        const forceClosed = !!partialState.autofilled && partialState.autofilled !== 'idle'; // && state.autofilled !== 'idle';
+
+        const newState = { ...s, autofilled, isOpen: forceClosed ? false : s.isOpen };
 
         if (state.value !== newState.value) {
-            cmpProps.onChange?.(cmpProps.name, newState.value);
+            cmpProps.onChange?.(cmpProps.name, newState.value, event);
         }
 
         if (!state.isBlurred && newState.isBlurred) {
-            cmpProps.onBlur?.(cmpProps.name);
+            cmpProps.onBlur?.(cmpProps.name, event);
         }
 
         if (state.isBlurred && !newState.isBlurred) {
-            cmpProps.onFocus?.(cmpProps.name);
+            cmpProps.onFocus?.(cmpProps.name, event);
         }
 
         return newState;
     });
-
-
-    const handleChange: StrictDropdownProps[ 'onChange' ] = (event, { value }) => {
-        setState({
-            value,
-            isOpen: getIsOpenAfterChange((event as any).key)
-        });
-    };
-
-    const handleOpen = (isOpen: boolean) => {
-        setState({
-            isOpen: isOpen,
-            isBlurred: false
-        });
-    };
-
-    const handleBlur = (isBlurred: boolean) => {
-        setState({
-            isBlurred: isBlurred,
-            isOpen: false
-        });
-    };
 
 
     const previousPropsValue = usePrevious(cmpProps.value);
@@ -78,16 +74,18 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
 
     useEffect(() => {
         if (getIsInputValueReset(previousPropsValue, cmpProps.value)) {
-            setState({ value: undefined });
+            setState({ value: undefined, autofilled: 'idle' });
             return;
         }
 
         if (previousPropsValue !== cmpProps.value) {
             const value = getControlledInputValue(cmpProps.value, cmpProps.initialValue, state.value);
-            setState({ value });
+            setState({ value, autofilled: 'idle' });
             return;
         }
-    }, [ cmpProps.value ]);
+
+        setState({ autofilled: 'idle' });
+    }, [ previousPropsValue, cmpProps.value ]);
 
 
     const value = getControlledInputValue(cmpProps.value, cmpProps.initialValue, state.value);
@@ -97,17 +95,18 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
 
 
 
-    const dropdownProps: StrictDropdownProps & Pick<DropdownProps, 'ref'> = {
+    const dropdownProps: SemanticDropdownProps = {
         clearable: cmpProps.isClearable,
         compact: cmpProps.isCompact,
         disabled: cmpProps.isDisabled || !adaptedOptions.length,
-        icon: React.createElement(Icon, {
-            name: getIcon(value, cmpProps.isClearable),
-            size: getPropOnCondition('small', cmpProps.isCompact)
-        }),
-        onBlur: () => { handleBlur(true); },
-        onChange: handleChange,
-        onClick: () => { handleOpen(!state.isOpen); },
+        icon: <Icon name={getIcon(value, cmpProps.isClearable)} size={getPropOnCondition('small', cmpProps.isCompact)} />,
+        onClick: useCallback((event, data) => {
+            setState({
+                isOpen: data.open,
+                isBlurred: false,
+                autofilled: 'idle'
+            }, event);
+        }, []),
         open: state.isOpen,
         options: adaptedOptions,
         placeholder: cmpProps.label,
@@ -116,11 +115,58 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         selection: true,
         upward: cmpProps.willOpenAbove,
         value,
+        searchQuery: state.searchQuery,
         ...semanticProps,
+        searchInput: useMemo(() => {
+            if (props.autoComplete && (typeof !props.searchInput && props.searchInput !== '' || typeof props.searchInput === 'object'))
+                return { autoComplete: props.autoComplete, ...props.searchInput } as DropdownSearchInput;
+
+            return props.searchInput;
+        }, [ props.searchInput, props.autoComplete ]),
+        onOpen: useCallback(() => { setState({ isOpen: true }); }, []),
+        onClose: useCallback(() => { setState({ isOpen: false, searchQuery: '' }); }, []),
+        onSearchChange: useCallback((event, { searchQuery, options, open: isOpen }) => {
+            const isAutoFilled = !event.nativeEvent.inputType;
+
+            if (isAutoFilled) {
+                const items = getOptionsWithSearch(options, searchQuery);
+
+                if (items.length === 1) {
+                    const { value } = items[ 0 ];
+                    setState({ autofilled: 'processing', searchQuery: '', value });
+                } else if (!isOpen) {
+                    setState({ isOpen: true, searchQuery });
+                }
+            } else {
+                setState({ searchQuery });
+            }
+        }, []),
+        onChange: useCallback((event, data) => {
+            // to ensure that handleChange is called after onClose
+            // semantic dropdown handleItemClick is calling onChange before but if the search input has some value ("fr" for instance)
+            // and then click on the french flag,
+            // the browser will call first the input onClose listener before calling the onChange called synchronously by the Dropdown component
+            // Semantic should handle it forcing the calling order
+            setTimeout(() => {
+                setState({
+                    value: data.value,
+                    isOpen: getIsOpenAfterChange((event as any).key),
+                    autofilled: 'done',
+                }, event);
+            }, 0);
+        }, []),
+        onBlur: useCallback(event => {
+            setState({
+                isBlurred: true,
+                isOpen: false
+            }, event);
+        }, []),
         ref
     };
 
-    const className = classnames('dropdown-container', {
+
+
+    const className = classnames('Dropdown', 'dropdown-container', 'ui', 'input', {
         'has-images': hasImages,
         'is-compact': cmpProps.isCompact,
         dirty: some(value) || some(cmpProps.initialValue || cmpProps.value),
@@ -128,6 +174,15 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         focus: state.isOpen,
         valid: cmpProps.isValid
     });
+
+    // const className = classnames('dropdown-container', {
+    //     'has-images': hasImages,
+    //     'is-compact': cmpProps.isCompact,
+    //     dirty: some(value) || some(cmpProps.initialValue || cmpProps.value),
+    //     error: cmpProps.error,
+    //     focus: state.isOpen,
+    //     valid: cmpProps.isValid
+    // });
 
     return (
         <div className={className}>

@@ -142,14 +142,15 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
                         width="five"
                         label="Country"
                         name="country"
+                        autoComplete="country"
                         options={countriesOptions}
                         value={billingInfo.country}
                         isClearable={false}
                         noResultsMessage="No country"
                         getOptionsWithSearch={getCountryOptionsWithSearch}
-                        onChange={useCallback((name, _value) => {
+                       /*  onChange={useCallback((name, _value) => {
                             formRef.current?.setInputState(name, { isBlurred: true });
-                        }, [])} />
+                        }, [])}  *//>
                 </InputGroup>
 
 

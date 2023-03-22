@@ -112,3 +112,10 @@ body .ui.inverted::-webkit-scrollbar-thumb:hover {
 .ui.form .fields>.field.field {
     padding: 0;
 }
+
+
+.ui.form .field.field .ui.input.valid :is(input:-webkit-autofill, [class*="-input"]:has(input:-webkit-autofill)) {
+    box-shadow: inset 0 0 0 100px rgb(241 246 243) !important;
+    border-color: #3adf35 !important;
+}
+/* .ui.form .field.field input:-webkit-autofill */

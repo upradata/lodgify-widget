@@ -9,20 +9,24 @@ import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 // import { createCountryIconComponent } from 'react-phone-number-input/modules/CountryIcon';
 import { getCountryCallingCode } from 'libphonenumber-js';
 // import InternationalIcon from 'react-phone-number-input/modules/InternationalIcon';
-import { Dropdown, DropdownProps, DropdownRef } from '../Dropdown';
+import { Dropdown, DropdownProps } from '../Dropdown';
 
 // import { Flag } from './Flag';
 // import parsePhoneNumber from 'libphonenumber-js';
 import type { CountryCode } from 'libphonenumber-js/core';
 import type { CountrySelectOptions, CountrySelectWithIconProps } from 'react-phone-number-input';
-import type { Omit } from '../../util.types';
+import type { Omit as MyOmit } from '../../util.types';
 
 
 type DropdownItemProps = CountrySelectOptions & { name: string; };
 
+// react-phone-number-input/modules/CountrySelect.js only need onChange
 export type CountrySelectComponentProps =
-    CountrySelectWithIconProps<DropdownItemProps> &
-    Omit<DropdownProps<CountryCode, DropdownItemProps>, 'onChange' | 'label'>;
+    MyOmit<
+        CountrySelectWithIconProps<DropdownItemProps> &
+        Omit<DropdownProps<CountryCode, DropdownItemProps>, 'onChange' | 'label' | keyof CountrySelectWithIconProps>,
+        'onFocus' | 'onBlur'
+    >;
 
 /* const CountryIcon = createCountryIconComponent({
     // Must be equal to `defaultProps.flagUrl` in `./PhoneInputWithCountry.js`.
@@ -79,58 +83,59 @@ type DropdownItemOption = {
 
 
 const _CountrySelectComponent: React.FunctionComponent<CountrySelectComponentProps> = ({ onChange, options, iconComponent: CountryIcon, ...props }) => {
-    const [ isOpen, setIsOpen ] = useState(false);
-    const [ value, setValue ] = useState(props.value);
-    const [ searchQuery, setSearchQuery ] = useState(props.searchQuery);
+    // const [ isOpen, setIsOpen ] = useState(false);
+    // const [ value, setValue ] = useState(props.value);
+    // const [ searchQuery, setSearchQuery ] = useState(props.searchQuery);
 
-    const dropDownProps: DropdownProps = {
+    const dropDownProps: DropdownProps<CountryCode, DropdownItemProps> = {
         getOptionsWithSearch,
         isClearable: false,
         // floating: true,
         // isSearchable: true,
         // isFluid: true,
-        searchInput: { autoComplete: 'country' },
+        autoComplete: 'country',
         ...props,
-        value,
-        searchQuery,
-        open: isOpen,
-        onOpen: useCallback(() => { setIsOpen(true); }, []),
-        onClose: useCallback(() => {
-            setIsOpen(false);
-            setSearchQuery('');
-        }, []),
-        onSearchChange: useCallback((event, { searchQuery, options, value }) => {
-            const isAutoFilled = !event.nativeEvent.inputType;
+        onChange: useCallback((name, value) => { onChange(value); }, [ onChange ]),
+        // value,
+        // searchQuery,
+        // open: isOpen,
+        // onOpen: useCallback(() => { setIsOpen(true); }, []),
+        // onClose: useCallback(() => {
+        //     setIsOpen(false);
+        //     setSearchQuery('');
+        // }, []),
+        // onSearchChange: useCallback((event, { searchQuery, options, value }) => {
+        //     const isAutoFilled = !event.nativeEvent.inputType;
 
-            if (isAutoFilled) {
-                const items = getOptionsWithSearch(options, searchQuery);
+        //     if (isAutoFilled) {
+        //         const items = getOptionsWithSearch(options, searchQuery);
 
-                if (items.length === 1) {
-                    if (items[ 0 ].value !== value)
-                        setValue(items[ 0 ].value);
+        //         if (items.length === 1) {
+        //             if (items[ 0 ].value !== value)
+        //                 setValue(items[ 0 ].value);
 
-                    setSearchQuery('');
-                    setIsOpen(false);
+        //             setSearchQuery('');
+        //             setIsOpen(false);
 
-                } else if (!isOpen) {
-                    setSearchQuery(searchQuery);
-                    setIsOpen(true);
-                }
-            } else {
-                setSearchQuery(searchQuery);
-            }
-        }, []),
-        onChange: useCallback((name: string, value: CountryCode) => {
-            // to ensure that onClose is called after onChange
-            // semantic dropdown handleItemClick is calling onChange before but if the search input has some value ("fr" for instance)
-            // and then click on the french flag,
-            // the browser will call first the input onClose listener before calling the onChange called synchronously by the Dropdown component
-            // Semantic should handle it forcing the calling order
-            setTimeout(() => {
-                setValue(value);
-                onChange(value);
-            }, 0);
-        }, [ onChange ]),
+        //         } else if (!isOpen) {
+        //             setSearchQuery(searchQuery);
+        //             setIsOpen(true);
+        //         }
+        //     } else {
+        //         setSearchQuery(searchQuery);
+        //     }
+        // }, []),
+        // onChange: useCallback((name: string, value: CountryCode) => {
+        //     // to ensure that onClose is called after onChange
+        //     // semantic dropdown handleItemClick is calling onChange before but if the search input has some value ("fr" for instance)
+        //     // and then click on the french flag,
+        //     // the browser will call first the input onClose listener before calling the onChange called synchronously by the Dropdown component
+        //     // Semantic should handle it forcing the calling order
+        //     setTimeout(() => {
+        //         setValue(value);
+        //         onChange(value);
+        //     }, 0);
+        // }, [ onChange ]),
         options: useMemo(() => {
             const optionCache: Record<string, DropdownItemOption> = {};
 

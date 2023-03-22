@@ -31,7 +31,7 @@ declare module 'react-phone-number-input' {
          */
         onChange?: (value: CountryCode) => void,
         // `<select/>` options.
-        options: Options;
+        options: Options[];
 
         name?: string;
         'aria-label': string;

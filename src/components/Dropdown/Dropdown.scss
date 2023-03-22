@@ -1,0 +1,16 @@
+.Dropdown {
+    &.dropdown-container .ui.search.selection.dropdown input.search {
+        width: 100%;
+        padding: inherit;
+        top: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    &.dropdown-container:not(.dirty) .ui.dropdown .menu > .item .image,
+    &.dropdown-container:not(.dirty) .ui.dropdown .menu > .item img,
+    &.dropdown-container:not(.dirty) .ui.dropdown > .text > .image,
+    &.dropdown-container:not(.dirty) .ui.dropdown > .text > img {
+        filter: unset;
+    }
+}
