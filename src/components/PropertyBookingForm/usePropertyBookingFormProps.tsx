@@ -17,7 +17,9 @@ export const usePropertyBookingFormProps = ({ buttonText = 'Book' }: UseProperty
 
     const locationOptions = Object.values(rooms).map(room => ({ ...room, indent: 0 as const, text: room.name, imageUrl: room.image } as LocationOptions));
 
-    const onInputChange: PropertyBookingFormProps[ 'onInputChange' ] = useCallback((name, value) => { setReservation({ [ name ]: value }); }, []);
+    const onInputChange: PropertyBookingFormProps[ 'onInputChange' ] = useCallback((name, value) => {
+        setReservation({ type: 'change-input', [ name ]: value });
+    }, []);
 
     const getIsDayBlocked = useCallback((date: Moment) => {
         const isBlocked = !!room.periodsNonAvailable?.find(({ start, end }) => isDateInRange(start, end)(date));

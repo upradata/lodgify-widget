@@ -26,8 +26,8 @@ export type BookingReservation = {
 export class ReservationDebug {
     roomValue?: string = 'mini-hotel';
     nbOfNights?: number = 3;
-    startDate?: LodgifyDate = '2023-05-14';
-    endDate?: LodgifyDate = '2023-05-21';
+    startDate?: LodgifyDate = '2023-07-14';
+    endDate?: LodgifyDate = '2023-07-21';
     // price?: number;
     nbGuests: number = 3;
     isLoading?: boolean;

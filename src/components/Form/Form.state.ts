@@ -1,18 +1,27 @@
-import { useCallback, useEffect, useState } from 'react';
-import { getEmptyState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyState';
-import { getErroredState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getErroredState';
+import { useCallback, useEffect, useState, useMemo } from 'react';
+// import { getEmptyState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyState';
+// import { getErroredState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getErroredState';
 import isEqual from 'fast-deep-equal';
 
-import type { FormValue, FormValues } from '@lodgify/ui';
-import type { FormProps } from './Form.props';
+// import type { FormValue, FormValues } from '@lodgify/ui';
+import type { FormProps, InputsState, InputState } from './Form.props';
+import { getEmptyState, processInputValue } from './Form.helpers';
+import { getValidationWithDefaults } from './Form.validation';
+import { map } from '../../util';
 
 
 export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'>;
 
 export const useFormState = (props: UseFormStateProps) => {
 
-    const [ state, setState ] = useState<FormValues>({});
-   // const [ stateNameChanged, setStateNameChanged ] = useState<{ name: string | null; }>({ name: null });
+    const [ state, setState ] = useState<InputsState>({});
+
+    const propsValidation = useMemo(() => {
+        return map(props.validation.props, (name, validation) => [ name, getValidationWithDefaults(validation, props.validation.default) ]);
+    }, [ props.validation ]);
+
+
+    // const [ stateNameChanged, setStateNameChanged ] = useState<{ name: string | null; }>({ name: null });
 
     /* useEffect(() => {
         const { name } = stateNameChanged;
@@ -22,7 +31,7 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ stateNameChanged, props.onInputChange ]); */
 
 
-    const setInputState = useCallback((inputName: string, inputState: FormValue) => {
+    const setInputState = useCallback((inputName: string, inputState: InputState) => {
         if (!inputState)
             return;
 
@@ -36,7 +45,7 @@ export const useFormState = (props: UseFormStateProps) => {
                 };
 
                 // setStateNameChanged({ name: inputName });
-                props.onInputChange?.(inputName, inputStateWithData.value);
+                props.onInputChange?.(inputName, inputStateWithData.transformedValue);
                 return newState;
             }
 
@@ -45,24 +54,27 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.onInputChange ]);
 
 
-    const getInputStateWithData = useCallback((inputName: string, inputState: FormValue, previousState: FormValues) => {
-        const previousInputState = previousState?.[ inputName ] || {};
+    const getInputStateWithData = useCallback((inputName: string, inputState: InputState, previousInputState: InputState) => {
+        const previousState = previousInputState?.[ inputName ] || {};
+
+        if (isEqual(previousState, inputState))
+            return undefined;
+
+        const processedInputValue = processInputValue(propsValidation[ inputName ], inputState);
 
         switch (true) {
-            case isEqual(previousInputState, inputState):
-                return undefined;
 
-            case !previousInputState.isBlurred && inputState.isBlurred:
-            case inputState.isBlurred && previousInputState.value !== inputState.value:
-                const errorState = getErroredState(props.validation[ inputName ], inputState) as FormValue;
-                return errorState;
+            case !previousState.isBlurred && inputState.isBlurred:
+            case inputState.isBlurred && previousState.value !== inputState.value:
+                return processedInputValue;
 
-            case previousInputState.value !== inputState.value:
-                return {
-                    ...inputState,
-                    error: undefined,
-                    isValid: undefined
-                };
+            case previousState.value !== processedInputValue.value:
+                return processedInputValue;
+            /*  return {
+                 ...validatedInputValue,
+                 error: undefined,
+                 isValid: undefined
+             }; */
 
             default:
                 return null;
@@ -72,7 +84,7 @@ export const useFormState = (props: UseFormStateProps) => {
     useEffect(() => {
         if (!!props.successMessage) {
             setState(state => {
-                const emptyState = getEmptyState(state);
+                const emptyState = getEmptyState(propsValidation, state);
                 return { ...state, ...emptyState };
             });
 
@@ -80,5 +92,5 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.successMessage ]);
 
 
-    return { state, setState, setInputState };
+    return { state, setState, setInputState, propsValidation };
 };

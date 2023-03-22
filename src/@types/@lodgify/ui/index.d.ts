@@ -9,7 +9,8 @@ declare module '@lodgify/ui' {
     import type { Moment } from 'moment';
     // import type { PropsWithStyle } from '../../../util.types';
     // import { ModalProps as ModalPropsClass } from './types';
-    /* export type PropsWithStyle<P = {}> = P & {
+    /* import { type } from '../../../App/PropertyContext';
+export type PropsWithStyle<P = {}> = P & {
         style?: React.CSSProperties;
         className?: string;
     }; */
@@ -208,6 +209,8 @@ declare module '@lodgify/ui' {
         size?: 'mini' | 'tiny' | 'small' | 'large' | 'big' | 'huge' | 'massive';
     }>;
 
+
+    export type IconNames = IconProps[ 'name' ];
     export const Icon: React.ComponentType<IconProps>;
 
 
@@ -251,26 +254,30 @@ declare module '@lodgify/ui' {
     export const Heading: React.ComponentType<{ [ K: string ]: any; }>;
 
     export type Validation = {
-        getIsEmpty: Function;
-        getIsValid: Function;
+        getIsEmpty: (value: string) => boolean;
+        getIsValid: (value: string) => boolean;
         invalidMessage?: string;
         isRequired: boolean;
         isRequiredMessage?: string;
     };
 
-    export type FormProps<Values = unknown> = PropsWithStyle<{
+    export type FormProps<
+        Names extends string = string,
+        Values = unknown,
+        V extends Record<string, Partial<Validation>> = Record<string, Partial<Validation>>
+    > = PropsWithStyle<{
         actionLink?: {
             onClick?: Function;
             text: React.ReactNode;
         };
         autoComplete?: 'on' | 'off';
-        children: boolean | React.ReactChild | ReactNodeArray | React.ReactPortal; //  Exclude<React.ReactNode, React.ReactFragment>;
+        children: boolean | React.ReactChild | React.ReactNodeArray | React.ReactPortal; //  Exclude<React.ReactNode, React.ReactFragment>;
         errorMessage?: string;
         headingText?: string;
-        onSubmit?: (values: Values) => void;
+        onSubmit?: (values: FormValues<Names, Values>) => void;
         submitButtonText?: string;
         successMessage?: string;
-        validation?: Record<string, Partial<Validation>>;
+        validation?: V;
         // ref?: React.MutableRefObject<typeof Form>;
     }>;
 
@@ -282,7 +289,7 @@ declare module '@lodgify/ui' {
     };
 
     export type FormValues<Names extends string = string, V = unknown> = {
-        [ InputName: Names ]: FormValue<V>;
+        [ InputName in Names ]: FormValue<V>;
     };
 
     export const Form: ForwardRefExoticComponent<PropsWithoutRef<FormProps> & RefAttributes<{}>>;
@@ -301,7 +308,8 @@ declare module '@lodgify/ui' {
 
     export type DropdownProps = PropsWithStyle<{
         error?: boolean | string;
-        getOptionsWithSearch?: Function;
+        // DropdownItemProps
+        getOptionsWithSearch?: boolean | ((options: {}[], value: string) => {}[]);
         icon?: string;
         initialValue?: boolean | number | string;
         isClearable?: boolean;
@@ -311,7 +319,7 @@ declare module '@lodgify/ui' {
         isValid?: boolean;
         label?: string;
         noResultsText?: string;
-        onFocus?: Function;
+        onFocus?: (name?: string) => void;
         options?: {
             content?: React.ReactNode;
             imageSizes?: string;
@@ -381,8 +389,8 @@ declare module '@lodgify/ui' {
         isFluid?: boolean;
         isFocused?: boolean;
         isValid?: boolean;
-        mapValueToProps?: Function;
-        value?: boolean | string | number | object | Array<unknown>;
+        mapValueToProps?: (v: unknown) => Record<string, unknown>;
+        value?: unknown; // boolean | string | number | object | Array<unknown>;
         name: string;
         onChange?: InputProps[ 'onChange' ];
         children: ReactElementLike;
@@ -425,8 +433,7 @@ declare module '@lodgify/ui' {
     export const NumberInput: React.ComponentType<{ [ K: string ]: any; } & InputProps>;
     export const Paragraph: React.ComponentType<{ [ K: string ]: any; }>;
     export const Link: React.ComponentType<{ [ K: string ]: any; }>;
-
-
+    export const ErrorMessage: React.ComponentType<{ [ K: string ]: any; }>;
 }
 
 

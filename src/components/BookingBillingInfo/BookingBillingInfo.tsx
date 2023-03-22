@@ -2,19 +2,20 @@ import './BookingBillingInfo.scss';
 
 import countriesData from '../../countries-metadata.json';
 
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Dropdown, DropdownProps, FormValue, InputGroup, TextInput, Validation as ValidationType } from '@lodgify/ui';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { InputGroup, TextInput } from '@lodgify/ui';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
 import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 // import debounce from 'debounce';
-import { BookingBillingInfo as BookingBillingInfoType } from '../Booking/BookingComponent';
+// import { BookingBillingInfo as BookingBillingInfoType } from '../Booking/BookingComponent';
 import { BookingContext } from '../Booking/BookingContext';
-import { debounce } from '../../util';
+import { Dropdown, DropdownProps } from '../Dropdown';
 import { Form, FormImperativeAPI, FormProps } from '../Form';
+import { makeValidation, PropsValidationOptions } from '../Form/Form.validation';
 import { PhoneInput } from '../PhoneInput';
 
-import type { DateRange, PropsWithStyleBase } from '../../util.types';
+import type { PropsWithStyleBase } from '../../util.types';
 
 
 type DropdownOption = DropdownProps[ 'options' ][ number ] & { key?: string; };
@@ -31,17 +32,7 @@ const countriesOptions: DropdownProps[ 'options' ] = countriesData.map(({ name, 
 const countriesDataByCode = countriesData.reduce((o, data) => ({ ...o, [ data.code ]: data }), {} as { [ Code: string ]: (typeof countriesData)[ number ]; });
 
 
-
-type FormValueType = 'string' | 'email' | 'country' | 'phone' | 'date-range' | 'number';
-
-type FormValueToType<V extends FormValueType> =
-    V extends 'string' | 'email' | 'phone' ? string :
-    V extends 'country' ? CountryCode :
-    V extends 'date-range' ? DateRange :
-    V extends 'number' ? number : never;
-
-
-type Validations = { [ K in keyof BookingBillingInfoType ]: Partial<ValidationType> & { type: FormValueType; } };
+// type Validations = { [ K in keyof BookingBillingInfoType ]: Partial<Validation> & { type: FormValueType; } };
 
 type UseFormProps = { phoneCountry: CountryCode; };
 
@@ -49,69 +40,50 @@ type UseFormProps = { phoneCountry: CountryCode; };
 const useForm = (props: UseFormProps) => {
     const [ formState, setFormState ] = useState(props);
 
-    const validation = useMemo(() => ({
-        email: {
-            isRequired: true,
-            getIsValid: (value: string) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value),
-            invalidMessage: `Invalid email`,
-            isRequiredMessage: `Required`,
-            type: 'email'
+    const propsValidation = useMemo(() => ({
+        default: {
+            isRequiredMessage: 'Required',
+            invalidMessage: 'Invalid'
         },
-        firstName: {
-            isRequired: true,
-            isRequiredMessage: `Required`,
-            type: 'string'
-        },
-        lastName: {
-            isRequired: true,
-            isRequiredMessage: `Required`,
-            type: 'string'
-        },
-        phoneNumber: {
-            isRequired: true,
-            getIsValid: (value: string) => isValidPhoneNumber(value, formState.phoneCountry),
-            invalidMessage: `Invalid phone number`,
-            isRequiredMessage: `Required`,
-            type: 'phone'
-        },
-        country: {
-            isRequired: true,
-            isRequiredMessage: `Required`,
-            getIsValid: (value: string) => countriesOptions.some(({ value: v }) => value === v),
-            type: 'country'
-        },
-        comment: {
-            isRequired: false,
-            type: 'string'
+        props: {
+            email: makeValidation('email', { invalidMessage: 'Invalid email' }),
+            firstName: makeValidation('string'),
+            lastName: makeValidation('string'),
+            phoneNumber: makeValidation('string', {
+                invalidMessage: 'Invalid phone number',
+                validate: value => {
+                    const isValid = isValidPhoneNumber(value, formState.phoneCountry);
+                    return { error: !isValid, value: isValid ? value : undefined };
+                }
+            }),
+            country: makeValidation('string', { validate: value => ({ error: !countriesOptions.some(({ value: v }) => value === v) }) }),
+            comment: makeValidation('string', { isRequired: false })
         }
-    } satisfies Validations), [ formState.phoneCountry ]);
+    } satisfies PropsValidationOptions), [ formState.phoneCountry ]);
 
     return {
         formState,
         setFormState,
         setPropFormState: useCallback(function <P extends keyof UseFormProps>(prop: P, value: UseFormProps[ P ]) {
             setFormState(state => ({ ...state, [ prop ]: value }));
-        }, [ setFormState ]),
-        validation
+        }, []),
+        propsValidation
     };
 };
 
-
-type RealValidations = ReturnType<typeof useForm>[ 'validation' ];
+type RealPropsValidations = ReturnType<typeof useForm>[ 'propsValidation' ][ 'props' ];
+/* 
 
 type FormValues = {
-    [ K in keyof Validations ]: FormValueToType<RealValidations[ K ][ 'type' ]>
+    [ K in keyof RealPropsValidations ]: ValidationValue<RealPropsValidations[ K ][ 'input' ][ 'type' ]>
 };
-
-type FormInputValues = {
-    [ K in keyof FormValues ]: FormValue<FormValues[ K ]>
-};
-
+ */
+type FormInputValues = Record<keyof RealPropsValidations, string>; // FormValues<keyof RealPropsValidations, string>;
 
 // export type BookingDetailsData = FormValues;
 
 export type BookingDetailsProps = PropsWithStyleBase & {
-    onSubmit?: FormProps<FormValues>[ 'onSubmit' ];
+    onSubmit?: (data: FormInputValues) => void;
     buttonText?: string;
 } /* & CardProps */;
 
@@ -123,26 +95,22 @@ const getCountryOptionsWithSearch = (options: Pick<DropdownOption, 'value'>[], s
 };
 
 
-export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = ({ onSubmit: handleSummit, buttonText }) => {
+export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = ({ onSubmit, buttonText }) => {
     const { billingInfo, setBillingInfo } = useContext(BookingContext);
 
-    const [ billingState, setBillingState ] = useState(billingInfo);
-    const { setPropFormState, validation } = useForm({ phoneCountry: billingState.country });
+    // const [ billingState, setBillingState ] = useState(billingInfo);
+    /* const { setPropFormState, propsValidation } = useForm({ phoneCountry: billingState.country }); */
+    const { setPropFormState, propsValidation } = useForm({ phoneCountry: billingInfo.country });
 
-    const onSubmit: FormProps<FormInputValues>[ 'onSubmit' ] = useCallback((values => {
-        const data = Object.entries(values).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as FormValues);
-        handleSummit?.(data);
-    }), [ handleSummit ]);
+    // const debouncedSetBillingInfo = debounce((billingState: Partial<BookingBillingInfoType>) => { setBillingInfo(billingState); }, 200);
 
-
-    const debouncedSetBillingInfo = debounce((billingState: BookingBillingInfoType) => { setBillingInfo(billingState); }, 200);
-
-    useEffect(() => {
+    /* useEffect(() => {
         debouncedSetBillingInfo(billingState);
     }, [ billingState ]);
-
-    const onInputChange = useCallback((name: keyof FormValues, value: FormValues) => {
-        setBillingState(state => ({ ...state, [ name ]: value }));
+ */
+    const onInputChange: FormProps<FormInputValues>[ 'onInputChange' ] = useCallback((name, value) => {
+        // setBillingState(state => ({ ...state, [ name ]: value }));
+        setBillingInfo({ [ name ]: value });
     }, [ setBillingInfo, ]);
 
 
@@ -151,14 +119,14 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
     return (
         <div className="BookingBillingInfo">
 
-            <Form submitButtonText={buttonText} validation={validation} onSubmit={onSubmit} onInputChange={onInputChange} ref={formRef}>
+            <Form submitButtonText={buttonText} validation={propsValidation} onSubmit={onSubmit} onInputChange={onInputChange} ref={formRef}>
 
                 <InputGroup>
-                    <TextInput autoComplete="given-name" label="First name" name="firstName" value={billingState.firstName} />
-                    <TextInput autoComplete="family-name" label="Last name" name="lastName" value={billingState.lastName} />
+                    <TextInput autoComplete="given-name" label="First name" name="firstName" value={billingInfo.firstName} />
+                    <TextInput autoComplete="family-name" label="Last name" name="lastName" value={billingInfo.lastName} />
                 </InputGroup>
 
-                <TextInput autoComplete="email" label="Email" name="email" value={billingState.email} />
+                <TextInput autoComplete="email" label="Email" name="email" value={billingInfo.email} />
 
                 <InputGroup>
                     <PhoneInput
@@ -166,18 +134,18 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
                         label="Phone number"
                         name="phoneNumber"
                         autoComplete="tel"
-                        defaultCountry={billingState.country}
-                        value={billingState.phoneNumber}
-                        onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [ setPropFormState ])} />
+                        defaultCountry={billingInfo.country}
+                        value={billingInfo.phoneNumber}
+                        onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [])} />
 
                     <Dropdown
                         width="five"
                         label="Country"
                         name="country"
                         options={countriesOptions}
-                        value={billingState.country}
+                        value={billingInfo.country}
                         isClearable={false}
-                        noResultsText="No country"
+                        noResultsMessage="No country"
                         getOptionsWithSearch={getCountryOptionsWithSearch}
                         onChange={useCallback((name, _value) => {
                             formRef.current?.setInputState(name, { isBlurred: true });
@@ -185,7 +153,7 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
                 </InputGroup>
 
 
-                <TextArea label="Comments (optional)" name="comment" maxCharacters={4000} value={billingState.comment} />
+                <TextArea label="Comments (optional)" name="comment" maxCharacters={4000} value={billingInfo.comment} />
             </Form>
         </div>
     );

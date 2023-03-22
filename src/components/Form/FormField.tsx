@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { FormValue, FormValues, InputControllerProps, InputGroup, InputProps } from '@lodgify/ui';
 // import { getInputWidth } from '@lodgify/ui/lib/es/components/collections/Form/utils/getInputWidth';
-import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
+// import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { Form as SemanticForm, SemanticWIDTHS, StrictFormFieldProps } from 'semantic-ui-react';
 
-import type { FormProps } from './Form.props';
-import type { Omit } from '../../util.types';
+import type { Omit, PropsWithStyle } from '../../util.types';
+import { PropsValidation } from './Form.validation';
 
 
 export const InputField: React.FunctionComponent<PropsWithStyle<StrictFormFieldProps>> = React.memo(SemanticForm.Field);
@@ -29,7 +29,7 @@ export type ParentImperativeApi = {
     handleInputBlur: (name: string) => void;
     setInputState: (inputName: string, inputState: FormValue) => void;
     state: FormValues;
-    validation: FormProps[ 'validation' ];
+    propsValidation: PropsValidation;
 };
 
 const isPrimitiveElement = (element: React.ReactElement | string | number | boolean): string | number | boolean => {
@@ -37,7 +37,7 @@ const isPrimitiveElement = (element: React.ReactElement | string | number | bool
 };
 
 
-export type FormFieldProps = ParentImperativeApi & { children: React.ReactChild | boolean | null; };
+export type FormFieldProps = ParentImperativeApi & { children: React.ReactChild | boolean | null | undefined; };
 
 export const FormField: React.FunctionComponent<FormFieldProps> = ({ children, ...props }) => {
     if (!children)
@@ -117,15 +117,17 @@ export const _InputField: React.FunctionComponent<{
         if (!value)
             return;
 
-        const inputValidation = getValidationWithDefaults(parent.validation[ name ]) as FormProps[ 'validation' ][ string ];
+        parent.handleInputChange(name, value);
+        /*  const { propsValidation } = parent;
+         const inputValidation = propsValidation.props[ name ];
+         const { value: validValue, error } = inputValidation.validate(value);
+ 
+         if (!error)
+             parent.setInputState(name, { value: validValue, isValid: true });
+         else
+             parent.setInputState(name, { value, error: typeof error === 'string' ? error : inputValidation.invalidMessage }); */
 
-        if (!inputValidation.getIsEmpty(value)) {
-            if (inputValidation.getIsValid(value))
-                parent.setInputState(name, { value, isValid: true });
-            else
-                parent.setInputState(name, { value, error: inputValidation.invalidMessage });
-        }
-    }, [ /* parent.validation, parent.setInputState, inputOrField.props, name */ ]);
+    }, [ /* parent.propsValidation, inputOrField.props, name */ ]);
 
 
     const onBlur = useCallback(() => parent.handleInputBlur(name), [ name, parent.handleInputBlur ]);
@@ -171,6 +173,7 @@ export const _InputField: React.FunctionComponent<{
 
     if (renderedElement)
         return renderedElement;
+
 
     return <InputField width={inputOrField.props.width}>{inputFieldChildren}</InputField>;
 };

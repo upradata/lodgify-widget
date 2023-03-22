@@ -1,6 +1,6 @@
 import moment, { Moment } from 'moment';
 import { useEffect, useRef, useState } from 'react';
-import { Key, KeyOf, ValueOf } from './util.types';
+import { CasedObject, CasedType, Key, KeyOf, ValueOf } from './util.types';
 
 
 export const isInRange = (min: number, max: number) => (v: number) => min <= v && v <= max;
@@ -209,37 +209,96 @@ export const isSame = <T, U>(value1: T, value2: U): boolean => {
 export const plural = (n: number, s: string) => `${s}${n > 1 ? 's' : ''}`;
 
 
-export const map = <T, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, unknown ]>(
-    o: T, mapping: M
+export const map = <T, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, (unknown | typeof map_KEEP_VALUE)?]>(
+    o: T, mapping: M, options: { mode?: 'recursive'; } = {}
 ): { [ K in ReturnType<M>[ 0 ] ]: ReturnType<M>[ 1 ]; } => {
 
-    const next = (value: unknown) => {
-        if (typeof value === 'object') {
-            if (Array.isArray(value))
-                return value.map(v => map(v, mapping));
+    const { mode } = options;
 
-            return map(value, mapping);
+    const next = (oldValue: unknown, newValue: unknown) => {
+
+
+        if (mode === 'recursive') {
+
+            if (newValue === map.KEEP_VALUE) {
+
+                if (typeof oldValue === 'object') {
+                    if (Array.isArray(oldValue))
+                        return oldValue.map(v => _map(v));
+
+                    return map(oldValue, mapping);
+                }
+
+                return oldValue;
+            }
+
+            return newValue;
         }
 
-        return value;
+
+        if (newValue === map.KEEP_VALUE)
+            return oldValue;
+
+        return newValue;
     };
 
-    return Object.entries(o).reduce((mappedO, [ k, v ]) => {
-        const [ mappedK, mappedV ] = mapping(k as KeyOf<T>, v);
+    const _map = (o: T) => {
+        if (typeof o !== 'object' || Array.isArray(o) || o === null)
+            return o as any;
 
-        if (typeof mappedK === 'undefined' || mappedK === null)
-            return mappedO;
+        return Object.entries(o).reduce((mappedO, [ k, v ]) => {
+            const m = mapping(k as KeyOf<T>, v);
+            const [ mappedK, mappedV ] = m.length === 2 ? m : [ m[ 0 ], map.KEEP_VALUE ];
 
-        return { ...mappedO, [ mappedK ]: next(mappedV) };
-    }, {}) as any;
+            if (typeof mappedK === 'undefined' || mappedK === null)
+                return mappedO;
+
+            return { ...mappedO, [ mappedK ]: next(v, mappedV) };
+        }, {}) as any;
+    };
+
+    return _map(o);
 };
+
+
+const map_KEEP_VALUE: unique symbol = Symbol('map keep value');
+map.KEEP_VALUE = map_KEEP_VALUE;
 
 
 export const kebabCase = (s: string, sep: '-' | '_' = '_') => s.trim().replaceAll(/(\s+)/g, sep).toLowerCase();
 export const camelCase = (s: string) => s.trim().toLowerCase().replaceAll(/_./g, s => s[ 1 ].toUpperCase());
 
 
-export const toCasedObject = <O>(o: O, type: 'kebab' | 'camel') => {
+export const toCasedObject = <O, T extends CasedType>(o: O, type: T): CasedObject<O, T> => {
     const casing = type === 'camel' ? camelCase : kebabCase;
-    return map(o, (k, v) => [ casing(k as string), v ]);
+    return map(o, k => [ casing(k as string) ], { mode: 'recursive' }) as any;
 };
+
+
+/* type MergeIstances<C extends (new () => any)[], Merge = {}> = C extends [ infer Ctor, ...infer Rest ] ?
+    Rest extends (new () => any)[] ? Ctor extends (new () => any) ?
+    MergeIstances<Rest, Merge & Ctor> : never : never :
+    Merge;
+
+export const mixin = <C extends (new () => any)[]>(...classes: C): new () => MergeIstances<C> => {
+    const { prototype, constructors } = classes.reduce((acc, Class) => ({
+        prototype: [ ...acc.prototype, ...Class.prototype ],
+        constructors: [ ...acc.constructors, Class ]
+    }), { prototype: [], constructors: [] as (new () => any)[] });
+
+
+    function SuperClass() {
+        constructors.forEach(C => C.apply(this));
+    }
+
+    Object.setPrototypeOf(SuperClass.prototype, prototype);
+    SuperClass.name = constructors.map(c => c.name).join(', ');
+
+    return SuperClass as any;
+};
+
+class A { a = 1; }
+class B { b = 2; }
+
+const C = mixin(A, B);
+ */

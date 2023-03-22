@@ -1,13 +1,7 @@
+import { InputProps } from '../../util.types';
+
 import type { DateRange, FormValue as LodgifyFormValue } from '@lodgify/ui';
 
-
-class InputProps<V = unknown> {
-    name?: string;
-    onBlur?: (event?: FocusEvent) => any;
-    onChange?: (name: string, value: V) => any;
-    width?: string;
-    label?: string;
-};
 
 class FormValue<V = unknown> extends InputProps implements Required<LodgifyFormValue> {
     isBlurred: boolean;

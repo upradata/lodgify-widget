@@ -1,5 +1,5 @@
 export * from './FixedBar';
-export * from './BookingRegistration';
+export * from '../../BookingRegistration';
 export * from './Card';
 export * from './Form';
 export * from './MediaQuery';

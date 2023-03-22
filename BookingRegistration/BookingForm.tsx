@@ -1,4 +1,4 @@
-import countriesData from '../../countries-metadata.json';
+import countriesData from '../src/countries-metadata.json';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -15,14 +15,14 @@ import {
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
 import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 import moment, { Moment } from 'moment';
-import { Card } from '../Card';
-import { DateRange, PropsWithStyleBase } from '../../util.types';
-import { Form } from '../Form';
-import { lodgifyDateToMoment } from '../../lodgify-info/info';
-import { PhoneInput } from '../PhoneInput';
-import { RoomValue } from '../../rooms.data';
+import { Card } from '../src/components/Card';
+import { DateRange, PropsWithStyleBase } from '../src/util.types';
+import { Form } from '../src/components/Form';
+import { lodgifyDateToMoment } from '../src/lodgify-info/info';
+import { PhoneInput } from '../src/components/PhoneInput';
+import { RoomValue } from '../src/rooms.data';
 
-import type { LodgifyDate } from '../../lodgify-requests';
+import type { LodgifyDate } from '../src/lodgify-requests';
 
 
 type DropdownOption = DropdownProps[ 'options' ][ number ] & { key?: string; };

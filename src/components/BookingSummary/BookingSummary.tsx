@@ -308,7 +308,7 @@ export const BookingSummary: React.FunctionComponent<BookingSummaryProps> = ({ o
 
     const onCouponApply = useCallback(() => {
         if (formState.coupon)
-            setReservation({ promotionCode: formState.coupon });
+            setReservation({ type: 'change-input', promotionCode: formState.coupon });
     }, [ setReservation, formState.coupon ]);
 
     // const [ isLoading, setIsLoading ] = useState(reservation.isLoading);

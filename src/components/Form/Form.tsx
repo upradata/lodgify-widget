@@ -1,32 +1,19 @@
 import './Form.scss';
 
 import React, { memo, useCallback, useImperativeHandle, useMemo } from 'react';
-import { getEmptyRequiredInputs as _getEmptyRequiredInputs } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyRequiredInputs';
-// import { getIsSubmitButtonDisabled as _getIsSubmitButtonDisabled } from '@lodgify/ui/lib/es/components/collections/Form/utils/getIsSubmitButtonDisabled';
-import { getValidationWithDefaults as _getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
-// import Card from 'semantic-ui-react/dist/es/views/Card/Card.js';
-import { Button, FormValue, FormValues, Link, Validation } from '@lodgify/ui';
-import { forEach } from '@lodgify/ui/lib/es/utils/for-each';
+
+import { Button, FormValue, Link, } from '@lodgify/ui';
 // import { setInputState } from '@lodgify/ui/lib/es/components/collections/Form/utils/setInputState';
 import { SEND } from '@lodgify/ui/lib/es/utils/default-strings';
-import { size } from '@lodgify/ui/lib/es/utils/size';
 import classnames from 'classnames';
 import { Form as SemanticForm, Message } from 'semantic-ui-react';
-import { FormField, ParentImperativeApi } from './FormField';
+import { FormField, FormFieldProps, ParentImperativeApi } from './FormField';
 import { useFormState } from './Form.state';
 
 import type { FormProps } from './Form.props';
+import { getEmptyRequiredInputs, isSubmitButtonDisabled } from './Form.helpers';
 
 
-type GetEmptyRequiredInputs = (validation: FormProps[ 'validation' ], state: FormValues) => Record<string, boolean>;
-const getEmptyRequiredInputs = _getEmptyRequiredInputs as GetEmptyRequiredInputs;
-
-const getIsSubmitButtonDisabled = (inputsState: FormValues) => {
-    return Object.values<FormValue>(inputsState).some(({ error }) => !!error);
-};
-// _getIsSubmitButtonDisabled as (state: FormValues) => boolean;
-
-const getValidationWithDefaults = _getValidationWithDefaults as (validation: Partial<Validation>) => Validation;
 
 
 export type FormImperativeAPI = {
@@ -35,7 +22,7 @@ export type FormImperativeAPI = {
 
 
 const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, submitButtonText, isSubmitDisabled, ...props }, ref) => {
-    const { state, setInputState } = useFormState(props);
+    const { state, setInputState, propsValidation } = useFormState(props);
 
     useImperativeHandle(ref, () => ({ setInputState }), [ setInputState ]);
 
@@ -43,30 +30,30 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
         setInputState(name, {
             isBlurred: true
         });
-    }, [ setInputState ]);
+    }, []);
 
 
-    const handleInputChange = useCallback((name: string, value: unknown) => {
+    const handleInputChange = useCallback((name: string, value: string) => {
         setInputState(name, {
             isBlurred: false,
             value: value
         });
 
-    }, [ setInputState ]);
+    }, []);
 
 
     const handleSubmit = useCallback(() => {
-        const emptyRequiredInputs = getEmptyRequiredInputs(props.validation, state);
+        const emptyRequiredInputs = getEmptyRequiredInputs(propsValidation, state);
 
-        if (size(emptyRequiredInputs)) {
-            forEach(emptyRequiredInputs, (validation: Partial<Validation>, name: string) => {
-                const { isRequiredMessage } = getValidationWithDefaults(validation);
-                setInputState(name, { error: isRequiredMessage, isBlurred: true });
+        if (emptyRequiredInputs.length > 0) {
+            emptyRequiredInputs.forEach(inputName => {
+                setInputState(inputName, { error: propsValidation[ inputName ].isRequiredMessage, isBlurred: true });
             });
         } else {
-            props.onSubmit(state);
+            const values = Object.entries(state).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as Record<string, unknown>);
+            props.onSubmit(values, state);
         }
-    }, [ state, setInputState, props.onSubmit ]);
+    }, [ state, props.onSubmit, propsValidation ]);
 
 
     const imperativeInterfaceForChildren: ParentImperativeApi = useMemo(() => ({
@@ -74,7 +61,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
         handleInputBlur,
         setInputState,
         state,
-        validation: props.validation
+        propsValidation
     }), [ handleInputChange, handleInputBlur, state, props.validation, setInputState ]);
 
 
@@ -82,7 +69,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
 
     return (
         <SemanticForm autoComplete={autoComplete} error={!!errorMessage} success={!!successMessage} onSubmit={handleSubmit} className={classnames('Form', className)}>
-            {React.Children.map(props.children as FormProps[ 'children' ], child => <FormField {...imperativeInterfaceForChildren}>{child}</FormField>)}
+            {React.Children.map(props.children, (child: FormFieldProps[ 'children' ]) => <FormField {...imperativeInterfaceForChildren}>{child}</FormField>)}
 
             {successMessage && <Message content={successMessage} success />}
             {errorMessage && <Message content={errorMessage} error />}
@@ -133,5 +120,5 @@ Form.defaultProps = {
     submitButtonText: SEND,
     successMessage: '',
     validation: {},
-    isSubmitDisabled: getIsSubmitButtonDisabled
+    isSubmitDisabled: isSubmitButtonDisabled
 };

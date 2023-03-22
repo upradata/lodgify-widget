@@ -37,42 +37,50 @@ type TestCamelCase2 = CamelCase<'   name_  __name  _jj '>; */
 
 /* type FromEntries<E extends [ Key, unknown ], O = {}> = E extends [ infer K, infer V ] ? { [ _Key in K & Key ]: V } : never;
 type A = FromEntries<[ 'name', 1 ] | [ 'id', 'value' ]>; */
-type KeyCaseMap<T, Type extends 'kebab' | 'camel'> = keyof T extends infer K ? K extends keyof T ?
+type KeyCaseMap<T, Type extends CasedType> = keyof T extends infer K ? K extends keyof T ?
     Type extends 'kebab' ?
     KebabCase<K> extends infer CasedKey ? { [ _K in CasedKey & Key ]: K } : never :
     CamelCase<K> extends infer CasedKey ? { [ _K in CasedKey & Key ]: K } : never :
     never : never;
 
-type Evaluate<O, Key> = O extends infer U ? U extends O ? U[ Key & keyof U ] : never : never;
+type Evaluate<O, Key> = O extends O ? O[ Key & keyof O ] : never;
 /* type AA = KeyMap<{ nameName: 1; idIdId: 'value'; }>;
 type BB = GetMappedKey<{ name: 1; } | { id: 'value'; }, 'name'>;
 type CC = GetMappedKey<KeyMap<{ nameName: 1; idIdId: 'value'; }>, 'name'>; */
 
 type NextIndex = [ 1, 2, 3, 4, 5, 6, 7, 8 ];
 type IsObject<T> = T extends object ? T extends any[] ? false : true : false;
+type IsObjectOrArray<T> = T extends object ? true : false;
 type InferArrayType<T> = T extends readonly (infer U)[] ? U : never;
-type IsOptional<T, K extends keyof T> = T extends { [ Key in K ]-?: T[ Key ]; } ? false : true;
+type IsPropsOptional<T, K extends keyof T> = T extends { [ Key in K ]-?: T[ Key ]; } ? false : true;
 
-type OptionalProps<T> = keyof T extends infer K ? K extends keyof T ? IsOptional<T, K> extends true ? K : never : never : never;
+type OptionalProps<T> = keyof T extends infer K ? K extends keyof T ? IsPropsOptional<T, K> extends true ? K : never : never : never;
 type ExtractOptional<T> = { [ K in OptionalProps<T> ]?: T[ K ] };
-type RequiredProps<T> = keyof T extends infer K ? K extends keyof T ? IsOptional<T, K> extends false ? K : never : never : never;
+type RequiredProps<T> = keyof T extends infer K ? K extends keyof T ? IsPropsOptional<T, K> extends false ? K : never : never : never;
 type ExtractRequired<T> = { [ K in RequiredProps<T> ]: T[ K ] };
 
 // type AA = IsOptional<{ a?: 1; b: 2; }, 'a'>;
 // type AA = RequiredProps<{ a?: 1; b: 2; }>;
-type CasedKey<T, Type extends 'kebab' | 'camel'> = Type extends 'kebab' ? KebabCase<keyof T> : CamelCase<keyof T>;
-export type _CasedObject<T, Type extends 'kebab' | 'camel', Index extends number> = T extends object ? Index extends 8 ? T : {
+
+export type CasedType = 'kebab' | 'camel';
+
+type CasedKey<T, Type extends CasedType> = Type extends 'kebab' ? KebabCase<keyof T> : CamelCase<keyof T>;
+export type _CasedObject<T, Type extends CasedType, Index extends number> = T extends object ? Index extends 8 ? T : {
     [ K in CasedKey<T, Type> ]:
     T[ Evaluate<KeyCaseMap<T, Type>, K> ] extends infer V ?
-    IsObject<V> extends true ? CasedObject<V, Type, NextIndex[ Index ]> :
-    V extends any[] ? CasedObject<InferArrayType<V>, Type, NextIndex[ Index ]>[] : V :
+    IsObjectOrArray<V> extends true ? CasedObject<V, Type, NextIndex[ Index ]> : V :
     never
 } : T;
 
 
-export type CasedObject<T, Type extends 'kebab' | 'camel', Index extends number = 0> = T extends object ?
+export type CasedObject<T, Type extends CasedType, Index extends number = 0, StopRecursion extends boolean = false> = T extends T ?
+    IsObject<T> extends true ?
     Partial<_CasedObject<ExtractOptional<T>, Type, Index>> & _CasedObject<ExtractRequired<T>, Type, Index> :
-    T;
+    // StopRecursion: to prevent typescript error: Type instantiation is excessively deep and possibly infinite.ts(2589) when T = {...}[]
+    StopRecursion extends false ? T extends readonly any[] ?
+    CasedObject<InferArrayType<T>, Type, Index, true> extends infer C ? T extends any[] ? C[] : readonly C[] : never :
+    never :
+    T : never;
 
 
 export type CamelObject<T extends object> = CasedObject<T, 'camel'>;
@@ -118,8 +126,7 @@ export type Select<
     KeyName extends string | number | symbol,
     Union extends { [ K in KeyName ]: string },
     Name extends Union[ KeyName ]
-> = Union extends infer U ? U extends Union ? U[ KeyName ] extends Name ? U : never : never : never;
-
+> = Union extends Union ? Name extends Union[ KeyName ] ? Union : never : never;
 export type SelectType<Union extends { type: string; }, Name extends Union[ 'type' ]> = Select<'type', Union, Name>;
 
 /* type O = { type: 'a', value: 1; } | { type: 'b', value: 2; };
@@ -130,3 +137,13 @@ type S2 = SelectType<O, 'a'>; */
 export type KeyOf<T> = T extends T ? keyof T : never;
 
 export type ValueOf<T> = T extends T ? T[ keyof T ] : never;
+
+
+export class InputProps<V = unknown> {
+    name?: string;
+    onBlur?: (name: string/* event?: FocusEvent */) => any;
+    onChange?: (name: string, value: V) => any;
+    width?: string;
+    label?: string;
+    value?: V;
+};

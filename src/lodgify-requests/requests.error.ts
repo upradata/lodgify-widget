@@ -1,0 +1,22 @@
+export const RequestErrors = {
+    666: 'Unknown',
+    901: 'NoRateDefined',
+    902: 'MinStayRequired',
+    903: 'BookingStatusUnknown',
+    904: 'BookingMessageTypeNotAllowed',
+    905: 'BookingNoRooms',
+    906: 'BookingCannotChangeStatus',
+    907: 'EnquiryAlreadyUpgraded',
+    908: 'BookingPaymentNotValid',
+    909: 'ArrivalNotValid',
+    910: 'DepartureNotValid',
+    911: 'PropertyNotAvailable',
+    920: 'CaptchaInvalid',
+    930: 'StripeError',
+    940: 'ValidationError',
+    950: 'PaymentError',
+    996: 'ArgumentError',
+    997: 'NotFound',
+    998: 'NotImplemented',
+    999: 'NotAuthorized'
+} as const;

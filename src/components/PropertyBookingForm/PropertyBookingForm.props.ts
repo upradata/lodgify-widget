@@ -4,9 +4,9 @@ import type { ChangeInputData, InputDataNames, InputDataValues } from './Propert
 import type { FormProps } from '../Form';
 import type { Omit } from '../../util.types';
 
-export type PropertyBookingFormProps = Omit<PropertyBookingFormContentProps, 'onInputChange'> & {
-    onSubmit?: (data: ChangeInputData) => void;
-    onInputChange?: (name: InputDataNames, value: InputDataValues, data: ChangeInputData) => void;
+export type PropertyBookingFormProps = Omit<PropertyBookingFormContentProps, 'onInputChange' | 'onSubmit'> & {
+    onSubmit?: (/* data: ChangeInputData */) => void;
+    onInputChange?: (name: InputDataNames, value: InputDataValues/* , data: ChangeInputData */) => void;
     searchButton?: FormProps[ 'searchButton' ];
     isCompact?: boolean;
 };
@@ -14,7 +14,7 @@ export type PropertyBookingFormProps = Omit<PropertyBookingFormContentProps, 'on
 
 export type PropertyBookingFormContentProps = Omit<SearchBarFieldsProps, 'locationOptions'> & {
     locationOptions: LocationOptions[];
-    onSubmit?: (data: ChangeInputData) => void;
+    onSubmit?: (/* data: ChangeInputData */) => void;
     searchButton?: FormProps[ 'searchButton' ];
     buttonText?: string;
 } & Pick<CalendarProps, 'minimumNights'>;

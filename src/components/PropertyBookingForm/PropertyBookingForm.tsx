@@ -42,21 +42,22 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
         };
     }, []); */
 
-    const [ state, setState ] = useState({
+    /* const [ state, setState ] = useState({
         dates: props.datesInputValue,
         guests: props.guestsInputValue,
         location: props.locationInputValue,
         // willLocationDropdownOpenAbove
-    });
+    }); */
 
     // const [ stateNameChanged, setStateNameChanged ] = useState<{ name: InputDataNames | null; }>({ name: null });
 
     const onInputChange = useCallback((name: InputDataNames, value: InputDataValues) => {
-        setState(state => {
+        /* setState(state => {
             const newState = { ...state, [ name ]: value };
             onChange?.(name, value, newState);
             return newState;
-        });
+        }); */
+        onChange?.(name, value);
 
         // setStateNameChanged({ name });
     }, [ onChange /* , setStateNameChanged  */ ]);
@@ -69,7 +70,7 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
     }, [ stateNameChanged, onChange ]); */
 
 
-    const handleSubmit = useCallback(() => { onSubmit?.(state); }, [ onSubmit, state ]);
+    const handleSubmit = useCallback(() => { onSubmit?.(/* state */); }, [ onSubmit/* , state */ ]);
 
 
     // const previousProps = usePrevious(props);
@@ -97,9 +98,9 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
 
     const formProps: PropertyBookingFormContentProps = {
         ...props,
-        datesInputValue: state.dates,
+       /*  datesInputValue: state.dates,
         guestsInputValue: state.guests,
-        locationInputValue: state.location,
+        locationInputValue: state.location, */
         willLocationDropdownOpenAbove: props.willLocationDropdownOpenAbove,
         onSubmit: handleSubmit,
         onInputChange: onInputChange

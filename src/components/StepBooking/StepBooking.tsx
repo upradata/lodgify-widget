@@ -68,7 +68,7 @@ export type StepBookingProps = {
 };
 
 export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose }) => {
-    const { getRoom, reservation, setReservation } = useContext(BookingContext);
+    const { getRoom, reservation, setReservation, billingInfo } = useContext(BookingContext);
 
     const [ isModalOpen, setIsModalOpen ] = useState(true);
 
@@ -116,13 +116,19 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
     const { searchProps, summaryProps } = usePropertyBookingFormProps({ buttonText: 'Next' });
 
     const panes = tabNames.map(name => {
-        const onSubmit = () => {
+        const handleTabState = () => {
             setTabsState(name, { isValid: true });
 
             if (tabNames[ tabNames.length - 1 ] !== name) {
                 const activeIndex = tabNames.findIndex(n => name !== n && !tabStates[ n ].isValid);
                 setActiveIndex(activeIndex !== -1 ? activeIndex : tabNames.length - 1);
             }
+        };
+
+        const onSubmit = () => {
+            handleTabState();
+
+            setReservation({ type: 'create-booking', billingInfo });
         };
 
         if (name === 'booking') {
@@ -139,7 +145,7 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
                     <TabContent>
                         <Container direction="column">
                             <Summary {...summaryProps} propertyName="" />
-                            <PropertyBookingForm {...searchProps} searchButton={searchButton} onSubmit={onSubmit} />
+                            <PropertyBookingForm {...searchProps} searchButton={searchButton} onSubmit={handleTabState} />
                         </Container>
                     </TabContent>
                 </Tab.Pane>
@@ -156,7 +162,7 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
                     <TabContentHeader />
 
                     <TabContent>
-                        <BookingBillingInfo onSubmit={onSubmit} buttonText="Next" />
+                        <BookingBillingInfo onSubmit={handleTabState} buttonText="Next" />
                     </TabContent>
                 </Tab.Pane>
             };

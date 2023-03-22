@@ -1,28 +1,37 @@
 import 'react-phone-number-input/style.css';
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { Dropdown, DropdownProps } from '@lodgify/ui';
-import { getDiallingCode } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getDiallingCode.js';
-import { getOptionsWithSearch } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getOptionsWithSearch.js';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+// import { getDiallingCode } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getDiallingCode.js';
+// import { getOptionsWithSearch } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getOptionsWithSearch.js';
 // import { FlagComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/FlagComponent';
 // import { CountrySelectComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/CountrySelectComponent';
 // import { getAllOptions } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getAllOptions.js';
-import CountryIcon from '../../../node_modules/react-phone-number-input/modules/CountryIcon.js';
+// import { createCountryIconComponent } from 'react-phone-number-input/modules/CountryIcon';
+import { getCountryCallingCode } from 'libphonenumber-js';
+// import InternationalIcon from 'react-phone-number-input/modules/InternationalIcon';
+import { Dropdown, DropdownProps, DropdownRef } from '../Dropdown';
 
+// import { Flag } from './Flag';
 // import parsePhoneNumber from 'libphonenumber-js';
 import type { CountryCode } from 'libphonenumber-js/core';
-import type { StrictInputProps as SemanticInputProps } from 'semantic-ui-react';
+import type { CountrySelectOptions, CountrySelectWithIconProps } from 'react-phone-number-input';
 import type { Omit } from '../../util.types';
 
 
-export type CountrySelectComponentProps = {
-    options: {
-        label?: string;
-        value?: CountryCode;
-    }[];
-    value?: string;
-    onChange?: (value: CountryCode) => void;
-} & Omit<SemanticInputProps, 'onChange' | 'label'>;
+type DropdownItemProps = CountrySelectOptions & { name: string; };
+
+export type CountrySelectComponentProps =
+    CountrySelectWithIconProps<DropdownItemProps> &
+    Omit<DropdownProps<CountryCode, DropdownItemProps>, 'onChange' | 'label'>;
+
+/* const CountryIcon = createCountryIconComponent({
+    // Must be equal to `defaultProps.flagUrl` in `./PhoneInputWithCountry.js`.
+    flagUrl: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/{XX}.svg',
+    flagComponent: Flag,
+    internationalIcon: InternationalIcon
+}); */
+
+
 
 /* const getIconOrFlag = (country: CountryCode) => {
     const flagName = country.toLowerCase();
@@ -40,21 +49,90 @@ export type CountrySelectComponentProps = {
     internationalIcon: DefaultInternationalIcon
 }); */
 
-const _CountrySelectComponent: React.FunctionComponent<CountrySelectComponentProps> = ({ onChange, options, ...props }) => {
+
+
+
+export const getOptionsWithSearch: CountrySelectComponentProps[ 'getOptionsWithSearch' ] = (options, searchValue) => {
+    const regExp = new RegExp(`^${searchValue.replace('+', '\\+')}`, 'i');
+
+    return options.filter(({ name, value }) => {
+        return regExp.test(name) || regExp.test(`${value}`);
+    });
+};
+
+
+export const getDiallingCode = (countryCode: CountryCode) => {
+    try {
+        return `+${getCountryCallingCode(countryCode)}`;
+    } catch (_unused) {
+        return '';
+    }
+};
+
+type DropdownItemOption = {
+    name: string;
+    text: React.ReactNode;
+    value: CountryCode;
+    content: React.ReactNode;
+};
+
+
+
+const _CountrySelectComponent: React.FunctionComponent<CountrySelectComponentProps> = ({ onChange, options, iconComponent: CountryIcon, ...props }) => {
+    const [ isOpen, setIsOpen ] = useState(false);
+    const [ value, setValue ] = useState(props.value);
+    const [ searchQuery, setSearchQuery ] = useState(props.searchQuery);
+
     const dropDownProps: DropdownProps = {
         getOptionsWithSearch,
         isClearable: false,
+        // floating: true,
+        // isSearchable: true,
         // isFluid: true,
+        searchInput: { autoComplete: 'country' },
         ...props,
-        onChange: useCallback((name: string, value: CountryCode) => { onChange(value); }, [ onChange ]),
-        options: useMemo(() => {
-            const optionCache: Record<string, {
-                name: string;
-                text: React.ReactNode;
-                value: CountryCode;
-                content: React.ReactNode;
+        value,
+        searchQuery,
+        open: isOpen,
+        onOpen: useCallback(() => { setIsOpen(true); }, []),
+        onClose: useCallback(() => {
+            setIsOpen(false);
+            setSearchQuery('');
+        }, []),
+        onSearchChange: useCallback((event, { searchQuery, options, value }) => {
+            const isAutoFilled = !event.nativeEvent.inputType;
+
+            if (isAutoFilled) {
+                const items = getOptionsWithSearch(options, searchQuery);
+
+                if (items.length === 1) {
+                    if (items[ 0 ].value !== value)
+                        setValue(items[ 0 ].value);
+
+                    setSearchQuery('');
+                    setIsOpen(false);
+
+                } else if (!isOpen) {
+                    setSearchQuery(searchQuery);
+                    setIsOpen(true);
+                }
+            } else {
+                setSearchQuery(searchQuery);
             }
-            > = {};
+        }, []),
+        onChange: useCallback((name: string, value: CountryCode) => {
+            // to ensure that onClose is called after onChange
+            // semantic dropdown handleItemClick is calling onChange before but if the search input has some value ("fr" for instance)
+            // and then click on the french flag,
+            // the browser will call first the input onClose listener before calling the onChange called synchronously by the Dropdown component
+            // Semantic should handle it forcing the calling order
+            setTimeout(() => {
+                setValue(value);
+                onChange(value);
+            }, 0);
+        }, [ onChange ]),
+        options: useMemo(() => {
+            const optionCache: Record<string, DropdownItemOption> = {};
 
             return options.map(({ value, label }) => {
 

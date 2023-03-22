@@ -19,7 +19,7 @@ export const PropertyBooking: React.FunctionComponent<BookingProps> = ({ onSubmi
 
     const [ isBookingDetailsOpen, setIsBookingDetailsOpen ] = useState(false);
 
-    const onSearchFormOnSubmit: PropertyBookingFormProps[ 'onSubmit' ] = useCallback(data => {
+    const onSearchFormOnSubmit: PropertyBookingFormProps[ 'onSubmit' ] = useCallback(() => {
         // setState(state => ({ ...state, ...data }));
         setIsBookingDetailsOpen(true);
     }, [ setIsBookingDetailsOpen ]);

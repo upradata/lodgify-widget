@@ -93,7 +93,7 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
             const focusedInput = isFocusControlled ? newValue.propsFocusedInput : newValue.stateFocusedInput;
 
             if (isBlurEvent(previousFocusedInput, focusedInput))
-                rangePickerProps.onBlur?.();
+                rangePickerProps.onBlur?.(props.name);
 
             if (isFocusControlled)
                 return;
@@ -101,7 +101,7 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
             if (previousFocusedInput !== focusedInput)
                 rangePickerProps.onFocusChange?.(focusedInput);
         });
-    }, [ rangePickerProps.onBlur, rangePickerProps.onFocusChange ]);
+    }, [ rangePickerProps.onBlur, rangePickerProps.onFocusChange, props.name ]);
 
 
     const visibilityCheck = useRef();

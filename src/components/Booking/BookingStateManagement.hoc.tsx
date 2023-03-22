@@ -24,10 +24,7 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
 
 
         const contextFns: Pick<BookingContextType, 'setReservation' | 'setBillingInfo'> = {
-            setReservation: useCallback(data => {
-                Object.entries(data).forEach(([ name, value ]) => { setReservation(name as keyof BookingData, value); });
-            }, []),
-
+            setReservation,
             setBillingInfo: useCallback(data => setBillingInfo(state => {
                 if (Object.entries(data).some(([ k, v ]) => state[ k ] !== v))
                     return { ...state, ...data };

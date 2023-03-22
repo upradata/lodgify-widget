@@ -5,11 +5,11 @@ import { Modal } from '@lodgify/ui';
 import classnames from 'classnames';
 // import { Bar } from '../Bar';
 import { BookingForm, BookingFormProps } from './BookingForm';
-import { BreakPoint } from '../MediaQuery/BreakPoint';
-import { fragments } from '../../util';
-import { ModalProps } from '../../@types/@lodgify/ui/types';
+import { BreakPoint } from '../src/components/MediaQuery/BreakPoint';
+import { fragments } from '../src/util';
+import { ModalProps } from '../src/@types/@lodgify/ui/types';
 
-import type { Omit } from '../../util.types';
+import type { Omit } from '../src/util.types';
 
 
 // import { PropertyBooking, PropertyBookingForm } from '../PropertyBooking';

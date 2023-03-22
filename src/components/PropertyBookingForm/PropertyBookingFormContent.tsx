@@ -1,17 +1,18 @@
-import React /* , { useCallback } */ from 'react';
-import { Button, /* CounterDropdown, CounterDropdownProps, */ Dropdown, DropdownProps, FormValues, FormValue, NumberInput, NumberInputProps } from '@lodgify/ui';
+import React, { useCallback, useMemo } from 'react';
+import { Button, FormValue, FormValues, NumberInput, NumberInputProps } from '@lodgify/ui';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { Calendar, CalendarProps } from '../Calendar';
-import { Form, FormProps, InputField } from '../Form';
+import { Dropdown, DropdownProps } from '../Dropdown';
+import { Form, FormProps, InputField, InputsState } from '../Form';
+import { makeValidation, PropsValidationOptions } from '../Form/Form.validation';
 
 import type { ChangeInputData } from './PropertyBookingForm.type';
 import type { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
 
 
-
 type InputNames = keyof ChangeInputData;
-type InputValues = ChangeInputData[ InputNames ];
+
 
 const isDefinedInputValue = <N extends InputNames>(name: N, value: ChangeInputData[ N ]) => {
     if (name === 'dates') {
@@ -22,9 +23,9 @@ const isDefinedInputValue = <N extends InputNames>(name: N, value: ChangeInputDa
     return !!value;
 };
 
-const isSubmitDisabled = (inputsState: FormValues<InputNames, InputValues>) => {
-    return Object.entries<FormValue<InputValues>>(inputsState).some(([ name, { error, value } ]) => {
-        return !!error || !isDefinedInputValue(name as InputNames, value);
+const isSubmitDisabled = (inputsState: InputsState<ChangeInputData>) => {
+    return Object.entries(inputsState).some(([ name, { error, transformedValue } ]) => {
+        return !!error || !isDefinedInputValue(name as InputNames, transformedValue);
     });
 };
 
@@ -71,13 +72,26 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         value: props.guestsInputValue
     };
 
+    const propsValidation = useMemo(() => ({
+        default: {
+            isRequiredMessage: 'Required',
+            invalidMessage: 'Invalid'
+        },
+        props: {
+            location: makeValidation('string'),
+            dates: makeValidation('string'),
+            guests: makeValidation('integer'),
+        }
+    } satisfies PropsValidationOptions), []);
+
 
     return (
         <Form className="inputs-container"
             onSubmit={props.onSubmit}
             onInputChange={props.onInputChange}
             isSubmitDisabled={isSubmitDisabled}
-            searchButton={<FormButton searchButton={props.searchButton} />} >
+            searchButton={<FormButton searchButton={props.searchButton} />}
+            validation={propsValidation} >
 
             <InputField className="input-container location-input-container"><Dropdown icon={ICON_NAMES.MAP_PIN} name="location" {...dropdownProps} /></InputField>
             <InputField className="input-container dates-input-container"><Calendar name="dates" {...calendarProps} /></InputField>

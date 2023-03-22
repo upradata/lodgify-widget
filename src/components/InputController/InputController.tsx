@@ -33,7 +33,7 @@ const _InputController: React.FunctionComponent<InputControllerProps> = ({
     });
 
     return (
-        <Input className={className} fluid={isFluid} iconPosition={icon ? 'left' : undefined} name={name} value={value} {...inputProps}>
+        <Input className={className} fluid={isFluid} iconPosition={icon ? 'left' : undefined} value={value} name={name} {...inputProps}>
 
             {cloneElement(children, {
                 [ inputOnChangeFunctionName ]: handleChange,
@@ -61,7 +61,7 @@ _InputController.defaultProps = {
     icon: null,
     onChange: returnFirstArgument,
     value: null,
-    mapValueToProps: value => ({ value })
+    mapValueToProps: value => ({ value: value as string })
 };
 
 

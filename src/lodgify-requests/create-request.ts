@@ -1,4 +1,6 @@
 import { map, toCasedObject } from '../util';
+import { RequestErrors } from './requests.error';
+
 import type { CamelObject, SelectType } from '../util.types';
 
 
@@ -27,9 +29,10 @@ const corsProxy = `http://localhost:8080`;
 const lodgifyApi = (version: LodgifyVersion) => `https://api.lodgify.com/${version}`;
 
 export const getLodgifyOptions = (body?: string): RequestInit => ({
-    method: 'GET',
+    method: !!body ? 'POST' : 'GET',
     headers: {
         accept: 'application/json',
+        ...(!!body ? { 'content-type': 'application/*+json' } : {}),
         'X-ApiKey': '+BvSxGGZ/ay5H3lVshlgJvyDwSqRXAnhU4/kjvRdECoPHGTbKZ3pngf3MgEVv2K/',
         // mode: 'same-origin'
     },
@@ -50,7 +53,7 @@ export type RequestError = {
 
 export type LodgifyError = {
     message: string;
-    code: number;
+    code: keyof typeof RequestErrors;
     correlation_id: string;
     event_id: string;
 };
@@ -73,7 +76,7 @@ const lodgifyREST = (verb: string, options: Record<string, Primitive> = {}) => {
     return join('?', join('/', verb, propertyId, roomTypeId), opt);
 };
 
-type DebugFn = (requestUrl: string, body: string) => void;
+type DebugFn = (data: { requestUrl: string, body: string; }) => void;
 type CreateRequestReturn<T = unknown> = Promise<RequestSuccess<T> | RequestError>;
 
 
@@ -83,12 +86,12 @@ export const createRequest = <T = unknown>(verb: string, options: Options, versi
     const requestUrl = join('/',
         corsProxy,
         lodgifyApi(version),
-        type === 'url-parameters' ? lodgifyREST(verb, opts as SelectType<Options, 'url-parameters'>) : undefined
+        !type || type === 'url-parameters' ? lodgifyREST(verb, opts as SelectType<Options, 'url-parameters'>) : lodgifyREST(verb)
     );
 
     const body = type === 'body-parameters' ? JSON.stringify(opts) : undefined;
 
-    debug?.(requestUrl, body);
+    debug?.({ requestUrl, body });
 
     return fetch(
         requestUrl,
@@ -96,9 +99,14 @@ export const createRequest = <T = unknown>(verb: string, options: Options, versi
     ).then(response => response.json()).then(json => {
         if (json.code) {
             const { code, message } = json as LodgifyError;
-            console.error(`Lodgify request error. Request -> ${requestUrl}`);
+            const codeName = RequestErrors[ code ];
+
+            const errorMessage = `Lodgify request error "${message}" with code (${code}: ${codeName})`;
+
+            console.error(`${errorMessage} -> ${requestUrl}`);
             console.error(json);
-            return { type: 'error' as const, error: new Error(`Lodgify request error "${message}" with code (${code})`) };
+
+            return { type: 'error' as const, error: new Error(errorMessage) };
         }
 
         return { type: 'success' as const, json };
@@ -122,4 +130,14 @@ export const makeRequest = <R extends (options: {}) => ReturnType<CreateRequest>
     return (options: Parameters<R>[ 0 ], debug?: DebugFn) => {
         return request(options)(debug).then(res => toCasedObject(res, 'camel')) as CreateRequestReturn<CamelObject<Awaited<Return>>>;
     };
+};
+
+
+export const makeRequest2 = <R extends (options: {}) => ReturnType<CreateRequest>>(request: R): InferRequestReturn<R> => {
+    /*   type Return = InferRequestReturn<R>;
+  
+      return (options: Parameters<R>[ 0 ], debug?: DebugFn) => {
+          return request(options)(debug).then(res => toCasedObject(res, 'camel')) as CreateRequestReturn<CamelObject<Awaited<Return>>>;
+      }; */
+    return undefined;
 };

@@ -62,14 +62,18 @@
 }
 
 .ui.form .ui.input .PhoneInput
-/* .PhoneInput__row */
+// .PhoneInput__row 
 .dropdown-container .ui.search.selection.dropdown input.search,
 .ui.input .PhoneInput
 
-/* .PhoneInput__row */
+// .PhoneInput__row */
 .dropdown-container .ui.search.selection.dropdown input.search {
-    padding: 0;
-    width: 0;
+    // padding: 0;
+    // width: 0;
+    width: calc(100% - 24px);
+    padding: inherit;
+    top: 0;
+    bottom: 0;
 }
 
 .ui.form .ui.input .PhoneInput
@@ -82,32 +86,32 @@
     cursor: pointer;
 }
 
-.ui.form .ui.input .PhoneInput
-/* .PhoneInput__row */
-.dropdown-container .ui.search.selection.dropdown .text .flag,
-.ui.form .ui.input .PhoneInput
-/* .PhoneInput__row */
-.dropdown-container .ui.search.selection.dropdown .text .icon,
-.ui.input .PhoneInput
-/* .PhoneInput__row */
-.dropdown-container .ui.search.selection.dropdown .text .flag,
-.ui.input .PhoneInput
+// .ui.form .ui.input .PhoneInput
+// /* .PhoneInput__row */
+// .dropdown-container .ui.search.selection.dropdown .text .flag,
+// .ui.form .ui.input .PhoneInput
+// /* .PhoneInput__row */
+// .dropdown-container .ui.search.selection.dropdown .text .icon,
+// .ui.input .PhoneInput
+// /* .PhoneInput__row */
+// .dropdown-container .ui.search.selection.dropdown .text .flag,
+// .ui.input .PhoneInput
 
-/* .PhoneInput__row */
-.dropdown-container .ui.search.selection.dropdown .text .icon {
-    margin: 0;
-    transform: translateY(2px);
-}
+// /* .PhoneInput__row */
+// .dropdown-container .ui.search.selection.dropdown .text .icon {
+//     margin: 0;
+//     transform: translateY(2px);
+// }
 
-.ui.form .ui.input .PhoneInput
-/* .PhoneInput__row */
-.dropdown-container .ui.search.selection.dropdown .text .flag,
-.ui.input .PhoneInput
+// .ui.form .ui.input .PhoneInput
+// /* .PhoneInput__row */
+// .dropdown-container .ui.search.selection.dropdown .text .flag,
+// .ui.input .PhoneInput
 
-/* .PhoneInput__row */
-.dropdown-container .ui.search.selection.dropdown .text .flag {
-    opacity: 1;
-}
+// /* .PhoneInput__row */
+// .dropdown-container .ui.search.selection.dropdown .text .flag {
+//     opacity: 1;
+// }
 
 .ui.form .ui.input .PhoneInput
 /* .PhoneInput__row */

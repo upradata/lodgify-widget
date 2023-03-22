@@ -7,26 +7,31 @@ import phoneMetadata from '../../libphonenumber-metadata.custom.json';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 // import { InputController } from '@lodgify/ui/lib/es/components/inputs/InputController';
-import { DEFAULT_COUNTRY, INITIAL_VALUE } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/constants';
+// import { DEFAULT_COUNTRY, INITIAL_VALUE } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/constants';
 // import { FlagComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/FlagComponent';
 // import { CountrySelectComponent } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/CountrySelectComponent';
 // import { getLabels } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getLabels';
 import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
-import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
+// import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
 import { InputControllerProps, InputProps } from '@lodgify/ui';
 // import parsePhoneNumber from 'libphonenumber-js';
 import { CountryCode, MetadataJson } from 'libphonenumber-js/core';
 import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
 import { CountrySelectComponent } from './CountrySelectComponent';
+import { Flag } from './Flag';
 import { InputController } from '../InputController';
 import labels from '../../../node_modules/react-phone-number-input/locale/en.json.js';
-import { usePrevious, usePreviousListener } from '../../util';
 
+// import { usePrevious, usePreviousListener } from '../../util';
 // import { createPhoneInput } from 'react-phone-number-input/modules/react-hook-form/PhoneInputWithCountry';
 // import _ReactPhoneNumberInput from 'react-phone-number-input/react-hook-form-core';
 import type { Labels, Metadata, Props as _ReactPhoneNumberProps } from 'react-phone-number-input';
 import type { Omit } from '../../util.types';
 
+
+export const INITIAL_VALUE = '';
+// export const COUNTRY_OPTIONS = ['US', 'GB', '...'];
+export const DEFAULT_COUNTRY = 'FR';
 
 // const metadata = new Metadata(phoneMetadata as MetadataJson);
 // const ReactPhoneNumberInput = createPhoneInput(metadata);
@@ -67,7 +72,6 @@ export type PhoneIputProps = Omit<Partial<ReactPhoneNumberProps>, 'value' | 'onC
     error?: boolean | string;
     // initialCountryValue?: string;
     isValid?: boolean;
-    label?: string;
     isBlurred?: boolean;
     initialValue?: string;
     value?: string;
@@ -82,6 +86,7 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
         value: getControlledInputValue(props.value, props.initialValue, props.value),
         countryISO: props.defaultCountry
     });
+   
 
     const handleChange: PhoneIputProps[ 'onChange' ] = useCallback((name, value) => {
         setState(state => {
@@ -112,18 +117,14 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
 
     const phoneInputProps: ReactPhoneNumberProps = {
         // autoComplete: props.autoComplete,
-        // defaultCountry: props.defaultCountry,
         // countryOptions: COUNTRY_OPTIONS,
         countrySelectComponent: CountrySelectComponent,
         // flagComponent: props => <Flag name={props.countryName} code={props.country} />, // FlagComponent,
+        flagComponent: Flag,
         // labels: props.labels, // state.labels,
         // onBlur: props.onBlur,
         onChange: useCallback(() => { }, []), // will be set by InputController
         // onBlur: useCallback(() => { }, []),
-        onCountryChange: useCallback((countryISO: CountryCode) => {
-            setState(state => ({ ...state, countryISO }));
-            props.onCountryChange?.(countryISO);
-        }, [ props.onCountryChange, setState ]),
         labels,
         focusInputOnCountrySelection: true,
         smartCaret: false,
@@ -131,6 +132,11 @@ export const PhoneInput: React.FunctionComponent<PhoneIputProps> = props => {
             placeholder: label
         }), [ label ]),
         ...reactPhoneInputProps,
+        onCountryChange: useCallback((countryISO: CountryCode) => {
+            console.log({ onCountryChange: countryISO });
+            setState(state => ({ ...state, countryISO }));
+            props.onCountryChange?.(countryISO);
+        }, [ props.onCountryChange ]),
         metadata
         // flagComponent: Flag(phoneMetadata as MetadataJson),
     };
@@ -174,6 +180,8 @@ const PhoneInputInput = (label: string) => {
 };
  */
 
+
+
 PhoneInput.displayName = 'PhoneInput';
 PhoneInput.defaultProps = {
     autoComplete: 'off',
@@ -185,5 +193,6 @@ PhoneInput.defaultProps = {
     name: '',
     // onBlur: () => { },
     // onChange: () => { },
-    initialValue: INITIAL_VALUE
+    initialValue: INITIAL_VALUE,
+    flagUrl: Flag.defaultProps.flagUrl
 };
