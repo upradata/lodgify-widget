@@ -265,6 +265,24 @@ const map_KEEP_VALUE: unique symbol = Symbol('map keep value');
 map.KEEP_VALUE = map_KEEP_VALUE;
 
 
+type FilterParameters<T extends object | any[]> = T extends any[] ? [ number, T[ number ] ] : [ keyof T, T[ keyof T ] ];
+export const filter = <T extends object | any[]>(v: T, filter: (k: FilterParameters<T>[ 0 ], v: FilterParameters<T>[ 1 ]) => boolean): T => {
+    const isArray = Array.isArray(v);
+
+    const merge = (v: T, [ key, value ]: [ Key, unknown ]): T => {
+        if (isArray)
+            return [ ...(v as any[]), value ] as any;
+
+        return { ...v, [ key ]: value };
+    };
+
+    return Object.entries(v).reduce((filteredV, [ k, v ]) => {
+        const keep = filter(k as any, v);
+        return keep ? merge(filteredV, [ k, v ]) : filteredV;
+    }, (isArray ? [] : {}) as T);
+};
+
+
 export const kebabCase = (s: string, sep: '-' | '_' = '_') => s.trim().replaceAll(/(\s+)/g, sep).toLowerCase();
 export const camelCase = (s: string) => s.trim().toLowerCase().replaceAll(/_./g, s => s[ 1 ].toUpperCase());
 

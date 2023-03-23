@@ -276,7 +276,8 @@
         /* background-color: transparent; */
         /* box-shadow: 0 2px 7px 0 rgb(0 0 0 / 27%); */
         /* box-shadow: 1px 1px 4px 0 rgb(0 0 0 / 27%); */
-        box-shadow: var(--PhoneInputFlag--shadow, 1px 1px 4px 0 rgb(0 0 0 / 27%));
+        box-shadow: none;
+        // box-shadow: var(--PhoneInputFlag--shadow, 1px 1px 4px 0 rgb(0 0 0 / 27%));
         /* 0 0 0 var(--PhoneInputCountryFlag-borderWidth) var(--PhoneInputCountryFlag-borderColor),
             inset 0 0 0 var(--PhoneInputCountryFlag-borderWidth) var(--PhoneInputCountryFlag-borderColor); */
     }

@@ -15,11 +15,13 @@ export type InputControllerProps =
     Omit<StrictInputProps, 'className' | 'fluid' | 'error' | 'onChange'>;
 
 
-const _InputController: React.FunctionComponent<InputControllerProps> = ({
+const _InputController: React.FunctionComponent<InputControllerProps & { transformedValue?: never; }> = ({
     onChange, error, isCompact, isFocused, isValid, isFluid, name, value, icon,
     adaptOnChangeEvent, inputOnChangeFunctionName, mapValueToProps, children, className: klass, ...props
 }) => {
-    const { isDirty, ...inputProps } = props;
+
+    // we remove transformedValue created in Form component
+    const { isDirty, transformedValue, ...inputProps } = props;
 
     const showError = !!error && typeof error === 'string';
     const inputRef = createRef();

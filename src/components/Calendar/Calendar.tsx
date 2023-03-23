@@ -119,7 +119,8 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
 
 
 
-    const focusedInput: ReactDatesDateRangePickerProps[ 'focusedInput' ] = getIsFocusControlled(rangePickerProps.focusedInput) ? rangePickerProps.focusedInput : state.focusedInput;
+    const focusedInput: ReactDatesDateRangePickerProps[ 'focusedInput' ] =
+        getIsFocusControlled(rangePickerProps.focusedInput) ? rangePickerProps.focusedInput : state.focusedInput;
 
 
     const inputControllerProps: Omit<InputControllerProps, 'children'> = {
@@ -135,6 +136,7 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
     };
 
     const dateRangePickerProps: ReactDatesDateRangePickerProps = {
+        daySize: 52,
         ...reactDatesProps,
         // initialValue: calendarProps.initialValue,
         displayFormat: rangePickerProps.displayFormat,
@@ -152,7 +154,6 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
         customInputIcon: rangePickerProps.isCalendarIconDisplayed ? React.createElement(Icon, {
             name: ICON_NAMES.CALENDAR
         }) : undefined,
-        daySize: 52,
         hideKeyboardShortcutsPanel: true,
         navNext: React.createElement(Icon, {
             name: ICON_NAMES.ARROW_RIGHT

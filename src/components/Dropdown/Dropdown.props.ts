@@ -89,7 +89,7 @@ export type SemanticDropdownProps<V extends Value | Value[] = Value | Value[], I
 
 export type DropdownProps<V extends Value | Value[] = Value | Value[], ItemProps = {}> =
     LodgifyDropdownProps<V, ItemProps> &
-    MyOmit<SemanticDropdownProps<V, ItemProps>, 'onChange' | 'onFocus' | 'onBlur'>;
+    MyOmit<SemanticDropdownProps<V, ItemProps>, 'onChange' | 'onFocus' | 'onBlur' | 'options'>;
 
 
 export type DropdownSearchInput = {

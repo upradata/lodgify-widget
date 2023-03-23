@@ -1,23 +1,11 @@
-import { PropsValidationOptions } from './Form.validation';
-
 // import type { FormProps as LodgifyFormProps /*FormValues , Validation as LodgifyValidation */ } from '@lodgify/ui';
 import type { StrictFormProps } from 'semantic-ui-react';
+import type { PropsValidationOptions } from './Form.validation';
+import type { InputsState } from './Form.state.type';
 import type { Omit, PropsWithStyle } from '../../util.types';
 
 
-// export type Validation<Values> = LodgifyValidation & { transform: (value: string) => Values; }
-export type InputState<V = unknown> = {
-    isBlurred?: boolean;
-    value?: string | boolean;
-    transformedValue?: V;
-    isValid?: boolean;
-    error?: boolean | string;
-};
-
-export type InputsState<I extends Record<string, unknown> = Record<string, unknown>> = { [ K in keyof I ]: InputState<I[ K ]> };
-
-
-export type FormProps<InputValues extends Record<string, unknown> = Record<string, unknown>> = PropsWithStyle<{
+export type FormProps<InputValue = unknown, InputPropsValue extends Record<string, InputValue> = Record<string, InputValue>> = PropsWithStyle<{
     actionLink?: {
         onClick?: Function;
         text: React.ReactNode;
@@ -29,10 +17,10 @@ export type FormProps<InputValues extends Record<string, unknown> = Record<strin
     searchButton?: React.ReactElement; // | ((props: { isDisabled: boolean; }) => React.ReactNode);
     submitButtonText?: string;
     successMessage?: string;
-    validation?: PropsValidationOptions<InputValues>;
+    validation?: PropsValidationOptions<InputValue, InputPropsValue>;
 
-    onSubmit?: (values: InputValues, inputsState: InputsState<InputValues>) => void;
-    onInputChange?: (name: keyof InputValues, value: InputValues[ keyof InputValues ]) => void;
-    isSubmitDisabled?: (inputsState: InputsState<InputValues>) => boolean;
+    onSubmit?: (values: InputPropsValue, inputsState: InputsState<InputPropsValue>) => void;
+    onInputChange?: (name: keyof InputPropsValue, value: InputPropsValue[ keyof InputPropsValue ]) => void;
+    isSubmitDisabled?: (inputsState: InputsState<InputPropsValue>) => boolean;
     // ref?: React.MutableRefObject<typeof Form>;
 }> & Omit<StrictFormProps, 'onSubmit' | 'children'>;

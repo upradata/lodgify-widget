@@ -4,30 +4,12 @@ import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { Calendar, CalendarProps } from '../Calendar';
 import { Dropdown, DropdownProps } from '../Dropdown';
-import { Form, FormProps, InputField, InputsState } from '../Form';
+import { Form, FormProps, InputField } from '../Form';
 import { makeValidation, PropsValidationOptions } from '../Form/Form.validation';
 
 import type { ChangeInputData } from './PropertyBookingForm.type';
 import type { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
 
-
-type InputNames = keyof ChangeInputData;
-
-
-const isDefinedInputValue = <N extends InputNames>(name: N, value: ChangeInputData[ N ]) => {
-    if (name === 'dates') {
-        const dates = value as ChangeInputData[ 'dates' ];
-        return !!dates?.startDate && !!dates?.endDate;
-    }
-
-    return !!value;
-};
-
-const isSubmitDisabled = (inputsState: InputsState<ChangeInputData>) => {
-    return Object.entries(inputsState).some(([ name, { error, transformedValue } ]) => {
-        return !!error || !isDefinedInputValue(name as InputNames, transformedValue);
-    });
-};
 
 export const PropertyBookingFormContent: React.FunctionComponent<PropertyBookingFormContentProps> = props => {
 
@@ -89,7 +71,6 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         <Form className="inputs-container"
             onSubmit={props.onSubmit}
             onInputChange={props.onInputChange}
-            isSubmitDisabled={isSubmitDisabled}
             searchButton={<FormButton searchButton={props.searchButton} />}
             validation={propsValidation} >
 

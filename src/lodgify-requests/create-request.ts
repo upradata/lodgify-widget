@@ -131,13 +131,3 @@ export const makeRequest = <R extends (options: {}) => ReturnType<CreateRequest>
         return request(options)(debug).then(res => toCasedObject(res, 'camel')) as CreateRequestReturn<CamelObject<Awaited<Return>>>;
     };
 };
-
-
-export const makeRequest2 = <R extends (options: {}) => ReturnType<CreateRequest>>(request: R): InferRequestReturn<R> => {
-    /*   type Return = InferRequestReturn<R>;
-  
-      return (options: Parameters<R>[ 0 ], debug?: DebugFn) => {
-          return request(options)(debug).then(res => toCasedObject(res, 'camel')) as CreateRequestReturn<CamelObject<Awaited<Return>>>;
-      }; */
-    return undefined;
-};

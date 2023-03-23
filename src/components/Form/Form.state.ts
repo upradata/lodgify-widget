@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 // import { getEmptyState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyState';
 // import { getErroredState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getErroredState';
 import isEqual from 'fast-deep-equal';
+import { getEmptyState, useProcessInputValue } from './Form.helpers';
+import { getValidationWithDefaults, makeGetValidation } from './Form.validation';
+import { map } from '../../util';
 
 // import type { FormValue, FormValues } from '@lodgify/ui';
-import type { FormProps, InputsState, InputState } from './Form.props';
-import { getEmptyState, processInputValue } from './Form.helpers';
-import { getValidationWithDefaults } from './Form.validation';
-import { map } from '../../util';
+import type { FormProps } from './Form.props';
+import { InputsState, InputState } from './Form.state.type';
 
 
 export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'>;
@@ -15,9 +16,15 @@ export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' 
 export const useFormState = (props: UseFormStateProps) => {
 
     const [ state, setState ] = useState<InputsState>({});
+    const processInputValue = useProcessInputValue();
 
-    const propsValidation = useMemo(() => {
-        return map(props.validation.props, (name, validation) => [ name, getValidationWithDefaults(validation, props.validation.default) ]);
+    const getValidation = useMemo(() => {
+        const propsValidation = map(props.validation.props, (name, validation) => [
+            name,
+            getValidationWithDefaults(validation, props.validation.default)
+        ]);
+
+        return makeGetValidation(propsValidation, props.validation.default);
     }, [ props.validation ]);
 
 
@@ -36,7 +43,12 @@ export const useFormState = (props: UseFormStateProps) => {
             return;
 
         setState(state => {
-            const inputStateWithData = getInputStateWithData(inputName, { ...state[ inputName ], ...inputState }, state);
+            const inputStateWithData = getInputStateWithData({
+                inputName,
+                inputState: { ...state[ inputName ], ...inputState },
+                previousInputState: state,
+                hasNewValue: 'value' in inputState
+            });
 
             if (inputStateWithData) {
                 const newState = {
@@ -54,13 +66,24 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.onInputChange ]);
 
 
-    const getInputStateWithData = useCallback((inputName: string, inputState: InputState, previousInputState: InputState) => {
+    const getInputStateWithData = useCallback((options: {
+        inputName: string;
+        inputState: InputState;
+        previousInputState: InputState;
+        hasNewValue: boolean;
+    }) => {
+        const { inputName, inputState, previousInputState, hasNewValue } = options;
         const previousState = previousInputState?.[ inputName ] || {};
 
         if (isEqual(previousState, inputState))
             return undefined;
 
-        const processedInputValue = processInputValue(propsValidation[ inputName ], inputState);
+        const processedInputValue = processInputValue({
+            hasNewValue,
+            validation: getValidation(inputName),
+            inputValue: inputState,
+            state
+        });
 
         switch (true) {
 
@@ -84,7 +107,7 @@ export const useFormState = (props: UseFormStateProps) => {
     useEffect(() => {
         if (!!props.successMessage) {
             setState(state => {
-                const emptyState = getEmptyState(propsValidation, state);
+                const emptyState = getEmptyState(getValidation, state);
                 return { ...state, ...emptyState };
             });
 
@@ -92,5 +115,5 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.successMessage ]);
 
 
-    return { state, setState, setInputState, propsValidation };
+    return { state, setState, setInputState, getValidation };
 };

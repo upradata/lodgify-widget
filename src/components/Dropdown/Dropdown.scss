@@ -13,4 +13,9 @@
     &.dropdown-container:not(.dirty) .ui.dropdown > .text > img {
         filter: unset;
     }
+
+    .ui.search.dropdown > .text {
+        display: flex;
+        align-items: center;
+    }
 }

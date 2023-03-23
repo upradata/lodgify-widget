@@ -16,11 +16,11 @@ import { some } from '@lodgify/ui/lib/es/utils/some';
 import classnames from 'classnames';
 import { Dropdown as SemanticDropdown } from 'semantic-ui-react';
 import { DropdownProps, DropdownRef, DropdownSearchInput, LodgifyDropdownProps, SemanticDropdownProps } from './Dropdown.props';
-import { getOptionsWithSearch } from '../PhoneInput/CountrySelectComponent';
+import { getOptionsWithSearch } from '../CountryDropdown/CountryDropdown';
 import { partition, usePrevious } from '../../util';
 
 
-const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps> = (props, ref) => {
+const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps> = ({ className: klass, ...props }, ref) => {
     const [ cmpProps, semanticProps ] = partition(props, LodgifyDropdownProps);
 
     type State = {
@@ -166,7 +166,7 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
 
 
 
-    const className = classnames('Dropdown', 'dropdown-container', 'ui', 'input', {
+    const className = classnames('Dropdown', klass, 'dropdown-container', 'ui', 'input', {
         'has-images': hasImages,
         'is-compact': cmpProps.isCompact,
         dirty: some(value) || some(cmpProps.initialValue || cmpProps.value),

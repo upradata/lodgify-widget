@@ -19,7 +19,7 @@ import { Card } from '../src/components/Card';
 import { DateRange, PropsWithStyleBase } from '../src/util.types';
 import { Form } from '../src/components/Form';
 import { lodgifyDateToMoment } from '../src/lodgify-info/info';
-import { PhoneInput } from '../src/components/PhoneInput';
+import { _PhoneInput } from '../src/components/PhoneInput';
 import { RoomValue } from '../src/rooms.data';
 
 import type { LodgifyDate } from '../src/lodgify-requests';
@@ -234,7 +234,7 @@ export const BookingForm: React.FunctionComponent<BookingFormProps> = ({
                 <TextInput autoComplete="email" label="Email" name="email" />
 
                 <InputGroup>
-                    <PhoneInput
+                    <_PhoneInput
                         width="seven"
                         label="Phone number"
                         name="phoneNumber"

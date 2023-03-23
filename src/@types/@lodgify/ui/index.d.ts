@@ -381,7 +381,7 @@ export type PropsWithStyle<P = {}> = P & {
     }
 
     export type InputControllerProps = {
-        adaptOnChangeEvent?: Function;
+        adaptOnChangeEvent?: (...args: unknown[]) => unknown;
         error?: boolean | string;
         icon?: React.ReactNode;
         inputOnChangeFunctionName?: string;

@@ -1,19 +1,16 @@
 import './Form.scss';
 
 import React, { memo, useCallback, useImperativeHandle, useMemo } from 'react';
-
-import { Button, FormValue, Link, } from '@lodgify/ui';
+import { Button, FormValue, Link } from '@lodgify/ui';
 // import { setInputState } from '@lodgify/ui/lib/es/components/collections/Form/utils/setInputState';
 import { SEND } from '@lodgify/ui/lib/es/utils/default-strings';
 import classnames from 'classnames';
 import { Form as SemanticForm, Message } from 'semantic-ui-react';
 import { FormField, FormFieldProps, ParentImperativeApi } from './FormField';
+import { getEmptyRequiredInputs, isSubmitButtonDisabled } from './Form.helpers';
 import { useFormState } from './Form.state';
 
 import type { FormProps } from './Form.props';
-import { getEmptyRequiredInputs, isSubmitButtonDisabled } from './Form.helpers';
-
-
 
 
 export type FormImperativeAPI = {
@@ -22,7 +19,7 @@ export type FormImperativeAPI = {
 
 
 const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, submitButtonText, isSubmitDisabled, ...props }, ref) => {
-    const { state, setInputState, propsValidation } = useFormState(props);
+    const { state, setInputState, getValidation } = useFormState(props);
 
     useImperativeHandle(ref, () => ({ setInputState }), [ setInputState ]);
 
@@ -43,26 +40,26 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
 
 
     const handleSubmit = useCallback(() => {
-        const emptyRequiredInputs = getEmptyRequiredInputs(propsValidation, state);
+        const emptyRequiredInputs = getEmptyRequiredInputs(getValidation, state);
 
         if (emptyRequiredInputs.length > 0) {
             emptyRequiredInputs.forEach(inputName => {
-                setInputState(inputName, { error: propsValidation[ inputName ].isRequiredMessage, isBlurred: true });
+                setInputState(inputName, { error: getValidation(inputName).isRequiredMessage, isBlurred: true });
             });
         } else {
             const values = Object.entries(state).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as Record<string, unknown>);
             props.onSubmit(values, state);
         }
-    }, [ state, props.onSubmit, propsValidation ]);
+    }, [ state, props.onSubmit, getValidation ]);
 
 
     const imperativeInterfaceForChildren: ParentImperativeApi = useMemo(() => ({
         handleInputChange,
         handleInputBlur,
-        setInputState,
+        // setInputState,
         state,
-        propsValidation
-    }), [ handleInputChange, handleInputBlur, state, props.validation, setInputState ]);
+        // getValidation
+    }), [ handleInputChange, handleInputBlur, state /* , props.validation, setInputState */ ]);
 
 
     const { autoComplete, errorMessage, successMessage, actionLink } = props;

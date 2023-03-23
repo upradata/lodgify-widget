@@ -15,5 +15,5 @@ type RequestsWithContext = {
 };
 
 export const requests = (context: AppContextType): RequestsWithContext => {
-    return map(_requests, (name, request) => [ name, options => request(options, context.isDebug ? context.log : undefined) ]) as RequestsWithContext;
+    return map(_requests, (name, request) => [ name, options => request(options, context.isDebug ? context.logInfo : undefined) ]) as RequestsWithContext;
 };

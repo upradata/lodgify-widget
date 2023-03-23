@@ -5,7 +5,7 @@ import { FormValue, FormValues, InputControllerProps, InputGroup, InputProps } f
 import { Form as SemanticForm, SemanticWIDTHS, StrictFormFieldProps } from 'semantic-ui-react';
 
 import type { Omit, PropsWithStyle } from '../../util.types';
-import { PropsValidation } from './Form.validation';
+import type { Validation } from './Form.validation';
 
 
 export const InputField: React.FunctionComponent<PropsWithStyle<StrictFormFieldProps>> = React.memo(SemanticForm.Field);
@@ -27,9 +27,9 @@ export const NoInputField: React.FunctionComponent<{}> = ({ children }) => <Reac
 export type ParentImperativeApi = {
     handleInputChange: (name: string, value: unknown) => void;
     handleInputBlur: (name: string) => void;
-    setInputState: (inputName: string, inputState: FormValue) => void;
+    // setInputState: (inputName: string, inputState: FormValue) => void;
     state: FormValues;
-    propsValidation: PropsValidation;
+    // getValidation: (name: string | number) => Validation;
 };
 
 const isPrimitiveElement = (element: React.ReactElement | string | number | boolean): string | number | boolean => {

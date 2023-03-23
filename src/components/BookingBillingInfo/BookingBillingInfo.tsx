@@ -1,12 +1,10 @@
 import './BookingBillingInfo.scss';
-
 import countriesData from '../../countries-metadata.json';
 
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useRef } from 'react';
 import { InputGroup, TextInput } from '@lodgify/ui';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
-import { CountryCode, isValidPhoneNumber } from 'libphonenumber-js';
 // import debounce from 'debounce';
 // import { BookingBillingInfo as BookingBillingInfoType } from '../Booking/BookingComponent';
 import { BookingContext } from '../Booking/BookingContext';
@@ -16,29 +14,31 @@ import { makeValidation, PropsValidationOptions } from '../Form/Form.validation'
 import { PhoneInput } from '../PhoneInput';
 
 import type { PropsWithStyleBase } from '../../util.types';
+import { CountryDropdown, CountryDropdownProps } from '../CountryDropdown';
+import { AppContext } from '../../App/AppContext';
+import { CountryCode } from 'libphonenumber-js';
 
 
-type DropdownOption = DropdownProps[ 'options' ][ number ] & { key?: string; };
+// type DropdownOption = CountryDropdownProps[ 'options' ][ number ]; // DropdownProps<CountryCode>[ 'options' ][ number ] & { key?: string; };
 
 
-const countriesOptions: DropdownProps[ 'options' ] = countriesData.map(({ name, code, }) => ({
-    key: code,
-    text: name,
-    value: code,
-    // label: name,
-    imageUrl: `http://purecatamphetamine.github.io/country-flag-icons/3x2/${code.toUpperCase()}.svg`
-} as DropdownOption));
+// const countriesOptions: /* DropdownProps */CountryDropdownProps[ 'options' ] = countriesData.map(({ name, code, }) => ({
+//     key: code,
+//     text: name,
+//     value: code,
+//     // label: name,
+//     imageUrl: `http://purecatamphetamine.github.io/country-flag-icons/3x2/${code.toUpperCase()}.svg`
+// } /* as DropdownOption */)) as any;
 
-const countriesDataByCode = countriesData.reduce((o, data) => ({ ...o, [ data.code ]: data }), {} as { [ Code: string ]: (typeof countriesData)[ number ]; });
+// const countriesDataByCode = countriesData.reduce((o, data) => ({ ...o, [ data.code ]: data }), {} as { [ Code: string ]: (typeof countriesData)[ number ]; });
 
 
 // type Validations = { [ K in keyof BookingBillingInfoType ]: Partial<Validation> & { type: FormValueType; } };
 
-type UseFormProps = { phoneCountry: CountryCode; };
 
 
-const useForm = (props: UseFormProps) => {
-    const [ formState, setFormState ] = useState(props);
+const usePropsValidation = () => {
+    const { countriesMetadata } = useContext(AppContext);
 
     const propsValidation = useMemo(() => ({
         default: {
@@ -46,61 +46,36 @@ const useForm = (props: UseFormProps) => {
             invalidMessage: 'Invalid'
         },
         props: {
-            email: makeValidation('email', { invalidMessage: 'Invalid email' }),
+            email: makeValidation('email'),
             firstName: makeValidation('string'),
             lastName: makeValidation('string'),
-            phoneNumber: makeValidation('string', {
-                invalidMessage: 'Invalid phone number',
-                validate: value => {
-                    const isValid = isValidPhoneNumber(value, formState.phoneCountry);
-                    return { error: !isValid, value: isValid ? value : undefined };
-                }
-            }),
-            country: makeValidation('string', { validate: value => ({ error: !countriesOptions.some(({ value: v }) => value === v) }) }),
+            phoneNumber: makeValidation('phone'),
+            country: makeValidation('string', { validate: value => ({ error: !countriesMetadata.some(({ code }) => value === code) }) }),
             comment: makeValidation('string', { isRequired: false })
         }
-    } satisfies PropsValidationOptions), [ formState.phoneCountry ]);
+    } satisfies PropsValidationOptions), [ countriesMetadata ]);
 
     return {
-        formState,
-        setFormState,
-        setPropFormState: useCallback(function <P extends keyof UseFormProps>(prop: P, value: UseFormProps[ P ]) {
-            setFormState(state => ({ ...state, [ prop ]: value }));
-        }, []),
         propsValidation
     };
 };
 
-type RealPropsValidations = ReturnType<typeof useForm>[ 'propsValidation' ][ 'props' ];
-/* 
+type RealPropsValidations = ReturnType<typeof usePropsValidation>[ 'propsValidation' ][ 'props' ];
 
-type FormValues = {
-    [ K in keyof RealPropsValidations ]: ValidationValue<RealPropsValidations[ K ][ 'input' ][ 'type' ]>
-};
- */
 type FormInputValues = Record<keyof RealPropsValidations, string>; // FormValues<keyof RealPropsValidations, string>;
 
-// export type BookingDetailsData = FormValues;
 
 export type BookingDetailsProps = PropsWithStyleBase & {
     onSubmit?: (data: FormInputValues) => void;
     buttonText?: string;
-} /* & CardProps */;
-
-
-
-const getCountryOptionsWithSearch = (options: Pick<DropdownOption, 'value'>[], searchValue: string) => {
-    const regExp = new RegExp(`^${searchValue}`, 'i');
-    return options.filter(({ value: code }) => regExp.test(countriesDataByCode[ code as string ].name) || regExp.test(`${code}`));
 };
-
 
 export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = ({ onSubmit, buttonText }) => {
     const { billingInfo, setBillingInfo } = useContext(BookingContext);
 
     // const [ billingState, setBillingState ] = useState(billingInfo);
     /* const { setPropFormState, propsValidation } = useForm({ phoneCountry: billingState.country }); */
-    const { setPropFormState, propsValidation } = useForm({ phoneCountry: billingInfo.country });
+    const { propsValidation } = usePropsValidation();
 
     // const debouncedSetBillingInfo = debounce((billingState: Partial<BookingBillingInfoType>) => { setBillingInfo(billingState); }, 200);
 
@@ -136,29 +111,56 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
                         autoComplete="tel"
                         defaultCountry={billingInfo.country}
                         value={billingInfo.phoneNumber}
-                        onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [])} />
+                        adaptOnChangeEvent={useCallback((value, countryCode) => ({ value, countryCode }), [])}
+                        mapValue={useCallback((data: { value: string; countryCode: CountryCode; }) => data?.value, [])}
+                        /* onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [])} */ />
 
-                    <Dropdown
+                    <CountryDropdown
                         width="five"
                         label="Country"
                         name="country"
                         autoComplete="country"
-                        options={countriesOptions}
                         value={billingInfo.country}
                         isClearable={false}
-                        noResultsMessage="No country"
-                        getOptionsWithSearch={getCountryOptionsWithSearch}
-                       /*  onChange={useCallback((name, _value) => {
-                            formRef.current?.setInputState(name, { isBlurred: true });
-                        }, [])}  *//>
+                        noResultsMessage="No country" />
+
+
                 </InputGroup>
 
+
+                {/* <Dropdown
+                    label="Country"
+                    name="country"
+                    autoComplete="country"
+                    options={countriesOptions}
+                    value={billingInfo.country}
+                    isClearable={false}
+                    noResultsMessage="No country"
+                    getOptionsWithSearch={getCountryOptionsWithSearch}
+                    onChange={useCallback((name, _value) => {
+                        formRef.current?.setInputState(name, { isBlurred: true });
+                    }, [])} /> */}
 
                 <TextArea label="Comments (optional)" name="comment" maxCharacters={4000} value={billingInfo.comment} />
             </Form>
         </div>
     );
 };
+
+
+{/* <Dropdown
+        width="five"
+        label="Country"
+        name="country"
+        autoComplete="country"
+        options={countriesOptions}
+        value={billingInfo.country}
+        isClearable={false}
+        noResultsMessage="No country"
+        getOptionsWithSearch={getCountryOptionsWithSearch}
+            onChange={useCallback((name, _value) => {
+            formRef.current?.setInputState(name, { isBlurred: true });
+        }, [])}  /> */}
 
 /* 
 <Card
@@ -174,4 +176,22 @@ BookingBillingInfo.displayName = 'BookingBillingInfo';
 BookingBillingInfo.defaultProps = {
     // country: 'FR'
     buttonText: 'Ok'
+};
+
+
+const countriesOptions: DropdownProps[ 'options' ] = countriesData.map(({ name, code, }) => ({
+    key: code,
+    text: name,
+    value: code,
+    // label: name,
+    imageUrl: `http://purecatamphetamine.github.io/country-flag-icons/3x2/${code.toUpperCase()}.svg`
+}));
+
+const countriesDataByCode = countriesData.reduce((o, data) => ({ ...o, [ data.code ]: data }), {} as { [ Code: string ]: (typeof countriesData)[ number ]; });
+
+
+
+const getCountryOptionsWithSearch = (options: DropdownProps[ 'options' ], searchValue: string) => {
+    const regExp = new RegExp(`^${searchValue}`, 'i');
+    return options.filter(({ value: code }) => regExp.test(countriesDataByCode[ code as string ].name) || regExp.test(`${code}`));
 };

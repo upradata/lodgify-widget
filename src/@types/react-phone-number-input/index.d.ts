@@ -14,8 +14,8 @@ import type { CountryCode } from 'libphonenumber-js';
 
 declare module 'react-phone-number-input' {
     export type CountrySelectOptions<P = {}> = P & {
-        value?: CountryCode;
-        label?: string;
+        value: CountryCode;
+        label: string;
     };
 
     export type CountrySelectProps<Options extends CountrySelectOptions = CountrySelectOptions> = {
@@ -23,7 +23,7 @@ declare module 'react-phone-number-input' {
           * A two-letter country code.
           * Example: "US", "RU", etc.
           */
-        value?: CountryCode;
+        value: CountryCode;
 
         /**
          * A function of `value: string`.
@@ -34,7 +34,7 @@ declare module 'react-phone-number-input' {
         options: Options[];
 
         name?: string;
-        'aria-label': string;
+        'aria-label'?: string;
         onFocus?: (event: React.SyntheticEvent<React.Element, FocusEvent>) => void;
         onBlur?: (event: React.SyntheticEvent<React.Element, Event>) => void;
         disabled?: boolean;
@@ -45,7 +45,7 @@ declare module 'react-phone-number-input' {
         // 'aria-hidden': boolean;
         country?: CountryCode;
         label?: string;
-        aspectRatio?: number;
+        aspectRatio?: 1 | 1.5;
     };
 
     export type CountrySelectWithIconProps<Options extends CountrySelectOptions = CountrySelectOptions> = CountrySelectProps<Options> & {

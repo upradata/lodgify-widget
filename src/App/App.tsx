@@ -1,23 +1,30 @@
 import './App.css';
 
+import countriesMetadata from '../countries-metadata.json';
+import phonesMetadata from '../libphonenumber-metadata.custom.json';
+
 import React from 'react';
 import { Viewport } from '@lodgify/ui';
-import { Booking } from '../components/Booking';
-import { roomsData } from '../rooms.data';
 import { AppContext, AppContextType } from './AppContext';
+import { Booking } from '../components/Booking';
 import { PropertyContext, PropertyContextType } from './PropertyContext';
-
+import { roomsData } from '../rooms.data';
+import { CountriesMetadata, PhonesMetadata } from '../types';
+import { filter } from '../util';
 
 // window.global = { process: { env: {} } as any } as any; // NodeJS.ProcessEnv
 // window.global.process.env.WEBSITES_SERVICE_HOST = 'thomas-milotti.lodgify.com';
 // window.global.process.env.WEBSITES_SERVICE_URL = 'thomas-milotti.lodgify.com';
-
 // import('@lodgify/websites-service-client').then(({ getAvailability }) => {
+
 
 const appContext: AppContextType = {
     mode: 'dev',
     isDebug: true,
-    log: console.log
+    logInfo: v => console.log('App Debug Info: ', v),
+    logError: v => console.error('App Debug Error: ', v),
+    phonesMetadata: phonesMetadata as PhonesMetadata,
+    countriesMetadata: filter(countriesMetadata, (_, { code }) => !!phonesMetadata.countries[ code ]) as CountriesMetadata
 };
 
 

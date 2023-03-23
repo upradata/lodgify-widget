@@ -8,11 +8,12 @@
 .Form.ui.form {
     .ui.dropdown .menu > .item .image,
     .ui.dropdown .menu > .item img,
-    .ui.dropdown > .text > .image,
-    .ui.dropdown > .text > img {
+    .ui.dropdown > .text .image,
+    .ui.dropdown > .text img {
         /* box-shadow: 0 2px 7px 0 rgb(0 0 0 / 27%); */
         box-shadow: var(--PhoneInputFlag--shadow, 1px 1px 4px 0 rgb(0 0 0 / 27%));
         margin-left: 0;
+        margin-right: 0.79rem;
         height: 1em;
         max-height: none;
         min-width: auto;
