@@ -29,7 +29,7 @@ declare module 'react-phone-number-input' {
          * A function of `value: string`.
          * Updates the `value` property.
          */
-        onChange?: (value: CountryCode) => void,
+        onChange?: (value: CountryCode) => void;
         // `<select/>` options.
         options: Options[];
 

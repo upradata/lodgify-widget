@@ -1,10 +1,10 @@
 import { isValidPhoneNumber } from 'libphonenumber-js';
 import { DEFAULT_IS_INVALID_MESSAGE, DEFAULT_IS_REQUIRED_MESSAGE } from './Form.helpers';
 
+import type { DateRange } from '@lodgify/ui';
 import type { CountryCode } from '../../types';
 import type { InputsState } from './Form.state.type';
-import type { Omit, SelectType } from '../../util.types';
-import { DateRange } from '@lodgify/ui';
+import type { Omit, SelectType, TypeOf } from '../../util.types';
 
 
 export type Validation<InputValue = unknown, TransformedValue = InputValue, State extends InputsState = InputsState> = {
@@ -52,9 +52,9 @@ const tryCatch = <T = void>(fn: () => T): { error?: string | boolean; } & T => {
     }
 };
 
-type TypeOf = 'undefined' | 'object' | 'boolean' | 'number' | 'bigint' | 'string';
+type InputTypeOf = Exclude<TypeOf, 'symbol' | 'function'>;
 
-type InferValueFromType<T extends TypeOf> =
+type InferValueFromType<T extends InputTypeOf> =
     T extends 'undefined' ? undefined :
     T extends 'boolean' ? boolean :
     T extends 'string' ? string :
@@ -64,7 +64,7 @@ type InferValueFromType<T extends TypeOf> =
 
 
 
-export const validateAndTransform = <T extends TypeOf = 'string' | 'boolean'>(
+export const validateAndTransform = <T extends InputTypeOf = 'string' | 'boolean'>(
     value: unknown,
     options: { type?: T; error?: string | boolean | ((value: InferValueFromType<T>) => string | boolean); transform?: (value: unknown) => unknown; }
 ) => {

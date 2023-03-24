@@ -50,7 +50,11 @@ const usePropsValidation = () => {
             firstName: makeValidation('string'),
             lastName: makeValidation('string'),
             phoneNumber: makeValidation('phone'),
-            country: makeValidation('string', { validate: value => ({ error: !countriesMetadata.some(({ code }) => value === code) }) }),
+            country: makeValidation('string', {
+                validate: value => {
+                    return ({ error: !countriesMetadata.some(({ code }) => value === code) });
+                }
+            }),
             comment: makeValidation('string', { isRequired: false })
         }
     } satisfies PropsValidationOptions), [ countriesMetadata ]);

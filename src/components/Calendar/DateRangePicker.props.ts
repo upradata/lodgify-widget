@@ -1,4 +1,4 @@
-import { InputProps } from '../../util.types';
+import { InputProps } from '../../types';
 
 import type { DateRange, FormValue as LodgifyFormValue } from '@lodgify/ui';
 

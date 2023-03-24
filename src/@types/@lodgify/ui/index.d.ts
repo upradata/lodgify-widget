@@ -374,11 +374,6 @@ export type PropsWithStyle<P = {}> = P & {
 
     export const TextArea: TextArea.ComponentType<TextAreaProps>;
 
-    interface ReactElementLike {
-        type: ReactComponentLike;
-        props: any;
-        key: string | number | null;
-    }
 
     export type InputControllerProps = {
         adaptOnChangeEvent?: (...args: unknown[]) => unknown;
@@ -393,7 +388,7 @@ export type PropsWithStyle<P = {}> = P & {
         value?: unknown; // boolean | string | number | object | Array<unknown>;
         name: string;
         onChange?: InputProps[ 'onChange' ];
-        children: ReactElementLike;
+        children: React.ReactElement;
     };
 
 

@@ -1,7 +1,7 @@
-import { InputProps } from '../../util.types';
+import { InputProps } from '../../types';
 
 import type { IconNames } from '@lodgify/ui';
-import type { Dropdown as SemanticDropdown, DropdownOnSearchChangeData, StrictDropdownItemProps, StrictDropdownProps } from 'semantic-ui-react';
+import type { DropdownOnSearchChangeData, StrictDropdownItemProps, StrictDropdownProps } from 'semantic-ui-react';
 import type { Omit as MyOmit } from '../../util.types';
 
 
@@ -76,7 +76,7 @@ export type DropdownSearchOptionsFn<V extends Value = Value, P = {}> = (options:
 
 
 export type SemanticDropdownProps<V extends Value | Value[] = Value | Value[], ItemProps = {}> = MyOmit<
-    StrictDropdownProps, 'onSearchChange' | 'onSearchChange' | 'search'
+    StrictDropdownProps, 'onSearchChange' | 'search'
 //Exclude<keyof LodgifyDropdownProps | 'onSearchChange' | 'search', 'ref' | 'onChange' | 'onBlur' | 'icon' | 'options' |'value'>
 > & {
     onSearchChange?: (

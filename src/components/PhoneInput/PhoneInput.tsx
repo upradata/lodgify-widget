@@ -52,7 +52,9 @@ export const getDiallingCode = (countryCode: CountryCode) => {
 };
 
 
-const PhoneInputCountrySelectComponent: React.FunctionComponent<CountryDropdownProps> = ({ options, iconComponent: CountryIcon, ...props }) => {
+type PhoneInputCountrySelectComponentProps = Omit<CountryDropdownProps, 'onChange'> & { onChange?: (value: CountryCode) => void; };
+
+const PhoneInputCountrySelectComponent: React.FunctionComponent<PhoneInputCountrySelectComponentProps> = ({ options, iconComponent: CountryIcon, ...props }) => {
     const countryDropdownOptions = useMemo(() => {
         const optionCache: Record<string, CountryDropdownItemOption> = {};
 
@@ -82,7 +84,10 @@ const PhoneInputCountrySelectComponent: React.FunctionComponent<CountryDropdownP
         });
     }, [ options ]);
 
-    return <CountryDropdown options={countryDropdownOptions} {...props} />;
+
+    const onChange: CountryDropdownProps[ 'onChange' ] = useCallback((_name, value) => props.onChange?.(value), []);
+
+    return <CountryDropdown options={countryDropdownOptions} {...props} onChange={onChange} />;
 };
 
 /* type FlagComponentProps = {
@@ -121,7 +126,7 @@ export type PhoneIputProps<V = unknown> = Omit<Partial<ReactPhoneNumberProps>, '
 } & Omit<InputProps<string>, 'onChange'>;
 
 
-export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnChangeEvent, mapValue,...props }) => {
+export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnChangeEvent, mapValue, ...props }) => {
     const { phonesMetadata } = useContext(AppContext);
 
     const [ state, setState ] = useState({

@@ -1,3 +1,3 @@
 export * from './Calendar';
-export * from './DateRangePicker.type';
-export * from './ReactDates.type';
+export * from './DateRangePicker.props';
+export * from './ReactDates.props';

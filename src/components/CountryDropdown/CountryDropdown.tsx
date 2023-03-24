@@ -31,9 +31,9 @@ type _CountrySelectWithIconProps<P = {}> = CountrySelectWithIconProps<CountrySel
 
 export type CountryDropdownProps<P = {}> =
     MyOmit<
-        MyOmit<_CountrySelectWithIconProps, 'options'> &
+        MyOmit<_CountrySelectWithIconProps, 'options' | 'onChange'> &
         { countryOptions?: _CountrySelectWithIconProps<P>[ 'options' ]; } &
-        Omit<_DropdownProps, 'onChange' | Exclude<keyof CountrySelectWithIconProps, 'options'>>,
+        Omit<_DropdownProps, Exclude<keyof CountrySelectWithIconProps, 'options' | 'onChange'>>,
 
         'onFocus' | 'onBlur'
     >;
@@ -126,7 +126,7 @@ const _CountryDropdown: React.FunctionComponent<CountryDropdownProps> = ({ onCha
         // isFluid: true,
         autoComplete: 'country',
         ...props,
-        onChange: useCallback((name, value) => { onChange(value); }, [ onChange ]),
+        onChange, // : useCallback((name, value,event) => { onChange(name, value); }, [ onChange ]),
         options: props.options || options
     };
 

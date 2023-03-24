@@ -138,12 +138,4 @@ export type KeyOf<T> = T extends T ? keyof T : never;
 
 export type ValueOf<T> = T extends T ? T[ keyof T ] : never;
 
-
-export class InputProps<V = unknown> {
-    name?: string;
-    onBlur?: (name: string/* event?: FocusEvent */) => any;
-    onChange?: (name: string, value: V) => any;
-    width?: string;
-    label?: string;
-    value?: V;
-};
+export type TypeOf = 'undefined' | 'object' | 'boolean' | 'number' | 'bigint' | 'string' | 'function' | 'symbol';

@@ -1,6 +1,7 @@
-import moment, { Moment } from 'moment';
 import { useEffect, useRef, useState } from 'react';
-import { CasedObject, CasedType, Key, KeyOf, ValueOf } from './util.types';
+import moment, { Moment } from 'moment';
+
+import type { CasedObject, CasedType, Key, KeyOf, ValueOf, TypeOf } from './util.types';
 
 
 export const isInRange = (min: number, max: number) => (v: number) => min <= v && v <= max;
@@ -282,6 +283,10 @@ export const filter = <T extends object | any[]>(v: T, filter: (k: FilterParamet
     }, (isArray ? [] : {}) as T);
 };
 
+
+export const removeType = <T extends object | any[]>(v: T, type: TypeOf): T => {
+    return filter(v, (_, v) => typeof v !== type);
+};
 
 export const kebabCase = (s: string, sep: '-' | '_' = '_') => s.trim().replaceAll(/(\s+)/g, sep).toLowerCase();
 export const camelCase = (s: string) => s.trim().toLowerCase().replaceAll(/_./g, s => s[ 1 ].toUpperCase());

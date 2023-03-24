@@ -33,7 +33,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
     const handleInputChange = useCallback((name: string, value: string) => {
         setInputState(name, {
             isBlurred: false,
-            value: value
+            value
         });
 
     }, []);

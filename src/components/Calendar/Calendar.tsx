@@ -19,12 +19,12 @@ import DateRangePicker from 'react-dates/esm/components/DateRangePicker';
 import moment from 'moment';
 import { v4 as uuid } from 'uuid';
 import { ComponentWithResponsiveProps, withResponsive } from '../../withResponsive';
-import { DateRangePickerProps } from './DateRangePicker.type';
+import { DateRangePickerProps } from './DateRangePicker.props';
 import { InputController, InputControllerProps } from '../InputController';
 import { isSame, partition, usePreviousListener } from '../../util';
 
 import type { Omit } from '../../util.types';
-import type { ReactDatesDateRangePickerProps } from './ReactDates.type';
+import type { ReactDatesDateRangePickerProps } from './ReactDates.props';
 
 
 export type CalendarProps = ComponentWithResponsiveProps<
@@ -123,7 +123,7 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
         getIsFocusControlled(rangePickerProps.focusedInput) ? rangePickerProps.focusedInput : state.focusedInput;
 
 
-    const inputControllerProps: Omit<InputControllerProps, 'children'> = {
+    const inputControllerProps: InputControllerProps = {
         adaptOnChangeEvent: returnFirstArgument,
         error: rangePickerProps.error,
         inputOnChangeFunctionName: 'onDatesChange',

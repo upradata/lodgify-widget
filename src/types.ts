@@ -14,3 +14,14 @@ export type Range<T> = {
     start: T;
     end: T;
 };
+
+
+
+export class InputProps<V = unknown> {
+    name?: string;
+    onBlur?: (name: string/* event?: FocusEvent */) => any;
+    onChange?: (name: string, value: V) => any;
+    width?: string;
+    label?: string;
+    value?: V;
+};
