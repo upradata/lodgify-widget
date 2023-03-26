@@ -70,7 +70,7 @@
 .dropdown-container .ui.search.selection.dropdown input.search {
     // padding: 0;
     // width: 0;
-    width: calc(100% - 24px);
+    width: 100%;
     padding: inherit;
     top: 0;
     bottom: 0;
@@ -281,4 +281,12 @@
         /* 0 0 0 var(--PhoneInputCountryFlag-borderWidth) var(--PhoneInputCountryFlag-borderColor),
             inset 0 0 0 var(--PhoneInputCountryFlag-borderWidth) var(--PhoneInputCountryFlag-borderColor); */
     }
+
+    .search ~ .divider.text {
+        margin-right: 24px; // place for arrow icon
+    }
+
+    /* .ui.input .ui.search.selection.dropdown input.search:-webkit-autofill {
+        box-shadow: inset 0 0 0 100px rgb(255, 255, 255) !important;
+    } */
 }

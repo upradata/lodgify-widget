@@ -1,22 +1,22 @@
 import './BookingBillingInfo.scss';
-import countriesData from '../../countries-metadata.json';
 
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
-import { InputGroup, TextInput } from '@lodgify/ui';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import { InputGroup } from '@lodgify/ui';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
+import { parsePhoneNumber } from 'libphonenumber-js';
+import { AppContext } from '../../App/AppContext';
 // import debounce from 'debounce';
 // import { BookingBillingInfo as BookingBillingInfoType } from '../Booking/BookingComponent';
 import { BookingContext } from '../Booking/BookingContext';
-import { Dropdown, DropdownProps } from '../Dropdown';
+import { CountryDropdown } from '../CountryDropdown';
 import { Form, FormImperativeAPI, FormProps } from '../Form';
 import { makeValidation, PropsValidationOptions } from '../Form/Form.validation';
 import { PhoneInput } from '../PhoneInput';
+import { TextInput } from '../TextInput';
 
+import type { CountryCode } from '../../types';
 import type { PropsWithStyleBase } from '../../util.types';
-import { CountryDropdown, CountryDropdownProps } from '../CountryDropdown';
-import { AppContext } from '../../App/AppContext';
-import { CountryCode } from 'libphonenumber-js';
 
 
 // type DropdownOption = CountryDropdownProps[ 'options' ][ number ]; // DropdownProps<CountryCode>[ 'options' ][ number ] & { key?: string; };
@@ -49,7 +49,7 @@ const usePropsValidation = () => {
             email: makeValidation('email'),
             firstName: makeValidation('string'),
             lastName: makeValidation('string'),
-            phoneNumber: makeValidation('phone'),
+            phoneNumber: makeValidation('phone-string'),
             country: makeValidation('string', {
                 validate: value => {
                     return ({ error: !countriesMetadata.some(({ code }) => value === code) });
@@ -74,6 +74,9 @@ export type BookingDetailsProps = PropsWithStyleBase & {
     buttonText?: string;
 };
 
+
+const getCountryFromPhone = (phone: string, defaultCountry?: CountryCode) => phone ? parsePhoneNumber(phone, defaultCountry).country : undefined;
+
 export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = ({ onSubmit, buttonText }) => {
     const { billingInfo, setBillingInfo } = useContext(BookingContext);
 
@@ -95,6 +98,16 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
 
     const formRef = useRef<FormImperativeAPI>(null);
 
+    const countryFromPhone = getCountryFromPhone(billingInfo.phoneNumber, billingInfo.country);
+
+    const [ state, _setState ] = useState({
+        phone: billingInfo.phoneNumber,
+        phoneCountry: countryFromPhone || billingInfo.country,
+        countryCode: billingInfo.country || countryFromPhone || null
+    });
+
+    const setState = (set: (previousState: typeof state) => Partial<typeof state>) => _setState(state => ({ ...state, ...set(state) }));
+
     return (
         <div className="BookingBillingInfo">
 
@@ -113,20 +126,51 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
                         label="Phone number"
                         name="phoneNumber"
                         autoComplete="tel"
-                        defaultCountry={billingInfo.country}
-                        value={billingInfo.phoneNumber}
-                        adaptOnChangeEvent={useCallback((value, countryCode) => ({ value, countryCode }), [])}
-                        mapValue={useCallback((data: { value: string; countryCode: CountryCode; }) => data?.value, [])}
-                        /* onCountryChange={useCallback(code => setPropFormState('phoneCountry', code), [])} */ />
+                        defaultCountry={state.phoneCountry}
+                        value={state.phone}
+                        onCountryChange={useCallback(code => {
+                            setState(state => ({
+                                countryCode: state.countryCode || code,
+                                phoneCountry: code
+                            }));
+                        }, [])}
+                        onChange={useCallback((_, value: string) => {
+                            setState(state => {
+                                if (!value)
+                                    return { phone: value };
+
+                                try {
+                                    const { country } = parsePhoneNumber(value, state.phoneCountry);
+
+                                    return {
+                                        phone: value,
+                                        phoneCountry: country,
+                                        countryCode: state.countryCode || country,
+                                    };
+                                } catch (e) {
+                                    if (e instanceof Error && e.message === 'TOO_SHORT')
+                                        return { phone: value };
+
+                                    return { phone: undefined };
+                                }
+                            });
+                        }, [])} />
+
 
                     <CountryDropdown
                         width="five"
                         label="Country"
                         name="country"
                         autoComplete="country"
-                        value={billingInfo.country}
+                        value={state.countryCode}
                         isClearable={false}
-                        noResultsMessage="No country" />
+                        noResultsMessage="No country"
+                        onChange={useCallback((_, code) => {
+                            setState(state => ({
+                                countryCode: code,
+                                phoneCountry: state.phoneCountry || code
+                            }));
+                        }, [])} />
 
 
                 </InputGroup>
@@ -183,7 +227,7 @@ BookingBillingInfo.defaultProps = {
 };
 
 
-const countriesOptions: DropdownProps[ 'options' ] = countriesData.map(({ name, code, }) => ({
+/* const countriesOptions: DropdownProps[ 'options' ] = countriesData.map(({ name, code, }) => ({
     key: code,
     text: name,
     value: code,
@@ -199,3 +243,4 @@ const getCountryOptionsWithSearch = (options: DropdownProps[ 'options' ], search
     const regExp = new RegExp(`^${searchValue}`, 'i');
     return options.filter(({ value: code }) => regExp.test(countriesDataByCode[ code as string ].name) || regExp.test(`${code}`));
 };
+ */

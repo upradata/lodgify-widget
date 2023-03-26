@@ -1,6 +1,7 @@
 import classnames from 'classnames';
-import type { CountryCode } from 'libphonenumber-js';
+
 import type { ImgHTMLAttributes } from 'react';
+import type { CountryCode } from '../../types';
 
 
 export type FlagProps = {
@@ -8,7 +9,7 @@ export type FlagProps = {
     // Two-letter country code ("ISO 3166-1 alpha-2").
     country: CountryCode;
     // Will be HTML `title` attribute of the `<img/>`.
-    countryName: string;
+    countryName?: string;
     // Country flag icon components.
     // By default flag icons are inserted as `<img/>`s
     // with their `src` pointed to `country-flag-icons` gitlab pages website.

@@ -13,23 +13,23 @@ declare module 'react-phone-number-input/modules/react-hook-form/PhoneInputWithC
 import type { CountryCode } from 'libphonenumber-js';
 
 declare module 'react-phone-number-input' {
-    export type CountrySelectOptions<P = {}> = P & {
-        value: CountryCode;
+    export type CountrySelectOptions<Country extends string = CountryCode<string>, P = {}> = P & {
+        value: Country;
         label: string;
     };
 
-    export type CountrySelectProps<Options extends CountrySelectOptions = CountrySelectOptions> = {
+    export type CountrySelectProps<Country extends string = CountryCode, Options extends CountrySelectOptions<string> = CountrySelectOptions<Country>> = {
         /**
           * A two-letter country code.
           * Example: "US", "RU", etc.
           */
-        value: CountryCode;
+        value: Country; // ZZ is international
 
         /**
          * A function of `value: string`.
          * Updates the `value` property.
          */
-        onChange?: (value: CountryCode) => void;
+        onChange?: (value: Country) => void;
         // `<select/>` options.
         options: Options[];
 
@@ -41,19 +41,20 @@ declare module 'react-phone-number-input' {
         readOnly?: boolean;
     };
 
-    export type CountryIconProps = {
+    export type CountryIconProps<Country extends string = CountryCode> = {
         // 'aria-hidden': boolean;
-        country?: CountryCode;
+        country?: Country;
         label?: string;
         aspectRatio?: 1 | 1.5;
     };
 
-    export type CountrySelectWithIconProps<Options extends CountrySelectOptions = CountrySelectOptions> = CountrySelectProps<Options> & {
-        // Country flag component.
-        iconComponent?: React.ComponentType<CountryIconProps>;
-        // Select arrow component.
-        arrowComponent?: React.ComponentType;
-        // Set to `true` to render Unicode flag icons instead of SVG images.
-        unicodeFlags?: boolean;
-    };
+    export type CountrySelectWithIconProps<Country extends string = CountryCode, Options extends CountrySelectOptions<string> = CountrySelectOptions<Country>> =
+        CountrySelectProps<Country, Options> & {
+            // Country flag component.
+            iconComponent?: React.ComponentType<CountryIconProps<Country>>;
+            // Select arrow component.
+            arrowComponent?: React.ComponentType;
+            // Set to `true` to render Unicode flag icons instead of SVG images.
+            unicodeFlags?: boolean;
+        };
 }

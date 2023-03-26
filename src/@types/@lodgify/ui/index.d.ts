@@ -299,11 +299,12 @@ export type PropsWithStyle<P = {}> = P & {
 
     export type InputProps<V = unknown> = {
         name?: string;
-        onBlur?: (event: FocusEvent) => void;
+        onBlur?: React.DOMAttributes<Element>[ 'onBlur' ]; // (event: FocusEvent) => void;
         onChange?: (name: string, value: V) => void;
         width?: string;
         label?: string;
         value?: V;
+        inputValue?: V;
     };
 
     export type DropdownProps = PropsWithStyle<{

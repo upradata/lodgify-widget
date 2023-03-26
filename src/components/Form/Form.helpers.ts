@@ -58,9 +58,11 @@ export const useProcessInputValue = () => {
             if (requiredError)
                 return { isValid: false, error: validation.isRequiredMessage };
 
-            const { value: transformedValue, error, isValid } = !validation.isEmpty(newValue) ?
+            const validatedValue = !validation.isEmpty(newValue) ?
                 { ...validation.validate(newValue, state), isValid: true } :
-                { error: false, isValid: false, value: newValue };
+                { error: false, isValid: false };
+
+            const { error } = validatedValue;
 
             if (error) {
                 const message = error === true ? validation.invalidMessage : error;
@@ -70,7 +72,8 @@ export const useProcessInputValue = () => {
             }
 
             // both false => empty value
-            return { isValid, error, transformedValue };
+            // no transformedValue => by default, transformedValue = value (identity)
+            return { ...validatedValue, transformedValue: validatedValue.transformedValue || newValue, error: false };
         };
 
 
@@ -78,6 +81,8 @@ export const useProcessInputValue = () => {
     };
 };
 
+
+export type ProcessInputValue = ReturnType<typeof useProcessInputValue>;
 
 
 export const isSubmitButtonDisabled = (inputsState: InputsState) => {

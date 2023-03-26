@@ -3,19 +3,19 @@ import classnames from 'classnames';
 import { Flag, FlagProps } from './Flag';
 import InternationalIcon from '../../../node_modules/react-phone-number-input/modules/InternationalIcon';
 
-import type { CountryCode } from 'libphonenumber-js';
+import type { CountryCodeWithInternational } from '../../types';
+import type { Omit } from '../../util.types';
 
-
-export type CountryIconProps = FlagProps & {
-    country?: CountryCode;
+export type CountryIconProps = Omit<FlagProps, 'country'> & {
+    country?: CountryCodeWithInternational;
     label?: string;
     aspectRatio?: 1 | 1.5;
 };
 
-const _CountryIcon: React.FunctionComponent<FlagProps & CountryIconProps> = ({ country, label, aspectRatio, flags, flagUrl, ...props }) => {
+const _CountryIcon: React.FunctionComponent<CountryIconProps> = ({ country, label, aspectRatio, flags, flagUrl, ...props }) => {
     return (
         <div className={classnames('CountryIcon', { 'CountryIcon--square': aspectRatio === 1 })}>
-            {country ?
+            {country && country !== 'ZZ' ?
                 <Flag className="CountryIcon__img" country={country} countryName={label} flags={flags} flagUrl={flagUrl} {...props} /> :
                 <InternationalIcon className="CountryIcon__img" title={label} aspectRatio={aspectRatio} />
             }

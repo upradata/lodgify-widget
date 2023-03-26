@@ -1,4 +1,4 @@
-import { CountryCode, MetadataJson } from 'libphonenumber-js';
+import { CountryCode, PhonesMetadata } from './types';
 import React from 'react';
 
 
@@ -22,7 +22,7 @@ export type FlagProps = {
 // Default country flag icon.
 // `<img/>` is wrapped in a `<div/>` to prevent SVGs from exploding in size in IE 11.
 // https://github.com/catamphetamine/react-phone-number-input/issues/111
-export const Flag = (metadata: MetadataJson): React.FunctionComponent<FlagProps> => props => {
+export const Flag = (metadata: PhonesMetadata): React.FunctionComponent<FlagProps> => props => {
     const { country, countryName, flags, flagUrl, ...rest } = props;
 
     if (flags && flags[ country ]) {

@@ -4,7 +4,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { adaptOptions } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/adaptOptions';
 import { Icon } from '@lodgify/ui';
 import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
-import { getHasErrorMessage } from '@lodgify/ui/lib/es/utils/get-has-error-message';
+// import { getHasErrorMessage } from '@lodgify/ui/lib/es/utils/get-has-error-message';
 import { getHasImages } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/getHasImages';
 import { getIcon } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/getIcon';
 import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
@@ -17,12 +17,14 @@ import classnames from 'classnames';
 import { Dropdown as SemanticDropdown } from 'semantic-ui-react';
 import { DropdownProps, DropdownRef, DropdownSearchInput, LodgifyDropdownProps, SemanticDropdownProps } from './Dropdown.props';
 import { getOptionsWithSearch } from '../CountryDropdown/CountryDropdown';
-import { partition, removeType, usePrevious } from '../../util';
+import { partition, removeType, usePrevious, hasProp } from '../../util';
 import { InputController, InputControllerProps } from '../InputController';
 
 
 const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps> = ({ className: klass, ...props }, ref) => {
     const [ cmpProps, semanticProps ] = partition(props, LodgifyDropdownProps);
+
+    const propValue = hasProp(cmpProps, 'value') ? cmpProps.value : null;
 
     type State = {
         isBlurred: boolean;
@@ -35,7 +37,7 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     const [ state, _setState ] = useState<State>({
         isBlurred: true,
         isOpen: false,
-        value: getControlledInputValue(cmpProps.value, cmpProps.initialValue),
+        value: propValue || cmpProps.initialValue,
         searchQuery: semanticProps.searchQuery,
         autofilled: 'idle'
     });
@@ -45,8 +47,12 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     const [ value, setValue ] = useState(props.value);
     const [ searchQuery, setSearchQuery ] = useState(props.searchQuery);
     */
+    useEffect(() => {
+        if (!propValue && cmpProps.initialValue)
+            cmpProps.onChange?.(cmpProps.name, cmpProps.initialValue);
+    }, []);
 
-    const setState = (partialState: Partial<State>, event?: React.SyntheticEvent) => _setState(state => {
+    const setState = (partialState: Partial<State>/* , event?: React.SyntheticEvent */) => _setState(state => {
         const s: State = { ...state, ...partialState };
 
         const autofilled = partialState.autofilled === 'done' ? 'idle' : s.autofilled;
@@ -55,22 +61,22 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         const newState = { ...s, autofilled, isOpen: forceClosed ? false : s.isOpen };
 
         if (state.value !== newState.value) {
-            cmpProps.onChange?.(cmpProps.name, newState.value, event);
+            cmpProps.onChange?.(cmpProps.name, newState.value/* , event */);
         }
 
         if (!state.isBlurred && newState.isBlurred) {
-            cmpProps.onBlur?.(cmpProps.name, event);
+            cmpProps.onBlur?.(cmpProps.name/* , event */);
         }
 
         if (state.isBlurred && !newState.isBlurred) {
-            cmpProps.onFocus?.(cmpProps.name, event);
+            cmpProps.onFocus?.(cmpProps.name/* , event */);
         }
 
         return newState;
     });
 
 
-    const previousPropsValue = usePrevious(cmpProps.value);
+    const previousPropsValue = usePrevious(propValue);
 
 
     useEffect(() => {
@@ -80,7 +86,7 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         }
 
         if (previousPropsValue !== cmpProps.value) {
-            const value = getControlledInputValue(cmpProps.value, cmpProps.initialValue, state.value);
+            const value = getControlledInputValue(propValue, cmpProps.initialValue, state.value);
             setState({ value, autofilled: 'idle' });
             return;
         }
@@ -89,11 +95,10 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     }, [ previousPropsValue, cmpProps.value ]);
 
 
-    const value = getControlledInputValue(cmpProps.value, cmpProps.initialValue, state.value);
+    const value = getControlledInputValue(propValue, cmpProps.initialValue, state.value);
     const hasImages = getHasImages(cmpProps.options);
     const adaptedOptions = adaptOptions(cmpProps.options, hasImages);
-    const hasErrorMessage = getHasErrorMessage(cmpProps.error);
-
+    // const hasErrorMessage = getHasErrorMessage(cmpProps.error);
 
 
     const dropdownProps: SemanticDropdownProps = {
@@ -106,7 +111,7 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
                 isOpen: data.open,
                 isBlurred: false,
                 autofilled: 'idle'
-            }, event);
+            }/* , event */);
         }, []),
         open: state.isOpen,
         options: adaptedOptions,
@@ -165,7 +170,7 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
             setState({
                 isBlurred: true,
                 isOpen: false
-            }, event);
+            }/* , event */);
         }, []),
         ref
     };
@@ -183,18 +188,14 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
                 value: data.value,
                 isOpen: getIsOpenAfterChange((event as any).key),
                 autofilled: 'done',
-            }, event);
+            }/* , event */);
         }, 0);
     }, []);
 
 
     const className = classnames('dropdown-container', 'ui', 'input', {
         'has-images': hasImages,
-        'is-compact': cmpProps.isCompact,
-        /*  dirty: some(value) || some(cmpProps.initialValue || cmpProps.value),
-         error: cmpProps.error,
-         focus: state.isOpen,
-         valid: cmpProps.isValid */
+        'is-compact': cmpProps.isCompact
     });
 
     type OnChangePackedParameters = { event: Parameters<OnChange>[ 0 ], data: Parameters<OnChange>[ 1 ]; };
@@ -211,7 +212,8 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         onChange: useCallback((_name, { event, data }) => { onChange(event, data); }, []),
         value,
         className,
-        icon: !hasImages ? cmpProps.icon : undefined
+        icon: !hasImages ? cmpProps.icon : undefined,
+        useValidCheckOnValid: cmpProps.useValidCheckOnValid
     };
 
     return (
@@ -249,9 +251,10 @@ _Dropdown.defaultProps = {
     onChange: () => { },
     onFocus: () => { },
     options: [],
-    value: undefined,
+    // value: undefined,
     willOpenAbove: false,
-    initialValue: null
+    initialValue: null,
+    useValidCheckOnValid: false
 };
 
 

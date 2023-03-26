@@ -1,23 +1,30 @@
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 import { DEFAULT_IS_INVALID_MESSAGE, DEFAULT_IS_REQUIRED_MESSAGE } from './Form.helpers';
 
 import type { DateRange } from '@lodgify/ui';
 import type { CountryCode } from '../../types';
 import type { InputsState } from './Form.state.type';
 import type { Omit, SelectType, TypeOf } from '../../util.types';
+import { errorToString } from '../../util';
 
+
+type ValidatedValue<TransformedValue = unknown> = { transformedValue?: TransformedValue; error?: string | boolean; };
+
+type DateType = 'string' | 'object'; // 'moment' | 'date';
 
 export type Validation<InputValue = unknown, TransformedValue = InputValue, State extends InputsState = InputsState> = {
     invalidMessage: string;
     isRequired: boolean;
     isRequiredMessage: string;
     isEmpty: (value: InputValue) => boolean;
-    validate: (value: InputValue, state: State) => { value?: TransformedValue; error?: string | boolean; };
+    validate: (value: InputValue, state: State) => ValidatedValue<TransformedValue>;
+    untransformed?: (transformedValue: TransformedValue) => InputValue;
     input?:
-    | { type: 'string' | 'integer' | 'double' | 'boolean' | 'email' | 'date' | 'range-dates'; }
+    | { type: 'string' | 'integer' | 'double' | 'boolean' | 'email'; }
     | { type: 'range-integer' | 'range-double'; min?: number; max?: number; }
-    | { type: 'phone-string'; countryCode: CountryCode; }
-    | { type: 'phone'; };
+    | { type: 'phone-string'; countryCode?: CountryCode; }
+    | { type: 'phone'; }
+    | { type: 'range-dates' | 'date'; dateType: DateType; };
 };
 
 export type ValidationType = Validation[ 'input' ][ 'type' ];
@@ -42,15 +49,7 @@ export type PropsValidationOptions<
 };
 
 
-
-
-const tryCatch = <T = void>(fn: () => T): { error?: string | boolean; } & T => {
-    try {
-        return fn();
-    } catch (e) {
-        return { error: (e as Error).message || true } as any;
-    }
-};
+// type InferDateType<T extends 'string' | 'moment' | 'date'> = T extends 'string' ? string : T extends 'date' ? Date : Moment;
 
 type InputTypeOf = Exclude<TypeOf, 'symbol' | 'function'>;
 
@@ -64,22 +63,33 @@ type InferValueFromType<T extends InputTypeOf> =
 
 
 
+const parseNumber = (value: unknown, type: 'integer' | 'double'): ValidatedValue => {
+    const nb = type === 'integer' ? parseInt(value as string, 10) : parseFloat(value as string);
+    return isNaN(nb) ? { error: `Not a "${type}"` } : { transformedValue: nb };
+};
+
+
 export const validateAndTransform = <T extends InputTypeOf = 'string' | 'boolean'>(
     value: unknown,
     options: { type?: T; error?: string | boolean | ((value: InferValueFromType<T>) => string | boolean); transform?: (value: unknown) => unknown; }
-) => {
-    const { error, type, transform } = options;
+): ValidatedValue => {
+    try {
+        const { error, type, transform } = options;
 
-    if (type && typeof value !== type)
-        return { error: `value "${value}" is not of type "${type}"` };
+        if (type && typeof value !== type)
+            return { error: `value (${typeof value === 'object' ? JSON.stringify(value) : value}) is not of type "${type}"` };
 
-    const err = !!error && (typeof error === 'function' ? error(value as InferValueFromType<T>) : error);
+        const err = !!error && (typeof error === 'function' ? error(value as InferValueFromType<T>) : error);
 
-    if (!!err)
-        return { error: err };
+        if (!!err)
+            return { error: err };
 
 
-    return { value: transform?.(value) ?? value };
+        return { transformedValue: transform?.(value) ?? value };
+
+    } catch (e) {
+        return { error: errorToString(e) };
+    }
 };
 
 
@@ -99,8 +109,8 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
         switch (input.type) {
             case 'string': return validateAndTransform(value, { type: 'string' });
             case 'boolean': return validateAndTransform(value, { type: 'boolean' });
-            case 'integer': return tryCatch(() => ({ value: parseInt(value as string, 10) }));
-            case 'double': return tryCatch(() => ({ value: parseFloat(value as string) }));
+            case 'integer': return parseNumber(value, 'integer');
+            case 'double': return parseNumber(value, 'double');
             case 'email': return validateAndTransform(value, {
                 type: 'string',
                 error: v => !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) ? 'Invalid email' : false
@@ -109,20 +119,13 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
             case 'range-double': {
                 const { min = -Infinity, max = Infinity } = input;
 
-                const getNb = () => {
-                    if (input.type === 'range-integer')
-                        return tryCatch(() => ({ value: parseInt(value as string, 10) }));
-
-                    return tryCatch(() => ({ value: parseInt(value as string, 10) }));
-                };
-
-                const { value: nb, error } = getNb();
+                const { transformedValue: nb, error } = parseNumber(value, 'integer');
 
                 if (typeof error !== undefined)
                     return { error };
 
                 if (min <= nb && nb <= max)
-                    return { value: nb };
+                    return { transformedValue: nb };
 
                 return { error: `${nb} is out of range [ ${min}, ${max} ]` };
             }
@@ -132,25 +135,54 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
                     return validatePhone(value, input.countryCode);
 
                 const phone = value as ValidationValue<'phone'>[ 'value' ];
-                return validatePhone(phone.value, phone.countryCode);
+                const { error } = validatePhone(phone.value, phone.countryCode);
+
+                return error ? { error } : { transformedValue: value };
             }
+            case 'date':
             case 'range-dates': {
-                const dates = value as ValidationValue<'range-dates'>[ 'value' ];
+                const { dateType } = input;
 
-                const validations = {
-                    startDate: validateAndTransform(dates.startDate, { type: 'string' }),
-                    endDate: validateAndTransform(dates.endDate, { type: 'string' })
-                };
+                if (input.type === 'range-dates') {
+                    const dates = value as ValidationValue<'range-dates'>[ 'value' ];
 
-                const error = Object.entries(validations).map(([ k, { error } ]) => error ? `"${k}": ${error}` : '').join(', ');
-                return error ? { error } : { value };
+                    const validations = {
+                        startDate: validateAndTransform(dates.startDate, { type: dateType }),
+                        endDate: validateAndTransform(dates.endDate, { type: dateType })
+                    };
+
+                    const error = Object.entries(validations).map(([ k, { error } ]) => error ? `<${k}>: ${error}` : '').filter(s => s !== '').join(', ');
+                    return error ? { error } : { transformedValue: value };
+                }
+
+                return validateAndTransform(value as ValidationValue<'date'>[ 'value' ], { type: dateType });
             }
 
-            default: return { value };
+            default: return { transformedValue: value };
         }
     }) as V[ 'validate' ];
 
 
+
+    const untransformed = (value => {
+        if (!value)
+            return value;
+
+        switch (input.type) {
+            case 'integer':
+            case 'double':
+            case 'range-integer':
+            case 'range-double': return `${value}`;
+            case 'phone': {
+                const phone = value as string;
+                const parsePhone = parsePhoneNumber(phone);
+
+                return { value: value, countryCode: parsePhone.country } as ValidationValue<'phone'>[ 'value' ];
+            }
+
+            default: return value;
+        }
+    }) as V[ 'untransformed' ];
 
     const validationWithDefaults = {
         isEmpty: value => value === '' || typeof value === 'undefined' || value === null,
@@ -159,6 +191,7 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
         invalidMessage: DEFAULT_IS_INVALID_MESSAGE,
         isRequired: true,
         validate,
+        untransformed,
         ...defaultValidation,
         ...validation
     } as V;
@@ -168,12 +201,12 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
 
 
 
-
 export type ValidationValue<T extends ValidationType> =
-    T extends 'string' | 'email' | 'date' | 'phone-string' ? { value: string; transformedValue: string; } :
+    T extends 'string' | 'email' | 'phone-string' ? { value: string; transformedValue: string; } :
     T extends 'boolean' ? { value: boolean; transformedValue: boolean; } :
     T extends 'phone' ? { value: { countryCode: CountryCode; value: string; }; transformedValue: string; } :
-    T extends 'range-dates' ? { value: DateRange<string>; transformedValue: DateRange<string>; } :
+    T extends 'date' ? { value: DateType; transformedValue: DateType; } :
+    T extends 'range-dates' ? { value: DateRange<DateType>; transformedValue: DateRange<DateType>; } :
     T extends 'integer' | 'double' | 'range-integer' | 'range-double' ? { value: string; transformedValue: number; } :
     unknown;
 

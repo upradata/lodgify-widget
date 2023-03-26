@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { CountriesMetadata, PhonesMetadata } from '../types';
+import type { CountriesMetadata, PhonesMetadata, TimezonesMetadata } from '../types';
 
 
 export type AppContextType = {
@@ -9,6 +9,7 @@ export type AppContextType = {
     logError: (v: unknown) => void;
     phonesMetadata: PhonesMetadata;
     countriesMetadata: CountriesMetadata;
+    timezonesMetadata: TimezonesMetadata;
 };
 
 export const AppContext = createContext<AppContextType>(null);

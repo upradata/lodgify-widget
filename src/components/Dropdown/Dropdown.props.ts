@@ -2,6 +2,7 @@ import { InputProps } from '../../types';
 
 import type { IconNames } from '@lodgify/ui';
 import type { DropdownOnSearchChangeData, StrictDropdownItemProps, StrictDropdownProps } from 'semantic-ui-react';
+import type { InputControllerProps } from '../InputController';
 import type { Omit as MyOmit } from '../../util.types';
 
 
@@ -24,6 +25,7 @@ export class LodgifyDropdownProps<V extends Value | Value[] = Value | Value[], I
     isDisabled?: boolean;
     isSearchable?: boolean;
     isValid?: boolean;
+    useValidCheckOnValid?: InputControllerProps[ 'useValidCheckOnValid' ];
     label?: string;
     // noResultsText?: string;
     options?: {
@@ -38,9 +40,9 @@ export class LodgifyDropdownProps<V extends Value | Value[] = Value | Value[], I
     }[];
     value?: V;
     willOpenAbove?: boolean;
-    onFocus?: (name: string, event: React.SyntheticEvent) => void;
-    onBlur?: (name: string, event: React.SyntheticEvent) => void;
-    onChange?: (name: string, value: V, event: React.SyntheticEvent) => void;
+    onFocus?: (name: string/* , event: React.SyntheticEvent */) => void;
+    onBlur?: (name: string/* , event: React.SyntheticEvent */) => void;
+    onChange?: (name: string, value: V/* , event: React.SyntheticEvent */) => void;
     autoComplete?: string;
     ref?: React.ForwardedRef<DropdownRef<V, ItemProps>>;
 };

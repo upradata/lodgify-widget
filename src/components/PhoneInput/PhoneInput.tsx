@@ -14,24 +14,25 @@ import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled
 import { getCountryCallingCode } from 'libphonenumber-js';
 import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
 import { AppContext } from '../../App/AppContext';
-import { CountryDropdown, CountryDropdownItemOption, CountryDropdownProps, Flag } from '../CountryDropdown';
-import { InputController } from '../InputController';
+import { CountryDropdownItemOption, CountryDropdownProps, createCountryDropdown, /* DEFAULT_COUNTRY, */ Flag } from '../CountryDropdown';
+import { InputController, InputControllerProps } from '../InputController';
 import labels from '../../../node_modules/react-phone-number-input/locale/en.json.js';
 
 // import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
-import type { InputControllerProps, InputProps } from '@lodgify/ui';
+import type { InputProps } from '@lodgify/ui';
 // import { usePrevious, usePreviousListener } from '../../util';
 // import { createPhoneInput } from 'react-phone-number-input/modules/react-hook-form/PhoneInputWithCountry';
 // import _ReactPhoneNumberInput from 'react-phone-number-input/react-hook-form-core';
 import type { Labels, Metadata, Props as _ReactPhoneNumberProps } from 'react-phone-number-input';
 // import parsePhoneNumber from 'libphonenumber-js';
-import type { CountryCode } from '../../types';
+import type { CountryCode, CountryCodeWithInternational } from '../../types';
 import type { Omit } from '../../util.types';
+import { getCityFromLocale, hasProp } from '../../util';
 
 
 export const INITIAL_VALUE = '';
 // export const COUNTRY_OPTIONS = ['US', 'GB', '...'];
-export const DEFAULT_COUNTRY = 'FR';
+// export const DEFAULT_COUNTRY = 'FR'; // ZZ = internationl
 
 // const metadata = new Metadata(phoneMetadata as MetadataJson);
 // const ReactPhoneNumberInput = createPhoneInput(metadata);
@@ -52,13 +53,17 @@ export const getDiallingCode = (countryCode: CountryCode) => {
 };
 
 
-type PhoneInputCountrySelectComponentProps = Omit<CountryDropdownProps, 'onChange'> & { onChange?: (value: CountryCode) => void; };
+type PhoneInputCountrySelectComponentProps = Omit<CountryDropdownProps<CountryCodeWithInternational>, 'onChange'> & { onChange?: (value: CountryCode) => void; };
+
+const CountryDropdown = createCountryDropdown<CountryCodeWithInternational>();
+
 
 const PhoneInputCountrySelectComponent: React.FunctionComponent<PhoneInputCountrySelectComponentProps> = ({ options, iconComponent: CountryIcon, ...props }) => {
     const countryDropdownOptions = useMemo(() => {
-        const optionCache: Record<string, CountryDropdownItemOption> = {};
+        const optionCache: Record<string, CountryDropdownItemOption<CountryCodeWithInternational>> = {};
 
-        return options.map(({ value, label }) => {
+        return ([ { label: labels.ZZ, value: 'ZZ' as const }, ...options ]).map(({ value: v, label }) => {
+            const value = v === 'ZZ' ? undefined : v;
 
             if (!optionCache[ label ]) {
                 optionCache[ label ] = {
@@ -70,7 +75,7 @@ const PhoneInputCountrySelectComponent: React.FunctionComponent<PhoneInputCountr
                         <span className="text">{getDiallingCode(value)}</span>
                     </React.Fragment>,
                     // <Flag name={label} code={value} />,
-                    value,
+                    value: v,
                     // content are the options inside the dropdown options
                     content: <React.Fragment>
                         {/* <Flag name={label} code={value} /> */}
@@ -85,9 +90,11 @@ const PhoneInputCountrySelectComponent: React.FunctionComponent<PhoneInputCountr
     }, [ options ]);
 
 
-    const onChange: CountryDropdownProps[ 'onChange' ] = useCallback((_name, value) => props.onChange?.(value), []);
+    const onChange: CountryDropdownProps<CountryCodeWithInternational>[ 'onChange' ] = useCallback(
+        (_name, value) => props.onChange?.(value === 'ZZ' ? undefined : value), []
+    );
 
-    return <CountryDropdown options={countryDropdownOptions} {...props} onChange={onChange} />;
+    return <CountryDropdown options={countryDropdownOptions} {...props} value={props.value || 'ZZ'} onChange={onChange} />;
 };
 
 /* type FlagComponentProps = {
@@ -112,7 +119,7 @@ const Flag: React.FunctionComponent<FlagComponentProps> = ({ code, name = '' }) 
 PhoneNumberInput.displayName = 'PhoneNumberInput'; */
 const isReset = (previousValue: string, value: string) => (previousValue !== null || typeof previousValue !== 'undefined') && value === null;
 
-export type PhoneIputProps<V = unknown> = Omit<Partial<ReactPhoneNumberProps>, 'value' | 'onChange'> & {
+export type PhoneIputProps<V = unknown> = Omit<Partial<ReactPhoneNumberProps>, 'value' | 'onChange' | 'onCountryChange'> & {
     // autoComplete?: string;
     // countryNames?: Record<string, string>;
     error?: boolean | string;
@@ -123,16 +130,26 @@ export type PhoneIputProps<V = unknown> = Omit<Partial<ReactPhoneNumberProps>, '
     onChange?: (name: string, value: V) => void;
     adaptOnChangeEvent?: (value: string, countryCode: CountryCode) => V;
     mapValue?: (v: V) => string;
+    onCountryChange?: (country?: CountryCode) => void; // there is an error in ReactPhoneNumberProps['ReactPhoneNumberProps']
+    showErrorMessage?: InputControllerProps[ 'showErrorMessage' ];
+    useValidCheckOnValid?: InputControllerProps[ 'useValidCheckOnValid' ];
 } & Omit<InputProps<string>, 'onChange'>;
 
 
 export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnChangeEvent, mapValue, ...props }) => {
-    const { phonesMetadata } = useContext(AppContext);
+    const { phonesMetadata, timezonesMetadata } = useContext(AppContext);
+
+    const localeCity = getCityFromLocale();
+    const localeCountryCode = timezonesMetadata[ localeCity ]?.countryCode;
+
+    const mappedInitialValue = mapValue(props.initialValue);
+    const mappedValue = hasProp(props, 'value') ? mapValue(props.value) : null;
 
     const [ state, setState ] = useState({
         // labels: getLabels(props.countryNames),
-        value: getControlledInputValue(props.value, props.initialValue, props.value),
-        countryISO: props.defaultCountry
+        value: getControlledInputValue(mappedValue, mappedInitialValue, mappedValue),
+        countryISO: props.defaultCountry || localeCountryCode,
+        // isFocused: false
     });
 
 
@@ -150,17 +167,20 @@ export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnCh
     }, [ props.onChange ]);
 
 
-    const { error, isValid, label, isBlurred, name, onChange: _o, value: _v, initialValue, ...reactPhoneInputProps } = props;
+    const { error, isValid, label, isBlurred, name, onChange: _o, value: _v, initialValue, showErrorMessage, ...reactPhoneInputProps } = props;
 
-    const value = getControlledInputValue(mapValue(props.value), initialValue, state.value);
+    const value = getControlledInputValue(mappedValue, mappedInitialValue, state.value);
 
     const inputControllerProps: Omit<InputControllerProps, 'children'> = {
         error,
         isValid,
+        // isFocused: state.isFocused,
         // label,
         onChange: handleChange,
         value,
-        name: props.name || 'phone-number'
+        name: props.name || 'phone-number',
+        showErrorMessage: showErrorMessage || 'blur',
+        useValidCheckOnValid: props.useValidCheckOnValid
     };
 
     const phoneInputProps: ReactPhoneNumberProps = {
@@ -170,9 +190,6 @@ export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnCh
         // flagComponent: props => <Flag name={props.countryName} code={props.country} />, // FlagComponent,
         flagComponent: Flag,
         // labels: props.labels, // state.labels,
-        // onBlur: props.onBlur,
-        onChange: useCallback(() => { }, []), // will be set by InputController
-        // onBlur: useCallback(() => { }, []),
         labels,
         focusInputOnCountrySelection: true,
         smartCaret: false,
@@ -181,11 +198,16 @@ export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnCh
         }), [ label ]),
         className: 'phone-number-input',
         ...reactPhoneInputProps,
+        defaultCountry: props.defaultCountry || localeCountryCode,
+        onChange: useCallback(() => { }, []), // will be set by InputController
+        // onFocus: useCallback(event => { setState(state => ({ ...state, isFocused: true })); props?.onFocus(event); }, []),
+        // onBlur: useCallback(event => { setState(state => ({ ...state, isFocused: false })); props?.onBlur(event); }, []),
         onCountryChange: useCallback((countryISO: CountryCode) => {
             setState(state => ({ ...state, countryISO }));
             props.onCountryChange?.(countryISO);
         }, [ props.onCountryChange ]),
-        metadata: props.metadata || phonesMetadata
+        metadata: props.metadata || phonesMetadata,
+        addInternationalOption: false
         // flagComponent: Flag(phoneMetadata as MetadataJson),
     };
 
@@ -235,7 +257,7 @@ _PhoneInput.defaultProps = {
     autoComplete: 'off',
     error: false,
     // labels: {},
-    defaultCountry: DEFAULT_COUNTRY,
+    // defaultCountry: DEFAULT_COUNTRY,
     isValid: false,
     label: '',
     name: '',
@@ -244,7 +266,8 @@ _PhoneInput.defaultProps = {
     initialValue: INITIAL_VALUE,
     flagUrl: Flag.defaultProps.flagUrl,
     adaptOnChangeEvent: value => value,
-    mapValue: value => value as string
+    mapValue: value => value as string,
+    useValidCheckOnValid: false
 };
 
 

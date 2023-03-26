@@ -57,9 +57,9 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
         handleInputChange,
         handleInputBlur,
         // setInputState,
-        state,
-        // getValidation
-    }), [ handleInputChange, handleInputBlur, state /* , props.validation, setInputState */ ]);
+        inputsState: state,
+        getValidation
+    }), [ handleInputChange, handleInputBlur, state, getValidation /* , props.validation, setInputState */ ]);
 
 
     const { autoComplete, errorMessage, successMessage, actionLink } = props;

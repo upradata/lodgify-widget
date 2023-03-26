@@ -12,28 +12,29 @@ import { CountryIcon } from './CountryIcon';
 // import InternationalIcon from '../../../node_modules/react-phone-number-input/modules/InternationalIcon';
 import { Dropdown, DropdownProps } from '../Dropdown';
 
-// import parsePhoneNumber from 'libphonenumber-js';
-import type { CountryCode } from 'libphonenumber-js/core';
 import type { CountrySelectOptions, CountrySelectWithIconProps } from 'react-phone-number-input';
+// import parsePhoneNumber from 'libphonenumber-js';
+import type { CountryCode } from '../../types';
 import type { Omit as MyOmit } from '../../util.types';
+import { getCityFromLocale } from '../../util';
 
 
-export type CountryDropdownItemOption = {
+export type CountryDropdownItemOption<Country extends string = CountryCode> = {
     name: string;
     text: React.ReactNode;
-    value: CountryCode;
+    value: Country;
     content: React.ReactNode;
 };
 
 
-type _DropdownProps = DropdownProps<CountryCode, CountryDropdownItemOption>;
-type _CountrySelectWithIconProps<P = {}> = CountrySelectWithIconProps<CountrySelectOptions<P>>;
+type _DropdownProps<Country extends string = CountryCode> = DropdownProps<Country, CountryDropdownItemOption<Country>>;
+type _CountrySelectWithIconProps<Country extends string = CountryCode, P = {}> = CountrySelectWithIconProps<Country, CountrySelectOptions<Country, P>>;
 
-export type CountryDropdownProps<P = {}> =
+export type CountryDropdownProps<Country extends string = CountryCode, P = {}> =
     MyOmit<
-        MyOmit<_CountrySelectWithIconProps, 'options' | 'onChange'> &
-        { countryOptions?: _CountrySelectWithIconProps<P>[ 'options' ]; } &
-        Omit<_DropdownProps, Exclude<keyof CountrySelectWithIconProps, 'options' | 'onChange'>>,
+        MyOmit<_CountrySelectWithIconProps<Country, P>, 'options' | 'onChange'> &
+        { countryOptions?: _CountrySelectWithIconProps<Country, P>[ 'options' ]; } &
+        Omit<_DropdownProps<Country>, Exclude<keyof CountrySelectWithIconProps, 'options' | 'onChange'>>,
 
         'onFocus' | 'onBlur'
     >;
@@ -79,7 +80,7 @@ export const getOptionsWithSearch: CountryDropdownProps[ 'getOptionsWithSearch' 
 
 
 const _CountryDropdown: React.FunctionComponent<CountryDropdownProps> = ({ onChange, countryOptions, iconComponent: CountryIcon, ...props }) => {
-    const { countriesMetadata } = useContext(AppContext);
+    const { countriesMetadata, timezonesMetadata } = useContext(AppContext);
 
     const _countryOptions = useMemo(() => {
         return countryOptions || countriesMetadata.map(v => ({ label: v.name, value: v.code }) as CountrySelectOptions);
@@ -118,6 +119,9 @@ const _CountryDropdown: React.FunctionComponent<CountryDropdownProps> = ({ onCha
         });
     }, [ _countryOptions ]);
 
+    const localeCity = getCityFromLocale();
+    const initialValue = props.initialValue || timezonesMetadata[ localeCity ]?.countryCode;
+
     const dropDownProps: _DropdownProps = {
         getOptionsWithSearch,
         isClearable: false,
@@ -126,6 +130,7 @@ const _CountryDropdown: React.FunctionComponent<CountryDropdownProps> = ({ onCha
         // isFluid: true,
         autoComplete: 'country',
         ...props,
+        initialValue,
         onChange, // : useCallback((name, value,event) => { onChange(name, value); }, [ onChange ]),
         options: props.options || options
     };
@@ -133,9 +138,18 @@ const _CountryDropdown: React.FunctionComponent<CountryDropdownProps> = ({ onCha
     return <Dropdown {...dropDownProps} className="CountryDropdown" />;
 };
 
+
+// export const DEFAULT_COUNTRY =  'FR';
+
 _CountryDropdown.displayName = 'CountryDropdown';
 _CountryDropdown.defaultProps = {
-    iconComponent: CountryIcon
+    iconComponent: CountryIcon,
+    // defaultValue: DEFAULT_COUNTRY
 };
 
 export const CountryDropdown = memo(_CountryDropdown);
+
+
+export const createCountryDropdown = <Country extends string, P = {}>() => {
+    return CountryDropdown as React.FunctionComponent<CountryDropdownProps<Country, P>>;
+};

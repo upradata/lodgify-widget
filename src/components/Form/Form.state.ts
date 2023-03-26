@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-// import { getEmptyState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyState';
-// import { getErroredState } from '@lodgify/ui/lib/es/components/collections/Form/utils/getErroredState';
 import isEqual from 'fast-deep-equal';
 import { getEmptyState, useProcessInputValue } from './Form.helpers';
 import { getValidationWithDefaults, makeGetValidation } from './Form.validation';
-import { map } from '../../util';
+import { hasProp, map } from '../../util';
 
-// import type { FormValue, FormValues } from '@lodgify/ui';
 import type { FormProps } from './Form.props';
 import { InputsState, InputState } from './Form.state.type';
 
@@ -28,16 +25,6 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.validation ]);
 
 
-    // const [ stateNameChanged, setStateNameChanged ] = useState<{ name: string | null; }>({ name: null });
-
-    /* useEffect(() => {
-        const { name } = stateNameChanged;
-
-        if (name)
-            props.onInputChange?.(name, (state[ name ] as FormValue).value);
-    }, [ stateNameChanged, props.onInputChange ]); */
-
-
     const setInputState = useCallback((inputName: string, inputState: InputState) => {
         if (!inputState)
             return;
@@ -47,7 +34,7 @@ export const useFormState = (props: UseFormStateProps) => {
                 inputName,
                 inputState: { ...state[ inputName ], ...inputState },
                 previousInputState: state,
-                hasNewValue: 'value' in inputState
+                hasNewValue: hasProp(inputState, 'value')
             });
 
             if (inputStateWithData) {
@@ -56,7 +43,6 @@ export const useFormState = (props: UseFormStateProps) => {
                     [ inputName ]: inputStateWithData
                 };
 
-                // setStateNameChanged({ name: inputName });
                 props.onInputChange?.(inputName, inputStateWithData.transformedValue);
                 return newState;
             }

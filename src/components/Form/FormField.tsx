@@ -1,11 +1,16 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { FormValue, FormValues, InputControllerProps, InputGroup, InputProps } from '@lodgify/ui';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
+import { InputGroup, InputProps } from '@lodgify/ui';
 // import { getInputWidth } from '@lodgify/ui/lib/es/components/collections/Form/utils/getInputWidth';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { Form as SemanticForm, SemanticWIDTHS, StrictFormFieldProps } from 'semantic-ui-react';
 
+import type { InputControllerProps } from '../InputController';
+import type { InputsState, InputState } from './Form.state.type';
 import type { Omit, PropsWithStyle } from '../../util.types';
 import type { Validation } from './Form.validation';
+import { AppContext } from '../../App/AppContext';
+import { errorToString, hasProp } from '../../util';
 
 
 export const InputField: React.FunctionComponent<PropsWithStyle<StrictFormFieldProps>> = React.memo(SemanticForm.Field);
@@ -13,7 +18,7 @@ export const InputField: React.FunctionComponent<PropsWithStyle<StrictFormFieldP
 type RenderInputFieldOptions<V = any> = {
     onBlur: () => void;
     onChange: (_name: string, value: V) => void;
-} & FormValue<V>;
+} & InputState<V>;
 
 type RenderInputFieldProps = { children?: (options: RenderInputFieldOptions) => React.ReactElement; name: string; };
 export const RenderInputField: React.FunctionComponent<RenderInputFieldProps> = ({ children }) => {
@@ -28,8 +33,8 @@ export type ParentImperativeApi = {
     handleInputChange: (name: string, value: unknown) => void;
     handleInputBlur: (name: string) => void;
     // setInputState: (inputName: string, inputState: FormValue) => void;
-    state: FormValues;
-    // getValidation: (name: string | number) => Validation;
+    inputsState: InputsState;
+    getValidation: (name: string | number) => Validation;
 };
 
 const isPrimitiveElement = (element: React.ReactElement | string | number | boolean): string | number | boolean => {
@@ -62,20 +67,26 @@ export const FormField: React.FunctionComponent<FormFieldProps> = ({ children, .
         });
     }
 
-    const { state, ...parent } = props;
+    const getType = (): InputType => {
+        if (_children.type === InputField)
+            return 'field';
 
-    const isInputField = _children.type === InputField;
+        if (_children.type === RenderInputField)
+            return 'render-field';
+
+        return 'input';
+    };
+
+    const type = getType();
+
     // children can be ... 
-    const { name } = isInputField ? reactChildComponent<InputChildProps>(_children)?.props || { name: '' } : _children.props;
+    const { name } = type === 'field' ? reactChildComponent<InputChildProps>(_children)?.props || { name: '' } : _children.props;
+
+    const { inputsState, ...parent } = props;
+    const inputState = inputsState[ name ];
 
     return (
-        <_InputField
-            name={name}
-            inputState={state[ name ]}
-            parent={parent}
-            isInputField={isInputField}
-            isRenderInputField={_children.type === RenderInputField}
-        >
+        <_InputField name={name} parent={parent} inputState={inputState} type={type} >
             {_children}
         </_InputField>
     );
@@ -97,75 +108,93 @@ const reactChildComponent = function <P = {}>(element: React.ReactElement): Reac
     return React.Children.toArray(element.props.children)[ 0 ] as React.ReactElement;
 };
 
+
+type InputType = 'input' | 'field' | 'render-field';
+
 export const _InputField: React.FunctionComponent<{
     // input: InputElement;
     children: InputFieldChild;
     name: string;
-    inputState: FormValue<any>;
-    isInputField: boolean;
-    isRenderInputField: boolean;
-    parent: Omit<ParentImperativeApi, 'state'>;
-}> = ({ /* input */children, name, inputState, isInputField, isRenderInputField, parent }) => {
+    inputState: InputState;
+    type: InputType;
+    parent: Omit<ParentImperativeApi, 'inputsState'>;
+}> = ({ children, name, inputState, type, parent }) => {
+    const context = useContext(AppContext);
 
-    const inputOrField = children as InputFieldChild;
+    const getInput = (): React.ReactElement<InputChildProps> => {
 
-    // const { name } = isInputField ? reactChildComponent<InputChildProps>(inputOrField)?.props || { name: '' } : inputOrField.props;
+        if (type === 'field')
+            return type === 'field' ? reactChildComponent<InputChildProps>(children) : undefined;
+
+        if (type === 'render-field') {
+            if (type !== 'render-field')
+                return undefined;
+
+            if (!inputState)
+                throw new Error(`RenderInputField must have inputState`);
+
+            const render = (children as React.ReactElement<RenderInputFieldProps>).props.children;
+            return render({ onBlur, onChange, ...inputState });
+        }
+
+        return children;
+    };
+
+    const untransformedInputState = () => {
+        try {
+            const validation = parent.getValidation(name);
+            const value = inputState?.value; // getControlledInputValue(input.props.value, input.props.initialValue, inputState?.value);
+            return inputState && hasProp(inputState, 'value') ? { ...inputState, value: validation.untransformed(value) } : {};
+        } catch (e) {
+            context.logError(errorToString(e));
+            return inputState;
+        }
+    };
+
+    const input = getInput();
 
     useEffect(() => {
-        const { value } = inputOrField.props;
+        // check validity on init
+        const { value } = input.props;
+        const validation = parent.getValidation(name);
 
-        if (!value)
+        if (validation.isEmpty(value))
             return;
 
         parent.handleInputChange(name, value);
-        /*  const { propsValidation } = parent;
-         const inputValidation = propsValidation.props[ name ];
-         const { value: validValue, error } = inputValidation.validate(value);
- 
-         if (!error)
-             parent.setInputState(name, { value: validValue, isValid: true });
-         else
-             parent.setInputState(name, { value, error: typeof error === 'string' ? error : inputValidation.invalidMessage }); */
-
-    }, [ /* parent.propsValidation, inputOrField.props, name */ ]);
+    }, []);
 
 
     const onBlur = useCallback(() => parent.handleInputBlur(name), [ name, parent.handleInputBlur ]);
 
     const onChange = useCallback((_name: string, value: unknown) => {
         parent.handleInputChange(name, value);
-        inputOrField.props.onChange?.(name, value);
-    }, [ name, parent.handleInputChange, inputOrField.props.onChange ]);
+        input.props.onChange?.(name, value);
+    }, [ name, parent.handleInputChange, input.props.onChange ]);
 
 
-    const inputFieldElement = useMemo(() => {
-        const input = isInputField ? reactChildComponent<InputChildProps>(inputOrField) : null;
-
-        return isInputField && React.cloneElement(
-            inputOrField,
-            { width: inputOrField.props.width, ...inputOrField.props },
-            isPrimitiveElement(input) ? input : React.cloneElement(input, {
-                ...input.props,
-                onBlur,
-                onChange,
-                ...inputState
-            }));
-    }, [ isInputField, inputOrField, onChange, onBlur, inputState ]);
-
-
-    const renderedElement = useMemo(() => {
-        const input = isRenderInputField ? inputOrField as React.ReactElement<RenderInputFieldProps> : null;
-        const render = input?.props.children;
-
-        return isRenderInputField && render({ onBlur, onChange, ...inputState });
-    }, [ isRenderInputField, inputOrField, onChange, onBlur, inputState ]);
-
-
-    const inputFieldChildren = useMemo(() => !isInputField && React.cloneElement(inputOrField, {
+    const cloneElement = (input: React.ReactElement<InputChildProps>) => React.cloneElement(input, {
+        ...input.props,
         onBlur,
         onChange,
-        ...inputState
-    }), [ isInputField, inputOrField, onChange, onBlur, inputState ]);
+        ...untransformedInputState()
+    });
+
+    const memoArgs = [ children, onChange, onBlur, inputState ];
+
+    const inputFieldElement = useMemo(() => {
+        return type === 'field' && React.cloneElement(
+            children,
+            children.props,
+            isPrimitiveElement(input) ? input : cloneElement(input));
+    }, memoArgs);
+    /* isInputField, inputOrField, */
+
+    const renderedElement = useMemo(() => type === 'render-field' && cloneElement(input), memoArgs);
+    // /* isRenderInputField,  inputOrField,*/
+
+    const inputFieldChildren = useMemo(() => type === 'input' && cloneElement(input), memoArgs);
+    /* isInputField, inputOrField, */
 
 
     if (inputFieldElement)
@@ -175,5 +204,5 @@ export const _InputField: React.FunctionComponent<{
         return renderedElement;
 
 
-    return <InputField width={inputOrField.props.width}>{inputFieldChildren}</InputField>;
+    return <InputField width={input.props.width}>{inputFieldChildren}</InputField>;
 };

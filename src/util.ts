@@ -104,7 +104,9 @@ const isClass = (v: any): v is new (...args: any) => any => {
     return names.includes('prototype') && !names.includes('arguments');
 };
 
-export const fragments = <O extends {}, P extends unknown[]>(obj: O, ...parts: P): Fragments<O, P> => {
+type FragmentPart<T> = ReadonlyArray<keyof T> | (new () => unknown) | Partial<T>;
+
+export const fragments = <O extends {}, P extends FragmentPart<O>[]>(obj: O, ...parts: P): Fragments<O, P> => {
     type Part = (string | number | symbol)[];
 
     const keys = (part: any): Part => {
@@ -150,7 +152,7 @@ type ComplementaryKeys<O extends {}, P> =
     P extends {} ? Omit<O, keyof P & keyof O> :
     [];
 
-export const partition = <O, P>(o: O, p: P): Fragments<O, [ P, ComplementaryKeys<O, P> ]> => {
+export const partition = <O, P extends FragmentPart<O>>(o: O, p: P): Fragments<O, [ P, ComplementaryKeys<O, P> ]> => {
     const [ oP ] = fragments(o, p);
     const opKeys = Reflect.ownKeys(oP);
 
@@ -325,3 +327,19 @@ class B { b = 2; }
 
 const C = mixin(A, B);
  */
+
+
+export const errorToString = (e: unknown) => e instanceof Error ? e.message : typeof e === 'string' ? e : JSON.stringify(e);
+
+
+export const getCityFromLocale = () => {
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timezoneParts = userTimeZone.split("/");
+    // const userRegion = tzArr[ 0 ];
+    const userCity = timezoneParts.at(-1);
+
+    return userCity;
+};
+
+
+export const hasProp = <T extends {}>(o: T, prop: keyof T): boolean => prop in o;

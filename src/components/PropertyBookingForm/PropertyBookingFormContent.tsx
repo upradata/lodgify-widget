@@ -7,7 +7,6 @@ import { Dropdown, DropdownProps } from '../Dropdown';
 import { Form, FormProps, InputField } from '../Form';
 import { makeValidation, PropsValidationOptions } from '../Form/Form.validation';
 
-import type { ChangeInputData } from './PropertyBookingForm.type';
 import type { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
 
 
@@ -61,7 +60,7 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         },
         props: {
             location: makeValidation('string'),
-            dates: makeValidation('string'),
+            dates: makeValidation('range-dates', { input: { dateType: 'object' } }),
             guests: makeValidation('integer'),
         }
     } satisfies PropsValidationOptions), []);
