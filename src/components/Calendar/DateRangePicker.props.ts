@@ -1,6 +1,7 @@
 import { InputProps } from '../../types';
 
 import type { DateRange, FormValue as LodgifyFormValue } from '@lodgify/ui';
+import type { InputControllerProps } from '../InputController';
 
 
 class FormValue<V = unknown> extends InputProps implements Required<LodgifyFormValue> {
@@ -27,5 +28,6 @@ export class DateRangePickerProps extends (FormValue as (new () => Partial<FormV
     startDatePlaceholderText?: string;
     value?: DateRange;
     willOpenAbove?: boolean;
+    useValidCheckOnValid?: InputControllerProps[ 'useValidCheckOnValid' ];
     // windowInnerWidth?: number;
 };

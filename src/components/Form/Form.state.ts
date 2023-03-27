@@ -12,16 +12,22 @@ export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' 
 
 export const useFormState = (props: UseFormStateProps) => {
 
-    const [ state, setState ] = useState<InputsState>({});
+    const [ state, setState ] = useState<InputsState>(() => {
+        return Object.keys(props.validation?.props || {}).reduce((state, name) => ({ ...state, [ name ]: {} }), {} as InputsState);
+    });
+
     const processInputValue = useProcessInputValue();
 
-    const getValidation = useMemo(() => {
+    const { propsValidation, getValidation } = useMemo(() => {
         const propsValidation = map(props.validation.props, (name, validation) => [
             name,
             getValidationWithDefaults(validation, props.validation.default)
         ]);
 
-        return makeGetValidation(propsValidation, props.validation.default);
+        return {
+            propsValidation,
+            getValidation: makeGetValidation(propsValidation, props.validation.default),
+        };
     }, [ props.validation ]);
 
 
@@ -93,7 +99,7 @@ export const useFormState = (props: UseFormStateProps) => {
     useEffect(() => {
         if (!!props.successMessage) {
             setState(state => {
-                const emptyState = getEmptyState(getValidation, state);
+                const emptyState = getEmptyState(state, getValidation);
                 return { ...state, ...emptyState };
             });
 
@@ -101,5 +107,5 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.successMessage ]);
 
 
-    return { state, setState, setInputState, getValidation };
+    return { state, setState, setInputState, propsValidation, getValidation };
 };

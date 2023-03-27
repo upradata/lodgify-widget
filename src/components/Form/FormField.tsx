@@ -32,7 +32,7 @@ export const NoInputField: React.FunctionComponent<{}> = ({ children }) => <Reac
 export type ParentImperativeApi = {
     handleInputChange: (name: string, value: unknown) => void;
     handleInputBlur: (name: string) => void;
-    // setInputState: (inputName: string, inputState: FormValue) => void;
+    setInputState: (inputName: string, inputState: InputState) => void;
     inputsState: InputsState;
     getValidation: (name: string | number) => Validation;
 };
@@ -130,11 +130,11 @@ export const _InputField: React.FunctionComponent<{
             if (type !== 'render-field')
                 return undefined;
 
-            if (!inputState)
-                throw new Error(`RenderInputField must have inputState`);
+            /* if (!inputState)
+                throw new Error(`RenderInputField must have inputState`); */
 
             const render = (children as React.ReactElement<RenderInputFieldProps>).props.children;
-            return render({ onBlur, onChange, ...inputState });
+            return render({ onBlur: () => { onBlur(); }, onChange: (name, value) => { onChange(name, value); }, ...inputState });
         }
 
         return children;
@@ -159,9 +159,9 @@ export const _InputField: React.FunctionComponent<{
         const validation = parent.getValidation(name);
 
         if (validation.isEmpty(value))
-            return;
-
-        parent.handleInputChange(name, value);
+            parent.setInputState(name, {});
+        else
+            parent.handleInputChange(name, value);
     }, []);
 
 

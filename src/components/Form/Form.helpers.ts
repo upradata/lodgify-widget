@@ -3,7 +3,7 @@ import { AppContext } from '../../App/AppContext';
 import { map } from '../../util';
 
 import type { InputsState, InputState } from './Form.state.type';
-import type { Validation } from './Form.validation';
+import type { GetValidation, Validation } from './Form.validation';
 
 
 // import { getEmptyRequiredInputs as _getEmptyRequiredInputs } from '@lodgify/ui/lib/es/components/collections/Form/utils/getEmptyRequiredInputs';
@@ -21,7 +21,7 @@ export const isRequiredError = (value: unknown, validation: Validation) => {
 
 
 
-export const getEmptyRequiredInputs = (getValidation: (name: string | number) => Validation, inputsState: InputsState): string[] => {
+export const getEmptyRequiredInputs = (inputsState: InputsState, getValidation: GetValidation): string[] => {
     return Object.entries(inputsState).reduce((list, [ inputName, { value } ]) => {
         if (isRequiredError(value, getValidation(inputName)))
             return [ ...list, inputName ];
@@ -31,7 +31,7 @@ export const getEmptyRequiredInputs = (getValidation: (name: string | number) =>
 };
 
 
-export const getEmptyState = (getValidation: (name: string | number) => Validation, intputsValues: InputsState) => {
+export const getEmptyState = (intputsValues: InputsState, getValidation: GetValidation) => {
     return map(intputsValues, (name, data) => {
         const { input } = getValidation(name);
         return [ name, { ...data, value: input.type === 'date' /* name === 'dates' */ ? null : '' } ];
@@ -85,6 +85,12 @@ export const useProcessInputValue = () => {
 export type ProcessInputValue = ReturnType<typeof useProcessInputValue>;
 
 
-export const isSubmitButtonDisabled = (inputsState: InputsState) => {
-    return Object.values(inputsState).some(({ error }) => !!error);
+export const isSubmitButtonDisabled = (inputsState: InputsState, getValidation: GetValidation) => {
+    const emptyRequiredInputs = getEmptyRequiredInputs(inputsState, getValidation);
+
+    if (emptyRequiredInputs.length > 0)
+        return true;
+
+    const values = Object.values(inputsState);
+    return values.length === 0 || values.some(({ error }) => !!error);
 };

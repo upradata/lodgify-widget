@@ -1,4 +1,13 @@
 .PropertyBookingForm {
+    .dropdown-container.valid .ui.selection.dropdown,
+    .ui.form .ui.input.valid .DateRangePickerInput,
+    .ui.form .ui.input.valid .SingleDatePickerInput,
+    .ui.input.valid .DateRangePickerInput,
+    .ui.input.valid .SingleDatePickerInput {
+        background: unset;
+        border-color: unset;
+    }
+
     .ui.form .field {
         clear: none;
         margin: unset;

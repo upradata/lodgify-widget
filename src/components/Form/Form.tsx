@@ -19,7 +19,7 @@ export type FormImperativeAPI = {
 
 
 const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, submitButtonText, isSubmitDisabled, ...props }, ref) => {
-    const { state, setInputState, getValidation } = useFormState(props);
+    const { state, setInputState, getValidation, propsValidation } = useFormState(props);
 
     useImperativeHandle(ref, () => ({ setInputState }), [ setInputState ]);
 
@@ -40,7 +40,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
 
 
     const handleSubmit = useCallback(() => {
-        const emptyRequiredInputs = getEmptyRequiredInputs(getValidation, state);
+        const emptyRequiredInputs = getEmptyRequiredInputs(state, getValidation);
 
         if (emptyRequiredInputs.length > 0) {
             emptyRequiredInputs.forEach(inputName => {
@@ -56,10 +56,10 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
     const imperativeInterfaceForChildren: ParentImperativeApi = useMemo(() => ({
         handleInputChange,
         handleInputBlur,
-        // setInputState,
+        setInputState,
         inputsState: state,
         getValidation
-    }), [ handleInputChange, handleInputBlur, state, getValidation /* , props.validation, setInputState */ ]);
+    }), [ handleInputChange, handleInputBlur, state, getValidation, setInputState ]);
 
 
     const { autoComplete, errorMessage, successMessage, actionLink } = props;
@@ -72,7 +72,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
             {errorMessage && <Message content={errorMessage} error />}
             {actionLink && <Link onClick={actionLink.onClick}>{actionLink.text}</Link>}
 
-            <FormButton searchButton={searchButton} submitButtonText={submitButtonText} isDisabled={isSubmitDisabled(state)} />
+            <FormButton searchButton={searchButton} submitButtonText={submitButtonText} isDisabled={isSubmitDisabled({ ...state }, getValidation)} />
         </SemanticForm>
     );
 };

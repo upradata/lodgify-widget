@@ -1,6 +1,6 @@
 // import type { FormProps as LodgifyFormProps /*FormValues , Validation as LodgifyValidation */ } from '@lodgify/ui';
 import type { StrictFormProps } from 'semantic-ui-react';
-import type { PropsValidationOptions } from './Form.validation';
+import type { GetValidation, PropsValidationOptions } from './Form.validation';
 import type { InputsState } from './Form.state.type';
 import type { Omit, PropsWithStyle } from '../../util.types';
 
@@ -21,6 +21,6 @@ export type FormProps<InputValue = unknown, InputPropsValue extends Record<strin
 
     onSubmit?: (values: InputPropsValue, inputsState: InputsState<InputPropsValue>) => void;
     onInputChange?: (name: keyof InputPropsValue, value: InputPropsValue[ keyof InputPropsValue ]) => void;
-    isSubmitDisabled?: (inputsState: InputsState<InputPropsValue>) => boolean;
+    isSubmitDisabled?: (inputsState: InputsState<InputPropsValue>, getValidation: GetValidation<InputValue, InputPropsValue>) => boolean;
     // ref?: React.MutableRefObject<typeof Form>;
 }> & Omit<StrictFormProps, 'onSubmit' | 'children'>;

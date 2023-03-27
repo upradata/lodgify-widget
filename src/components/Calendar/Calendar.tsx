@@ -132,7 +132,8 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
         mapValueToProps,
         name: rangePickerProps.name,
         onChange: rangePickerProps.onChange,
-        value: rangePickerProps.value
+        value: rangePickerProps.value,
+        useValidCheckOnValid: props.useValidCheckOnValid
     };
 
     const dateRangePickerProps: ReactDatesDateRangePickerProps = {
@@ -196,7 +197,8 @@ _Calendar.defaultProps = {
     startDatePlaceholderText: '',
     value: undefined,
     willOpenAbove: false,
-    windowWidth: MAXIMUM_SCREEN_WIDTH_FOR_TWO_MONTH_CALENDAR
+    windowWidth: MAXIMUM_SCREEN_WIDTH_FOR_TWO_MONTH_CALENDAR,
+    useValidCheckOnValid: false
 };
 
 const MemoCalendar = memo(_Calendar);

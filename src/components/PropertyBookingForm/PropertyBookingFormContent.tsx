@@ -17,7 +17,8 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         onChange: props.onInputChange,
         options: props.locationOptions,
         value: props.locationInputValue,
-        willOpenAbove: props.willLocationDropdownOpenAbove
+        willOpenAbove: props.willLocationDropdownOpenAbove,
+        useValidCheckOnValid: false
     };
 
 
@@ -33,7 +34,8 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         onFocusChange: props.datesInputOnFocusChange,
         startDatePlaceholderText: props.datesCheckInLabel,
         value: props.datesInputValue,
-        willOpenAbove: props.willLocationDropdownOpenAbove
+        willOpenAbove: props.willLocationDropdownOpenAbove,
+        
     };
 
     /* const counterDropdownProps: CounterDropdownProps = {

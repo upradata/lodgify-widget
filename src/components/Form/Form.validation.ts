@@ -103,7 +103,7 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
     validation: Partial<V> = {}, defaultValidation: Partial<V> = {}
 ): V => {
 
-    const { input } = validation;
+    const input = validation.input || defaultValidation.input || { type: 'default' };
 
     const validate = (value => {
         switch (input.type) {
@@ -158,6 +158,7 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
                 return validateAndTransform(value as ValidationValue<'date'>[ 'value' ], { type: dateType });
             }
 
+            case 'default':
             default: return { transformedValue: value };
         }
     }) as V[ 'validate' ];
@@ -252,7 +253,14 @@ export const makeGetValidation = <
     const defaultValidationWithDefault = getValidationWithDefaults({}, defaultValidation);
 
     return (name: InferValidationData<PropsV>[ 'inputNames' ]) => {
-        return propsValidation[ name ] || defaultValidationWithDefault;
+        return propsValidation?.[ name ] || defaultValidationWithDefault;
     };
 
 };
+
+
+export type GetValidation<
+    InputValue = unknown,
+    InputValues extends Record<string, InputValue> = Record<string, InputValue>,
+    N extends string = string
+> = (name: N) => N extends keyof InputValues ? Validation<InputValue, InputValues[ keyof InputValues ], InputsState<InputValues>> : Validation;
