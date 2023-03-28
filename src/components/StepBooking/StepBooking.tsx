@@ -81,8 +81,12 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
     const [ activeIndex, setActiveIndex ] = useState(defaultActiveIndex);
 
 
-    const [ tabStates, _setTabsState ] = useState<TabsState>(Object.fromEntries(
-        tabNames.map((name, i) => [ name, { isActive: i === defaultActiveIndex, isValid: name === 'booking', isEnabled: name !== 'billing' } as TabState ])
+    const [ tabStates, _setTabsState ] = useState<TabsState>(() => Object.fromEntries(
+        tabNames.map((name, i) => [ name, {
+            isActive: i === defaultActiveIndex,
+            isValid: name === 'booking',
+            isEnabled: name !== 'billing'
+        } as TabState ])
     ) as TabsState);
 
     const isBillingTabEnabled = (tabsState: TabsState) => {

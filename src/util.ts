@@ -212,14 +212,13 @@ export const isSame = <T, U>(value1: T, value2: U): boolean => {
 export const plural = (n: number, s: string) => `${s}${n > 1 ? 's' : ''}`;
 
 
-export const map = <T, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, (unknown | typeof map_KEEP_VALUE)?]>(
+export const map = <T extends object, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, (unknown | typeof map_KEEP_VALUE)?]>(
     o: T, mapping: M, options: { mode?: 'recursive'; } = {}
 ): { [ K in ReturnType<M>[ 0 ] ]: ReturnType<M>[ 1 ]; } => {
 
     const { mode } = options;
 
     const next = (oldValue: unknown, newValue: unknown) => {
-
 
         if (mode === 'recursive') {
 
@@ -229,7 +228,7 @@ export const map = <T, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, (u
                     if (Array.isArray(oldValue))
                         return oldValue.map(v => _map(v));
 
-                    return map(oldValue, mapping);
+                    return _map(oldValue);
                 }
 
                 return oldValue;
@@ -245,9 +244,9 @@ export const map = <T, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, (u
         return newValue;
     };
 
-    const _map = (o: T) => {
+    const _map = (o: {}) => {
         if (typeof o !== 'object' || Array.isArray(o) || o === null)
-            return o as any;
+            return o;
 
         return Object.entries(o).reduce((mappedO, [ k, v ]) => {
             const m = mapping(k as KeyOf<T>, v);
@@ -257,7 +256,7 @@ export const map = <T, M extends (key: KeyOf<T>, value: ValueOf<T>) => [ Key, (u
                 return mappedO;
 
             return { ...mappedO, [ mappedK ]: next(v, mappedV) };
-        }, {}) as any;
+        }, {});
     };
 
     return _map(o);
@@ -290,15 +289,38 @@ export const removeType = <T extends object | any[]>(v: T, type: TypeOf): T => {
     return filter(v, (_, v) => typeof v !== type);
 };
 
-export const kebabCase = (s: string, sep: '-' | '_' = '_') => s.trim().replaceAll(/(\s+)/g, sep).toLowerCase();
-export const camelCase = (s: string) => s.trim().toLowerCase().replaceAll(/_./g, s => s[ 1 ].toUpperCase());
+export const kebabCase = (s: string, sep: '-' | '_' = '_') => s.trim()
+    .replaceAll(/(\s+)/g, sep)
+    .replaceAll(/[A-Z]/g, (s, index) => `${index === 0 ? '' : sep}${s.toLowerCase()}`)
+    .replaceAll(new RegExp(`${sep}+`, 'g'), sep);
 
+export const camelCase = (s: string, sep: '-' | '_' = '_') => s.trim().replaceAll(new RegExp(`${sep}.`, 'g'), s => s[ 1 ].toUpperCase());
 
-export const toCasedObject = <O, T extends CasedType>(o: O, type: T): CasedObject<O, T> => {
+export const toCasedObject = <O extends object, T extends CasedType>(o: O, type: T): CasedObject<O, T> => {
     const casing = type === 'camel' ? camelCase : kebabCase;
     return map(o, k => [ casing(k as string) ], { mode: 'recursive' }) as any;
 };
 
+/* console.log(kebabCase('theFullName'));
+console.log(camelCase('theFullName'));
+
+console.log(kebabCase('the_full_name'));
+console.log(camelCase('the_Full_Name'));
+
+console.log(toCasedObject({
+    theFullName: 'Thomas Milotti',
+    anotherProp: {
+        aSmallProp: 1,
+        anotherProp: {
+            x_y: 1
+        }
+    }
+}, 'kebab'));
+
+console.log(toCasedObject({
+    the_full_name: 'Thomas Milotti',
+    another_prop: { a_small_prop: 1, another_prop: { xY: 1 } }
+}, 'camel')); */
 
 /* type MergeIstances<C extends (new () => any)[], Merge = {}> = C extends [ infer Ctor, ...infer Rest ] ?
     Rest extends (new () => any)[] ? Ctor extends (new () => any) ?

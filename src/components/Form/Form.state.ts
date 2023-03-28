@@ -5,10 +5,10 @@ import { getValidationWithDefaults, makeGetValidation } from './Form.validation'
 import { hasProp, map } from '../../util';
 
 import type { FormProps } from './Form.props';
-import { InputsState, InputState } from './Form.state.type';
+import { InputsState, InputState, InputStateAction, SetInputState } from './Form.state.type';
 
 
-export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange'>;
+export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange' | 'isSubmitDisabled' | 'onSubmitEnabled'>;
 
 export const useFormState = (props: UseFormStateProps) => {
 
@@ -31,7 +31,9 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.validation ]);
 
 
-    const setInputState = useCallback((inputName: string, inputState: InputState) => {
+    const [ isDisabled, setIsDisabled ] = useState(props.isSubmitDisabled(state, getValidation));
+
+    const setInputState: SetInputState = useCallback((inputName, inputState) => {
         if (!inputState)
             return;
 
@@ -39,7 +41,7 @@ export const useFormState = (props: UseFormStateProps) => {
             const inputStateWithData = getInputStateWithData({
                 inputName,
                 inputState: { ...state[ inputName ], ...inputState },
-                previousInputState: state,
+                previousInputsState: state,
                 hasNewValue: hasProp(inputState, 'value')
             });
 
@@ -50,6 +52,13 @@ export const useFormState = (props: UseFormStateProps) => {
                 };
 
                 props.onInputChange?.(inputName, inputStateWithData.transformedValue);
+                const isNowDisabled = props.isSubmitDisabled(newState, getValidation);
+
+                if (isNowDisabled !== isDisabled) {
+                    setIsDisabled(isNowDisabled);
+                    props.onSubmitEnabled?.(!isNowDisabled);
+                }
+
                 return newState;
             }
 
@@ -60,14 +69,16 @@ export const useFormState = (props: UseFormStateProps) => {
 
     const getInputStateWithData = useCallback((options: {
         inputName: string;
-        inputState: InputState;
-        previousInputState: InputState;
+        inputState: InputStateAction;
+        previousInputsState: InputState;
         hasNewValue: boolean;
     }) => {
-        const { inputName, inputState, previousInputState, hasNewValue } = options;
-        const previousState = previousInputState?.[ inputName ] || {};
+        const { inputName, previousInputsState, hasNewValue } = options;
+        const { type, ...inputState } = options.inputState;
 
-        if (isEqual(previousState, inputState))
+        const previousState: InputState = previousInputsState?.[ inputName ] || {};
+
+        if (type !== 'init' && isEqual(previousState, inputState))
             return undefined;
 
         const processedInputValue = processInputValue({
@@ -83,7 +94,7 @@ export const useFormState = (props: UseFormStateProps) => {
             case inputState.isBlurred && previousState.value !== inputState.value:
                 return processedInputValue;
 
-            case previousState.value !== processedInputValue.value:
+            case !hasProp(previousState, 'value') || previousState.value !== processedInputValue.value:
                 return processedInputValue;
             /*  return {
                  ...validatedInputValue,
@@ -107,5 +118,5 @@ export const useFormState = (props: UseFormStateProps) => {
     }, [ props.successMessage ]);
 
 
-    return { state, setState, setInputState, propsValidation, getValidation };
+    return { state, setState, setInputState, propsValidation, getValidation, isDisabled };
 };

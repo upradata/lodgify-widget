@@ -1,16 +1,16 @@
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
-import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
+// import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
 import { InputGroup, InputProps } from '@lodgify/ui';
 // import { getInputWidth } from '@lodgify/ui/lib/es/components/collections/Form/utils/getInputWidth';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { Form as SemanticForm, SemanticWIDTHS, StrictFormFieldProps } from 'semantic-ui-react';
-
-import type { InputControllerProps } from '../InputController';
-import type { InputsState, InputState } from './Form.state.type';
-import type { Omit, PropsWithStyle } from '../../util.types';
-import type { Validation } from './Form.validation';
 import { AppContext } from '../../App/AppContext';
 import { errorToString, hasProp } from '../../util';
+
+import type { InputControllerProps } from '../InputController';
+import type { InputsState, InputState, SetInputState } from './Form.state.type';
+import type { Omit, PropsWithStyle } from '../../util.types';
+import type { Validation } from './Form.validation';
 
 
 export const InputField: React.FunctionComponent<PropsWithStyle<StrictFormFieldProps>> = React.memo(SemanticForm.Field);
@@ -32,7 +32,7 @@ export const NoInputField: React.FunctionComponent<{}> = ({ children }) => <Reac
 export type ParentImperativeApi = {
     handleInputChange: (name: string, value: unknown) => void;
     handleInputBlur: (name: string) => void;
-    setInputState: (inputName: string, inputState: InputState) => void;
+    setInputState: SetInputState;
     inputsState: InputsState;
     getValidation: (name: string | number) => Validation;
 };
@@ -159,7 +159,7 @@ export const _InputField: React.FunctionComponent<{
         const validation = parent.getValidation(name);
 
         if (validation.isEmpty(value))
-            parent.setInputState(name, {});
+            parent.setInputState(name, { type: 'init' });
         else
             parent.handleInputChange(name, value);
     }, []);

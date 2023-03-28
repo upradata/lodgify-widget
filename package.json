@@ -9,7 +9,7 @@
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "generate-libphonenumber-metadata": "./metadata/countries-metadata.sh phone",
-        "generate-timezone-metadata":"./metadata/countries-metadata.sh timezone"
+        "generate-timezone-metadata": "./metadata/countries-metadata.sh timezone"
     },
     "eslintConfig": {
         "extends": [
@@ -66,6 +66,7 @@
         "fs-extra": "^11.1.1",
         "libphonenumber-metadata-generator": "^1.0.1",
         "moment-timezone": "^0.5.42",
-        "sass": "^1.57.1"
+        "sass": "^1.57.1",
+        "ts-node": "^10.9.1"
     }
 }

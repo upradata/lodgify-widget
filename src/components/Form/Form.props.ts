@@ -22,5 +22,6 @@ export type FormProps<InputValue = unknown, InputPropsValue extends Record<strin
     onSubmit?: (values: InputPropsValue, inputsState: InputsState<InputPropsValue>) => void;
     onInputChange?: (name: keyof InputPropsValue, value: InputPropsValue[ keyof InputPropsValue ]) => void;
     isSubmitDisabled?: (inputsState: InputsState<InputPropsValue>, getValidation: GetValidation<InputValue, InputPropsValue>) => boolean;
+    onSubmitEnabled?: (isEnabled: boolean) => void;
     // ref?: React.MutableRefObject<typeof Form>;
 }> & Omit<StrictFormProps, 'onSubmit' | 'children'>;

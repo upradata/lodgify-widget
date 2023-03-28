@@ -1,6 +1,6 @@
 import './Form.scss';
 
-import React, { memo, useCallback, useImperativeHandle, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useImperativeHandle, useMemo } from 'react';
 import { Button, FormValue, Link } from '@lodgify/ui';
 // import { setInputState } from '@lodgify/ui/lib/es/components/collections/Form/utils/setInputState';
 import { SEND } from '@lodgify/ui/lib/es/utils/default-strings';
@@ -18,14 +18,18 @@ export type FormImperativeAPI = {
 };
 
 
-const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ className, searchButton, submitButtonText, isSubmitDisabled, ...props }, ref) => {
-    const { state, setInputState, getValidation, propsValidation } = useFormState(props);
+const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({
+    className, searchButton, submitButtonText, ...props }, ref
+) => {
+
+    const { state, setInputState, getValidation, isDisabled } = useFormState(props);
 
     useImperativeHandle(ref, () => ({ setInputState }), [ setInputState ]);
 
     const handleInputBlur = useCallback((name: string) => {
         setInputState(name, {
-            isBlurred: true
+            isBlurred: true,
+            type: 'update'
         });
     }, []);
 
@@ -33,7 +37,8 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
     const handleInputChange = useCallback((name: string, value: string) => {
         setInputState(name, {
             isBlurred: false,
-            value
+            value,
+            type: 'update'
         });
 
     }, []);
@@ -44,7 +49,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
 
         if (emptyRequiredInputs.length > 0) {
             emptyRequiredInputs.forEach(inputName => {
-                setInputState(inputName, { error: getValidation(inputName).isRequiredMessage, isBlurred: true });
+                setInputState(inputName, { error: getValidation(inputName).isRequiredMessage, isBlurred: true, type: 'update' });
             });
         } else {
             const values = Object.entries(state).reduce((o, [ k, v ]) => ({ ...o, [ k ]: v.value }), {} as Record<string, unknown>);
@@ -72,7 +77,7 @@ const _Form: React.ForwardRefRenderFunction<FormImperativeAPI, FormProps> = ({ c
             {errorMessage && <Message content={errorMessage} error />}
             {actionLink && <Link onClick={actionLink.onClick}>{actionLink.text}</Link>}
 
-            <FormButton searchButton={searchButton} submitButtonText={submitButtonText} isDisabled={isSubmitDisabled({ ...state }, getValidation)} />
+            <FormButton searchButton={searchButton} submitButtonText={submitButtonText} isDisabled={isDisabled} />
         </SemanticForm>
     );
 };

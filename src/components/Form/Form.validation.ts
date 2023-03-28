@@ -250,7 +250,7 @@ export const makeGetValidation = <
     propsValidation: PropsV,
     defaultValidation: Partial<InferValidation<PropsV>> = {}
 ) => {
-    const defaultValidationWithDefault = getValidationWithDefaults({}, defaultValidation);
+    const defaultValidationWithDefault = getValidationWithDefaults({}, { isRequired: false, ...defaultValidation });
 
     return (name: InferValidationData<PropsV>[ 'inputNames' ]) => {
         return propsValidation?.[ name ] || defaultValidationWithDefault;

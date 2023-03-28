@@ -32,7 +32,7 @@ export const getLodgifyOptions = (body?: string): RequestInit => ({
     method: !!body ? 'POST' : 'GET',
     headers: {
         accept: 'application/json',
-        ...(!!body ? { 'content-type': 'application/*+json' } : {}),
+        ...(!!body ? { 'content-type': /* 'application/*+json' */ 'application/json' } : {}),
         'X-ApiKey': '+BvSxGGZ/ay5H3lVshlgJvyDwSqRXAnhU4/kjvRdECoPHGTbKZ3pngf3MgEVv2K/',
         // mode: 'same-origin'
     },
