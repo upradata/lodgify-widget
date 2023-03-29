@@ -1,35 +1,17 @@
 import React, { cloneElement, forwardRef, memo, useCallback, useState } from 'react';
 import { ErrorMessage } from '@lodgify/ui/lib/es/components/inputs/ErrorMessage';
 import { getValueFromEvent } from '@lodgify/ui/lib/es/components/inputs/InputController/utils/getValueFromEvent';
-import { Icon, InputControllerProps as LodgifyInputControllerProps } from '@lodgify/ui';
+import { Icon } from '@lodgify/ui';
 import { returnFirstArgument } from '@lodgify/ui/lib/es/utils/return-first-argument';
 import { some } from '@lodgify/ui/lib/es/utils/some';
 import classnames from 'classnames';
-import { Input, StrictInputProps } from 'semantic-ui-react';
-import { hasProp } from '../../util';
-
-import type { Omit } from '../../util.types';
-
-
-export type InputControllerProps<V = unknown, Args extends unknown[] = unknown[]> =
-    Omit<LodgifyInputControllerProps, 'children' | 'onChange' | 'adaptOnChangeEvent'> &
-    Omit<StrictInputProps, 'className' | 'fluid' | 'error' | 'onChange'> &
-    {
-        as?: React.ElementType | string;
-        showErrorMessage?: 'typing' | 'blur';
-        isDirty?: boolean;
-        className?: string;
-        adaptOnChangeEvent?: (...args: Args) => V;
-        onChange?: (name: string, value: V) => void;
-        initialValue?: V;
-        onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
-        onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
-        hasFocusAndBlur?: boolean;
-        useValidCheckOnValid?: boolean;
-    };
+import { Input } from 'semantic-ui-react';
+import { fragments, hasProp } from '../../util';
+import { InputState } from '../Form';
+import { InputControllerProps } from './InputController.props';
 
 
-const FwdRefInputController: React.ForwardRefRenderFunction<{}, InputControllerProps & { transformedValue?: never; children: Parameters<typeof cloneElement>[ 0 ]; }> = ({
+const FwdRefInputController: React.ForwardRefRenderFunction<{}, InputControllerProps & { children: Parameters<typeof cloneElement>[ 0 ]; }> = ({
     onChange, error, showErrorMessage, isCompact, isValid, name, icon,
     adaptOnChangeEvent, inputOnChangeFunctionName, mapValueToProps, children, className: klass, as,
     onBlur, onFocus, hasFocusAndBlur, useValidCheckOnValid, ...props
@@ -37,8 +19,10 @@ const FwdRefInputController: React.ForwardRefRenderFunction<{}, InputControllerP
     const As = as || Input;
 
     // we remove transformedValue created in Form component
-    const { isDirty, isFluid, transformedValue, isFocused, value: v, ...restProps } = props;
-    const value = hasProp(props, 'value') ? v : null;
+    const [ , propsWithoutInputStateProps ] = fragments(props, InputState);
+
+    const { isDirty, isFluid, isFocused, ...restProps } = propsWithoutInputStateProps;
+    const value = hasProp(props, 'value') ? props.value : null;
 
     const handleChange = useCallback((...args: any[]) => {
         onChange(name, adaptOnChangeEvent.apply(null, args));
@@ -61,7 +45,7 @@ const FwdRefInputController: React.ForwardRefRenderFunction<{}, InputControllerP
         valid: isValid
     }, klass);
 
-    const inputProps = typeof as === 'function' ? {
+    const inputProps = typeof As === 'function' ? {
         value,
         fluid: isFluid,
         iconPosition: icon ? 'left' : undefined

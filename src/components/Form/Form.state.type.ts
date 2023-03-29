@@ -1,7 +1,7 @@
-export type InputState<InputValue = unknown, TrasnformedValue = InputValue> = {
+export class InputState<InputValue = unknown, TransformedValue = InputValue>  {
     isBlurred?: boolean;
     value?: InputValue;
-    transformedValue?: TrasnformedValue;
+    transformedValue?: TransformedValue;
     isValid?: boolean;
     error?: boolean | string;
 };

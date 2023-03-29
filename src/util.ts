@@ -85,10 +85,10 @@ export const localizedDate = (date: Moment, options: { longDateFormat?: moment.L
 
 
 
-type Fragments<O extends {}, P> = P extends [] ? [] : P extends [ infer T, ...infer Rest ] ?
-    T extends ReadonlyArray<keyof O> ? [ Pick<O, T[ number ] & keyof O>, ...Fragments<O, Rest> ] :
-    T extends new (...args: any) => any ? [ Pick<O, keyof InstanceType<T> & keyof O>, ...Fragments<O, Rest> ] :
-    T extends {} ? [ Pick<O, keyof T & keyof O>, ...Fragments<O, Rest> ] :
+type Fragments<O extends {}, P, ConsumedKeys extends Key = ''> = P extends [] ? [] : P extends [ infer T, ...infer Rest ] ?
+    T extends ReadonlyArray<keyof O> ? [ Pick<O, Exclude<T[ number ] & keyof O, ConsumedKeys>>, ...Fragments<O, Rest, ConsumedKeys | T[ number ] & keyof O> ] :
+    T extends new (...args: any) => any ? [ Pick<O, Exclude<keyof InstanceType<T> & keyof O, ConsumedKeys>>, ...Fragments<O, Rest, ConsumedKeys | keyof InstanceType<T> & keyof O> ] :
+    T extends {} ? [ Pick<O, Exclude<keyof T & keyof O, ConsumedKeys>>, ...Fragments<O, Rest, ConsumedKeys | keyof T & keyof O> ] :
     Fragments<O, Rest> :
     [];
 /* type Test<P> = P extends [ infer T, ...infer Rest ] ? [ T, Rest ] : 2;
@@ -96,6 +96,14 @@ type A = Test<[]>;
 type B = Fragments<{ a: 1; b: 2; c: 3; }, [ [ 'a', 'c' ], [ 'b' ] ]>;
  */
 
+type MergeFragmentsKeys<P> = P extends [] ? [] : P extends [ infer T, ...infer Rest ] ?
+    T extends ReadonlyArray<Key> ? [ ...T, ...MergeFragmentsKeys<Rest> ] :
+    T extends new (...args: any) => any ? [ keyof InstanceType<T>, ...MergeFragmentsKeys<Rest> ] :
+    T extends {} ? [ keyof T, ...MergeFragmentsKeys<Rest> ] :
+    MergeFragmentsKeys<Rest> :
+    [];
+
+type ComplementaryKeys<O extends {}, P extends Key[]> = Omit<O, P[ number ]>;
 
 
 
@@ -106,7 +114,7 @@ const isClass = (v: any): v is new (...args: any) => any => {
 
 type FragmentPart<T> = ReadonlyArray<keyof T> | (new () => unknown) | Partial<T>;
 
-export const fragments = <O extends {}, P extends FragmentPart<O>[]>(obj: O, ...parts: P): Fragments<O, P> => {
+export const fragments = <O extends {}, P extends FragmentPart<O>[]>(obj: O, ...parts: P): Fragments<O, [ ...P, ComplementaryKeys<O, MergeFragmentsKeys<P>> ]> => {
     type Part = (string | number | symbol)[];
 
     const keys = (part: any): Part => {
@@ -121,15 +129,31 @@ export const fragments = <O extends {}, P extends FragmentPart<O>[]>(obj: O, ...
 
     const filter = (part: Part) => part.reduce((o, k) => k in obj ? { ...o, [ k ]: obj[ k ] } : o, {});
 
-    const fragments = parts.reduce<unknown[]>((arr, part) => {
-        const fragment = filter(keys(part));
-        return [ ...arr, fragment ];
-    }, []);
+    const { fragments, keys: fragmentsKeys } = parts.reduce(({ fragments, keys: fragmentKeys }, part) => {
+        const partKeys = keys(part);
+        const fragment = filter(partKeys);
 
-    return fragments as any;
+        return {
+            fragments: [ ...fragments, fragment ],
+            keys: [ ...fragmentKeys, ...partKeys ]
+        };
+    }, { fragments: [] as object[], keys: [] as string[] });
+
+    const rest = Reflect.ownKeys(obj).reduce((o, k) => !fragmentsKeys.includes(k) ? { ...o, [ k ]: obj[ k ] } : o, {});
+
+    return [ ...fragments, rest ] as any;
 };
 
-// console.log(fragments({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 } as const, [ 'a', 'c' ] as const, [ 'b' ] as const, { d: undefined } as const, class { e; f; }));
+// const [ a, b, c ] = fragments({ a: 1, b: 2, c: 3, d: 4 } as const, [ 'a', 'c' ] as const, [ 'b' ] as const);
+
+/* console.log(fragments(
+    { a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8 } as const,
+    [ 'a', 'c' ] as const,
+    [ 'b' ] as const,
+    { d: undefined } as const,
+    class { e = 1; f = undefined; }
+)); */
+
 /* const o = fragments({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 } as const, [ 'a', 'c' ] as const, [ 'b' ] as const, { d: undefined } as const, class { e; f; });
 
 o[ 0 ].a === 1;
@@ -146,13 +170,9 @@ o[ 3 ].f === 6; */
 
 // const o2 = fragments({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 } as const, [ 'a', 'c' ], [ 'b' ], { d: undefined }, class { e; f; });
 
-type ComplementaryKeys<O extends {}, P> =
-    P extends ReadonlyArray<keyof O> ? Omit<O, P[ number ]> :
-    P extends new (...args: any) => any ? Omit<O, keyof InstanceType<P> & keyof O> :
-    P extends {} ? Omit<O, keyof P & keyof O> :
-    [];
 
-export const partition = <O, P extends FragmentPart<O>>(o: O, p: P): Fragments<O, [ P, ComplementaryKeys<O, P> ]> => {
+
+/* export const partition = <O, P extends FragmentPart<O>>(o: O, p: P): Fragments<O, [ P, ComplementaryKeys<O, P> ]> => {
     const [ oP ] = fragments(o, p);
     const opKeys = Reflect.ownKeys(oP);
 
@@ -160,7 +180,7 @@ export const partition = <O, P extends FragmentPart<O>>(o: O, p: P): Fragments<O
 
     return [ oP, rest ] as any;
 };
-
+ */
 
 // const [ a, b ] = partition({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 } as const, [ 'a', 'c' ] as const);
 // const [ a, b ] = partition({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6 } as const, class { a; c; });

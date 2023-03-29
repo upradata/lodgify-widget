@@ -2,7 +2,7 @@ import './Modal.scss';
 
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
-import { partition } from '../../util';
+import { fragments } from '../../util';
 import { ModalView, ModalViewProps } from './ModalView';
 
 
@@ -24,7 +24,7 @@ export type ModalPropsImperativeAPI = {
 
 
 const _Modal: React.ForwardRefRenderFunction<ModalPropsImperativeAPI, ModalProps> = ({ children, ...props }, ref) => {
-    const [ _props, modalProps ] = partition(props, _ModalProps);
+    const [ _props, modalProps ] = fragments(props, _ModalProps);
 
     const [ isEnabled, setIsEnabled ] = useState(_props.isOpen);
 

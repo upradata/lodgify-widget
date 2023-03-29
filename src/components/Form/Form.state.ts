@@ -13,7 +13,7 @@ export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' 
 export const useFormState = (props: UseFormStateProps) => {
 
     const [ state, setState ] = useState<InputsState>(() => {
-        return Object.keys(props.validation?.props || {}).reduce((state, name) => ({ ...state, [ name ]: {} }), {} as InputsState);
+        return Object.keys(props.validation?.props || {}).reduce((state, name) => ({ ...state, [ name ]: { value: null } }), {} as InputsState);
     });
 
     const processInputValue = useProcessInputValue();

@@ -15,7 +15,7 @@ import { getCountryCallingCode } from 'libphonenumber-js';
 import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
 import { AppContext } from '../../App/AppContext';
 import { CountryDropdownItemOption, CountryDropdownProps, createCountryDropdown, /* DEFAULT_COUNTRY, */ Flag } from '../CountryDropdown';
-import { InputController, InputControllerProps } from '../InputController';
+import { InputController, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
 import labels from '../../../node_modules/react-phone-number-input/locale/en.json.js';
 
 // import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
@@ -27,7 +27,7 @@ import type { Labels, Metadata, Props as _ReactPhoneNumberProps } from 'react-ph
 // import parsePhoneNumber from 'libphonenumber-js';
 import type { CountryCode, CountryCodeWithInternational } from '../../types';
 import type { Omit } from '../../util.types';
-import { getCityFromLocale, hasProp } from '../../util';
+import { getCityFromLocale, hasProp, fragments } from '../../util';
 
 
 export const INITIAL_VALUE = '';
@@ -139,6 +139,8 @@ export type PhoneIputProps<V = unknown> = Omit<Partial<ReactPhoneNumberProps>, '
 export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnChangeEvent, mapValue, ...props }) => {
     const { phonesMetadata, timezonesMetadata } = useContext(AppContext);
 
+    const [ strictInputContollerProps, restProps ] = fragments(props, StrictInputControllerPropsWithInputState);
+
     const localeCity = getCityFromLocale();
     const localeCountryCode = timezonesMetadata[ localeCity ]?.countryCode;
 
@@ -167,20 +169,21 @@ export const _PhoneInput: React.FunctionComponent<PhoneIputProps> = ({ adaptOnCh
     }, [ props.onChange ]);
 
 
-    const { error, isValid, label, isBlurred, name, onChange: _o, value: _v, initialValue, showErrorMessage, ...reactPhoneInputProps } = props;
+    const { label, isBlurred, initialValue, ...reactPhoneInputProps } = restProps;
 
     const value = getControlledInputValue(mappedValue, mappedInitialValue, state.value);
 
     const inputControllerProps: Omit<InputControllerProps, 'children'> = {
-        error,
-        isValid,
+        ...strictInputContollerProps,
+        // error,
+        //  isValid,
         // isFocused: state.isFocused,
         // label,
         onChange: handleChange,
         value,
         name: props.name || 'phone-number',
-        showErrorMessage: showErrorMessage || 'blur',
-        useValidCheckOnValid: props.useValidCheckOnValid
+        showErrorMessage: props.showErrorMessage || 'blur',
+        // useValidCheckOnValid: props.useValidCheckOnValid
     };
 
     const phoneInputProps: ReactPhoneNumberProps = {

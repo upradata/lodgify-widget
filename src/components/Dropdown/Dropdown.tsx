@@ -17,13 +17,22 @@ import classnames from 'classnames';
 import { Dropdown as SemanticDropdown } from 'semantic-ui-react';
 import { DropdownProps, DropdownRef, DropdownSearchInput, LodgifyDropdownProps, SemanticDropdownProps } from './Dropdown.props';
 import { getOptionsWithSearch } from '../CountryDropdown/CountryDropdown';
-import { partition, removeType, usePrevious, hasProp } from '../../util';
-import { InputController, InputControllerProps } from '../InputController';
+import { fragments, removeType, usePrevious, hasProp } from '../../util';
+import { InputController, InputControllerChildProps, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
+
+type OnChange = SemanticDropdownProps[ 'onChange' ];
+type OnChangePackedParameters = { event: Parameters<OnChange>[ 0 ], data: Parameters<OnChange>[ 1 ]; };
+type AdaptOnChangeEvent = (...args: Parameters<OnChange>) => OnChangePackedParameters;
 
 
 const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps> = ({ className: klass, ...props }, ref) => {
-    const [ cmpProps, semanticProps ] = partition(props, LodgifyDropdownProps);
+    const [ cmpProps, strictInputControllerProps, semanticProps ] = fragments(
+        props,
+        LodgifyDropdownProps,
+        StrictInputControllerPropsWithInputState<OnChangePackedParameters, Parameters<OnChange>>
+    );
 
+    
     const propValue = hasProp(cmpProps, 'value') ? cmpProps.value : null;
 
     type State = {
@@ -101,7 +110,7 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     // const hasErrorMessage = getHasErrorMessage(cmpProps.error);
 
 
-    const dropdownProps: SemanticDropdownProps = {
+    const dropdownProps: InputControllerChildProps<SemanticDropdownProps> = {
         clearable: cmpProps.isClearable,
         compact: cmpProps.isCompact,
         disabled: cmpProps.isDisabled || !adaptedOptions.length,
@@ -166,16 +175,9 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         //         }, event);
         //     }, 0);
         // }, []),
-        onBlur: useCallback(event => {
-            setState({
-                isBlurred: true,
-                isOpen: false
-            }/* , event */);
-        }, []),
         ref
     };
 
-    type OnChange = SemanticDropdownProps[ 'onChange' ];
 
     const onChange: OnChange = useCallback((event, data) => {
         // to ensure that handleChange is called after onClose
@@ -198,11 +200,9 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         'is-compact': cmpProps.isCompact
     });
 
-    type OnChangePackedParameters = { event: Parameters<OnChange>[ 0 ], data: Parameters<OnChange>[ 1 ]; };
-    type AdaptOnChangeEvent = (...args: Parameters<OnChange>) => OnChangePackedParameters;
-
 
     const inputControllerProps: InputControllerProps<OnChangePackedParameters, Parameters<OnChange>> = {
+        ...strictInputControllerProps,
         adaptOnChangeEvent: useCallback(((event, data) => ({ event, data })) as AdaptOnChangeEvent, []),
         error: cmpProps.error,
         isFocused: state.isOpen,
@@ -210,6 +210,12 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         isValid: cmpProps.isValid,
         name: cmpProps.name,
         onChange: useCallback((_name, { event, data }) => { onChange(event, data); }, []),
+        onBlur: useCallback(() => {
+            setState({
+                isBlurred: true,
+                isOpen: false
+            });
+        }, []),
         value,
         className,
         icon: !hasImages ? cmpProps.icon : undefined,

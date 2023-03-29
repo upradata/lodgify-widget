@@ -1,11 +1,13 @@
 import type { Moment } from 'moment';
+import type { DateRange } from '../../util.types';
+
 
 export type ReactDatesDateRangePickerProps = {
     startDate?: Moment;
     endDate?: Moment;
-    onDatesChange: Function;
-    focusedInput?: 'startDate' | 'endDate';
-    onFocusChange: Function;
+    onDatesChange: (dates: DateRange<Moment>) => void;
+    focusedInput?: 'startDate' | 'endDate' | null;
+    onFocusChange: (focusedInput: 'startDate' | 'endDate' | null) => void;
     onClose?: Function;
     // input related props
     startDateId: string;

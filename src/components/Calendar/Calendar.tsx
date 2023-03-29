@@ -20,8 +20,8 @@ import moment from 'moment';
 import { v4 as uuid } from 'uuid';
 import { ComponentWithResponsiveProps, withResponsive } from '../../withResponsive';
 import { DateRangePickerProps } from './DateRangePicker.props';
-import { InputController, InputControllerProps } from '../InputController';
-import { isSame, partition, usePreviousListener } from '../../util';
+import { InputController, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
+import { isSame, fragments, usePreviousListener } from '../../util';
 
 import type { Omit } from '../../util.types';
 import type { ReactDatesDateRangePickerProps } from './ReactDates.props';
@@ -55,7 +55,12 @@ export type CalendarProps = ComponentWithResponsiveProps<
 
 const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUserOnMobile: _is, windowWidth, windowHeight, ...props }) => {
 
-    const [ rangePickerProps, reactDatesProps ] = partition(props, DateRangePickerProps);
+
+    const [ rangePickerProps, strictInputContollerProps, reactDatesProps ] = fragments(
+        props,
+        DateRangePickerProps,
+        StrictInputControllerPropsWithInputState
+    );
 
     type FocusedInput = DateRangePickerProps[ 'focusedInput' ];
 
@@ -124,6 +129,7 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
 
 
     const inputControllerProps: InputControllerProps = {
+        ...strictInputContollerProps,
         adaptOnChangeEvent: returnFirstArgument,
         error: rangePickerProps.error,
         inputOnChangeFunctionName: 'onDatesChange',
@@ -133,7 +139,8 @@ const _Calendar: React.FunctionComponent<CalendarProps> = ({ children: _c, isUse
         name: rangePickerProps.name,
         onChange: rangePickerProps.onChange,
         value: rangePickerProps.value,
-        useValidCheckOnValid: props.useValidCheckOnValid
+        useValidCheckOnValid: props.useValidCheckOnValid,
+        hasFocusAndBlur: false
     };
 
     const dateRangePickerProps: ReactDatesDateRangePickerProps = {
