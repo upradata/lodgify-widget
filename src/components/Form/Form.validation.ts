@@ -186,19 +186,32 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
         }
     }) as V[ 'untransformed' ];
 
+
     const emptyValue = () => {
         switch (input.type) {
-            case 'boolean': return false;
+            case 'boolean': return ''; // false;
             case 'phone':
-            case 'range-dates':
+            case 'range-dates': return { startDate: null, endDate: null } as ValidationValue<'range-dates'>[ 'value' ];
             case 'date': return null;
 
             default: return '';
         }
     };
 
+    const isEmpty = (value: unknown) => {
+        switch (input.type) {
+            case 'range-dates': {
+                const { startDate, endDate } = value as ValidationValue<'range-dates'>[ 'value' ];
+                return startDate === null && endDate === null;
+            }
+            case 'date': return null;
+
+            default: return value === '' || typeof value === 'undefined' || value === null;
+        }
+    };
+
     const validationWithDefaults = {
-        isEmpty: value => value === '' || typeof value === 'undefined' || value === null,
+        isEmpty,
         emptyValue: emptyValue(),
         /* isValid: value => true, */
         isRequiredMessage: DEFAULT_IS_REQUIRED_MESSAGE,

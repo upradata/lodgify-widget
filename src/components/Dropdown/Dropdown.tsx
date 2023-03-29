@@ -14,7 +14,7 @@ import classnames from 'classnames';
 import { Dropdown as SemanticDropdown } from 'semantic-ui-react';
 import { DropdownProps, DropdownRef, DropdownSearchInput, LodgifyDropdownProps, SemanticDropdownProps } from './Dropdown.props';
 import { getOptionsWithSearch } from '../CountryDropdown/CountryDropdown';
-import { fragments, removeType, usePrevious, hasProp, isNil } from '../../util';
+import { fragments, removeType, usePrevious, hasProp, isNil, useActionsAfterRender } from '../../util';
 import { InputController, InputControllerChildProps, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
 
 type OnChange = SemanticDropdownProps[ 'onChange' ];
@@ -61,6 +61,8 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     }, []);
 
 
+    const scheduleActionsAfterRender = useActionsAfterRender();
+
     const setState = (partialState: Partial<State>/* , event?: React.SyntheticEvent */) => _setState(state => {
         const s: State = { ...state, ...partialState };
 
@@ -70,15 +72,15 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         const newState = { ...s, autofilled, isOpen: forceClosed ? false : s.isOpen };
 
         if (state.value !== newState.value) {
-            cmpProps.onChange?.(cmpProps.name, newState.value/* , event */);
+            scheduleActionsAfterRender.add(() => cmpProps.onChange?.(cmpProps.name, newState.value/* , event */));
         }
 
         if (!state.isBlurred && newState.isBlurred) {
-            cmpProps.onBlur?.(cmpProps.name/* , event */);
+            scheduleActionsAfterRender.add(() => cmpProps.onBlur?.(cmpProps.name/* , event */));
         }
 
         if (state.isBlurred && !newState.isBlurred) {
-            cmpProps.onFocus?.(cmpProps.name/* , event */);
+            scheduleActionsAfterRender.add(() => cmpProps.onFocus?.(cmpProps.name/* , event */));
         }
 
         return newState;
