@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react';
-import { Button, FormValue, FormValues, NumberInput, NumberInputProps } from '@lodgify/ui';
+import React, { useMemo } from 'react';
+import { Button, NumberInput, NumberInputProps } from '@lodgify/ui';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { Calendar, CalendarProps } from '../Calendar';
@@ -35,7 +35,7 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         startDatePlaceholderText: props.datesCheckInLabel,
         value: props.datesInputValue,
         willOpenAbove: props.willLocationDropdownOpenAbove,
-        
+
     };
 
     /* const counterDropdownProps: CounterDropdownProps = {

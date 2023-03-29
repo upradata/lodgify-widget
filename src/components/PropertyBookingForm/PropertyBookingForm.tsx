@@ -5,20 +5,8 @@ import classnames from 'classnames';
 // import isEqual from 'fast-deep-equal';
 import { PropertyBookingFormContent } from './PropertyBookingFormContent';
 
-import type { InputDataNames, InputDataValues } from './PropertyBookingForm.type';
 import type { PropertyBookingFormContentProps, PropertyBookingFormProps } from './PropertyBookingForm.props';
 import { ContainerContext } from '../Container/ContainerContext';
-
-
-// import Form from 'semantic-ui-react/dist/es/collections/Form/Form.js';
-// import { SearchFields } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchFields';
-// import { usePrevious } from '../../util';
-
-
-// type InputDataValueOf<Name extends InputDataNames> = ChangeInputData[ Name ];
-// export type PropertySearchDataValueOf<Name extends InputDataNames> = InputDataValueOf<Name>;
-
-
 
 
 export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = ({
@@ -42,68 +30,15 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
         };
     }, []); */
 
-    /* const [ state, setState ] = useState({
-        dates: props.datesInputValue,
-        guests: props.guestsInputValue,
-        location: props.locationInputValue,
-        // willLocationDropdownOpenAbove
-    }); */
-
-    // const [ stateNameChanged, setStateNameChanged ] = useState<{ name: InputDataNames | null; }>({ name: null });
-
-    const onInputChange = useCallback((name: InputDataNames, value: InputDataValues) => {
-        /* setState(state => {
-            const newState = { ...state, [ name ]: value };
-            onChange?.(name, value, newState);
-            return newState;
-        }); */
-        onChange?.(name, value);
-
-        // setStateNameChanged({ name });
-    }, [ onChange /* , setStateNameChanged  */ ]);
-
-    /* useEffect(() => {
-        const { name } = stateNameChanged;
-
-        if (name)
-            onChange?.(name, state[ name ], state);
-    }, [ stateNameChanged, onChange ]); */
-
-
+    
     const handleSubmit = useCallback(() => { onSubmit?.(/* state */); }, [ onSubmit/* , state */ ]);
-
-
-    // const previousProps = usePrevious(props);
-
-    /* useEffect(() => {
-        if (previousProps) {
-            const previousInputValueProps = {
-                dates: previousProps.datesInputValue,
-                guests: previousProps.guestsInputValue,
-                location: previousProps.locationInputValue
-            };
-
-            const currentInputValueProps = {
-                dates: props.datesInputValue,
-                guests: props.guestsInputValue,
-                location: props.locationInputValue
-            };
-
-            if (!isEqual(previousInputValueProps, currentInputValueProps)) {
-                setState(prev => ({ ...prev, ...currentInputValueProps }));
-            }
-        }
-    }, [ props, previousProps ]); */
 
 
     const formProps: PropertyBookingFormContentProps = {
         ...props,
-       /*  datesInputValue: state.dates,
-        guestsInputValue: state.guests,
-        locationInputValue: state.location, */
         willLocationDropdownOpenAbove: props.willLocationDropdownOpenAbove,
         onSubmit: handleSubmit,
-        onInputChange: onInputChange
+        onInputChange: onChange
     };
 
     const { isColumn, isRow } = useContext(ContainerContext);

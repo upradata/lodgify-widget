@@ -4,25 +4,27 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { adaptOptions } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/adaptOptions';
 import { Icon } from '@lodgify/ui';
 import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
-// import { getHasErrorMessage } from '@lodgify/ui/lib/es/utils/get-has-error-message';
 import { getHasImages } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/getHasImages';
 import { getIcon } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/getIcon';
-import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
 import { getIsOpenAfterChange } from '@lodgify/ui/lib/es/components/inputs/Dropdown/utils/getIsOpenAfterChange';
 import { getPropOnCondition } from '@lodgify/ui/lib/es/utils/get-prop-on-condition';
-// import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
 import { NO_RESULTS } from '@lodgify/ui/lib/es/utils/default-strings';
 import { some } from '@lodgify/ui/lib/es/utils/some';
 import classnames from 'classnames';
 import { Dropdown as SemanticDropdown } from 'semantic-ui-react';
 import { DropdownProps, DropdownRef, DropdownSearchInput, LodgifyDropdownProps, SemanticDropdownProps } from './Dropdown.props';
 import { getOptionsWithSearch } from '../CountryDropdown/CountryDropdown';
-import { fragments, removeType, usePrevious, hasProp } from '../../util';
+import { fragments, removeType, usePrevious, hasProp, isNil } from '../../util';
 import { InputController, InputControllerChildProps, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
 
 type OnChange = SemanticDropdownProps[ 'onChange' ];
 type OnChangePackedParameters = { event: Parameters<OnChange>[ 0 ], data: Parameters<OnChange>[ 1 ]; };
 type AdaptOnChangeEvent = (...args: Parameters<OnChange>) => OnChangePackedParameters;
+
+
+const getIsInputValueReset = function <T>(previousValue: T, value: T, isInitValue: (v: T) => boolean) {
+    return !isNil(previousValue) && !isInitValue(previousValue) && isInitValue(value);
+};
 
 
 const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps> = ({ className: klass, ...props }, ref) => {
@@ -32,8 +34,9 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
         StrictInputControllerPropsWithInputState<OnChangePackedParameters, Parameters<OnChange>>
     );
 
-    
+
     const propValue = hasProp(cmpProps, 'value') ? cmpProps.value : null;
+    const initialValue = hasProp(cmpProps, 'initialValue') ? cmpProps.initialValue : props.multiple ? [] : '';
 
     type State = {
         isBlurred: boolean;
@@ -46,20 +49,17 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     const [ state, _setState ] = useState<State>({
         isBlurred: true,
         isOpen: false,
-        value: propValue || cmpProps.initialValue,
+        value: propValue || initialValue,
         searchQuery: semanticProps.searchQuery,
         autofilled: 'idle'
     });
 
-    /* 
-       const [ isOpen, setIsOpen ] = useState(false);
-    const [ value, setValue ] = useState(props.value);
-    const [ searchQuery, setSearchQuery ] = useState(props.searchQuery);
-    */
+
     useEffect(() => {
         if (!propValue && cmpProps.initialValue)
             cmpProps.onChange?.(cmpProps.name, cmpProps.initialValue);
     }, []);
+
 
     const setState = (partialState: Partial<State>/* , event?: React.SyntheticEvent */) => _setState(state => {
         const s: State = { ...state, ...partialState };
@@ -85,29 +85,30 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
     });
 
 
-    const previousPropsValue = usePrevious(propValue);
+    const previousPropsValue = usePrevious(propValue, propValue || initialValue);
 
 
     useEffect(() => {
-        if (getIsInputValueReset(previousPropsValue, cmpProps.value)) {
-            setState({ value: undefined, autofilled: 'idle' });
+        const isInitValue = (v: DropdownProps[ 'value' ]) => isNil(v) || props.multiple ? Array.isArray(v) && v.length === 0 : v === '';
+
+        if (getIsInputValueReset(previousPropsValue, cmpProps.value, isInitValue)) {
+            setState({ value: initialValue, autofilled: 'idle' });
             return;
         }
 
         if (previousPropsValue !== cmpProps.value) {
-            const value = getControlledInputValue(propValue, cmpProps.initialValue, state.value);
+            const value = getControlledInputValue(propValue, initialValue, state.value);
             setState({ value, autofilled: 'idle' });
             return;
         }
 
-        setState({ autofilled: 'idle' });
+        // setState({ autofilled: 'idle' });
     }, [ previousPropsValue, cmpProps.value ]);
 
 
-    const value = getControlledInputValue(propValue, cmpProps.initialValue, state.value);
+    const value = getControlledInputValue(propValue, initialValue, state.value);
     const hasImages = getHasImages(cmpProps.options);
     const adaptedOptions = adaptOptions(cmpProps.options, hasImages);
-    // const hasErrorMessage = getHasErrorMessage(cmpProps.error);
 
 
     const dropdownProps: InputControllerChildProps<SemanticDropdownProps> = {
@@ -161,20 +162,6 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
                 setState({ searchQuery });
             }
         }, []),
-        // onChange: useCallback((event, data) => {
-        //     // to ensure that handleChange is called after onClose
-        //     // semantic dropdown handleItemClick is calling onChange before but if the search input has some value ("fr" for instance)
-        //     // and then click on the french flag,
-        //     // the browser will call first the input onClose listener before calling the onChange called synchronously by the Dropdown component
-        //     // Semantic should handle it forcing the calling order
-        //     setTimeout(() => {
-        //         setState({
-        //             value: data.value,
-        //             isOpen: getIsOpenAfterChange((event as any).key),
-        //             autofilled: 'done',
-        //         }, event);
-        //     }, 0);
-        // }, []),
         ref
     };
 
@@ -224,10 +211,6 @@ const _DropdownFwdRef: React.ForwardRefRenderFunction<DropdownRef, DropdownProps
 
     return (
         <div className={classnames('Dropdown', klass)}>
-            {/* {hasErrorMessage && <ErrorMessage errorMessage={cmpProps.error} />} */}
-            {/* {cmpProps.isValid && <Icon color="green" name={ICON_NAMES.CHECKMARK} />} */}
-            {/* {!hasImages && cmpProps.icon && <Icon name={cmpProps.icon} />} */}
-
             <InputController {...inputControllerProps} as='div'>
                 <SemanticDropdown {...dropdownProps} />
             </InputController>
@@ -259,7 +242,7 @@ _Dropdown.defaultProps = {
     options: [],
     // value: undefined,
     willOpenAbove: false,
-    initialValue: null,
+    // initialValue: null,
     useValidCheckOnValid: false
 };
 

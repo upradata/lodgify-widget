@@ -5,6 +5,8 @@ import { useReservation } from './BookingReservation.state';
 import { useRoomState } from '../../rooms.state';
 
 import type { RoomData } from '../../rooms.data';
+import { momentToLodgifyDate } from '../../lodgify-info/info';
+import moment from 'moment';
 
 
 export const addBookingReservationStateManagement = (BookingComponent: React.ComponentType<BookingProps>) => {
@@ -16,8 +18,11 @@ export const addBookingReservationStateManagement = (BookingComponent: React.Com
         const [ billingInfo, setBillingInfo ] = useState(new BookingBillingInfo());
 
         useEffect(() => {
+            const today = momentToLodgifyDate(moment());
+            const oneYear = momentToLodgifyDate(moment().add(1, 'years'));
+
             roomsList.forEach(({ value }) => {
-                setRoom({ type: 'request-property-availability', roomValue: value, start: '2023-01-01', end: '2024-01-01' });
+                setRoom({ type: 'request-property-availability', roomValue: value, start: today, end: oneYear });
                 setRoom({ type: 'request-property-info', roomValue: value });
             });
         }, []);

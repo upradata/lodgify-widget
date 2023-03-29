@@ -17,9 +17,10 @@ export type Validation<InputValue = unknown, TransformedValue = InputValue, Stat
     isRequired: boolean;
     isRequiredMessage: string;
     isEmpty: (value: InputValue) => boolean;
+    emptyValue: InputValue;
     validate: (value: InputValue, state: State) => ValidatedValue<TransformedValue>;
-    untransformed?: (transformedValue: TransformedValue) => InputValue;
-    input?:
+    untransformed: (transformedValue: TransformedValue) => InputValue;
+    input:
     | { type: 'string' | 'integer' | 'double' | 'boolean' | 'email'; }
     | { type: 'range-integer' | 'range-double'; min?: number; max?: number; }
     | { type: 'phone-string'; countryCode?: CountryCode; }
@@ -185,8 +186,20 @@ export const getValidationWithDefaults = <V extends Validation = Validation>(
         }
     }) as V[ 'untransformed' ];
 
+    const emptyValue = () => {
+        switch (input.type) {
+            case 'boolean': return false;
+            case 'phone':
+            case 'range-dates':
+            case 'date': return null;
+
+            default: return '';
+        }
+    };
+
     const validationWithDefaults = {
         isEmpty: value => value === '' || typeof value === 'undefined' || value === null,
+        emptyValue: emptyValue(),
         /* isValid: value => true, */
         isRequiredMessage: DEFAULT_IS_REQUIRED_MESSAGE,
         invalidMessage: DEFAULT_IS_INVALID_MESSAGE,

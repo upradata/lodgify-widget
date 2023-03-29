@@ -33,8 +33,8 @@ export const getEmptyRequiredInputs = (inputsState: InputsState, getValidation: 
 
 export const getEmptyState = (intputsValues: InputsState, getValidation: GetValidation) => {
     return map(intputsValues, (name, data) => {
-        const { input } = getValidation(name);
-        return [ name, { ...data, value: input.type === 'date' /* name === 'dates' */ ? null : '' } ];
+        const { emptyValue } = getValidation(name);
+        return [ name, { ...data, value: emptyValue } ];
     });
 };
 

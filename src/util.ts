@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import moment, { Moment } from 'moment';
 
 import type { CasedObject, CasedType, Key, KeyOf, ValueOf, TypeOf } from './util.types';
@@ -49,6 +49,28 @@ export function usePreviousListener<T>(value: T, options: { init?: T | undefined
         removeAll: () => { listeners.current = []; }
     };
 }
+
+export const useActionsAfterRender = () => {
+    const actionsRunner = useMemo(() => {
+        type Action = () => void;
+        let actions = [] as Action[];
+
+        return {
+            add: (action: Action) => { actions = [ ...actions, action ]; },
+            reset: () => { actions = []; },
+            run: () => {
+                actions.forEach(action => action());
+                actions = [];
+            }
+        };
+    }, []);
+
+    useEffect(() => { actionsRunner.run(); });
+
+    return useRef(actionsRunner).current;
+};
+
+
 
 // apparently the fastest and correct for rounding with 0.5
 export const round = (num = 0, precision = 2) => +(Math.round(+`${num}e${precision}`) + `e-${precision}`);
@@ -385,3 +407,6 @@ export const getCityFromLocale = () => {
 
 
 export const hasProp = <T extends {}>(o: T, prop: keyof T): boolean => prop in o;
+
+
+export const isNil = (v: unknown): v is undefined | null => typeof v === 'undefined' || v === null;

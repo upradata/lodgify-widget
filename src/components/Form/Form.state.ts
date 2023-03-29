@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import isEqual from 'fast-deep-equal';
 import { getEmptyState, useProcessInputValue } from './Form.helpers';
 import { getValidationWithDefaults, makeGetValidation } from './Form.validation';
-import { hasProp, map } from '../../util';
+import { hasProp, map, useActionsAfterRender } from '../../util';
 
 import type { FormProps } from './Form.props';
 import { InputsState, InputState, InputStateAction, SetInputState } from './Form.state.type';
@@ -11,10 +11,6 @@ import { InputsState, InputState, InputStateAction, SetInputState } from './Form
 export type UseFormStateProps = Pick<FormProps, 'successMessage' | 'validation' | 'onInputChange' | 'isSubmitDisabled' | 'onSubmitEnabled'>;
 
 export const useFormState = (props: UseFormStateProps) => {
-
-    const [ state, setState ] = useState<InputsState>(() => {
-        return Object.keys(props.validation?.props || {}).reduce((state, name) => ({ ...state, [ name ]: { value: null } }), {} as InputsState);
-    });
 
     const processInputValue = useProcessInputValue();
 
@@ -30,6 +26,13 @@ export const useFormState = (props: UseFormStateProps) => {
         };
     }, [ props.validation ]);
 
+
+    const [ state, setState ] = useState<InputsState>(() => {
+        const inputsState = Object.keys(props.validation?.props || {}).reduce((state, name) => ({ ...state, [ name ]: {} }), {} as InputsState);
+        return getEmptyState(inputsState, getValidation);
+    });
+
+    const scheduleActionsAfterRender = useActionsAfterRender();
 
     const [ isDisabled, setIsDisabled ] = useState(props.isSubmitDisabled(state, getValidation));
 
@@ -51,12 +54,14 @@ export const useFormState = (props: UseFormStateProps) => {
                     [ inputName ]: inputStateWithData
                 };
 
-                props.onInputChange?.(inputName, inputStateWithData.transformedValue);
+                if (inputState.type === 'update')
+                    scheduleActionsAfterRender.add(() => props.onInputChange?.(inputName, inputStateWithData.transformedValue));
+
                 const isNowDisabled = props.isSubmitDisabled(newState, getValidation);
 
                 if (isNowDisabled !== isDisabled) {
                     setIsDisabled(isNowDisabled);
-                    props.onSubmitEnabled?.(!isNowDisabled);
+                    scheduleActionsAfterRender.add(() => props.onSubmitEnabled?.(!isNowDisabled));
                 }
 
                 return newState;
@@ -96,11 +101,6 @@ export const useFormState = (props: UseFormStateProps) => {
 
             case !hasProp(previousState, 'value') || previousState.value !== processedInputValue.value:
                 return processedInputValue;
-            /*  return {
-                 ...validatedInputValue,
-                 error: undefined,
-                 isValid: undefined
-             }; */
 
             default:
                 return null;
