@@ -1,18 +1,24 @@
 import './StepBooking.scss';
 
-import React, { useCallback, useContext, useState } from 'react';
-import { Button, Icon, IconProps, Summary } from '@lodgify/ui';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Button, FlexContainer, Heading, Icon, IconProps, Summary } from '@lodgify/ui';
 import classnames from 'classnames';
-import { Menu, StrictMenuItemProps as MenuItemProps, Tab, StrictTabProps as TabProps } from 'semantic-ui-react';
+import { CardDescription, Menu, StrictMenuItemProps as MenuItemProps, StrictTabProps as TabProps, Tab } from 'semantic-ui-react';
 import { BookingBillingInfo } from '../BookingBillingInfo';
 import { BookingContext } from '../Booking/BookingContext';
+import { BookingReservation } from '../Booking/reservation.type';
 import { BookingSummary } from '../BookingSummary';
+import { Card, CardContent, CardHeader, CardSubHeader } from '../Card';
+import { Container } from '../Container';
 import { Modal } from '../Modal';
 import { PropertyBookingForm, usePropertyBookingFormProps } from '../PropertyBookingForm';
-import { Container } from '../Container';
 import { StepBookingHeader } from './StepBookingHeader';
 import { StepBookingSubHeader } from './StepBookingSubHeader';
 import { wrapWith } from '../../react-util';
+import { Elements } from '@stripe/react-stripe-js';
+import { stripe$, StripeCheckoutForm } from './StripeCheckoutForm';
+import { StripeElementsOptions } from '@stripe/stripe-js';
+import { helpers } from '../Booking/BookingReservation.action';
 
 
 const TabHeader = wrapWith({ props: { className: 'TabHeader' } });
@@ -63,6 +69,87 @@ const TabContentHeader: React.FunctionComponent<{}> = () => {
     );
 };
 
+const ReservationPayment: React.FunctionComponent<{}> = () => {
+    const { reservation } = useContext(BookingContext);
+    /* booking?.isBooked */
+    const options: StripeElementsOptions = {
+        // passing the client secret obtained from the server
+        // clientSecret: '{{CLIENT_SECRET}}',
+        mode: 'payment',
+        amount: reservation.quote.totalGross * 100, // 10.99€
+        currency: reservation.quote.currencyCode.toLowerCase(),
+        fonts: [ { cssSrc: 'https://fonts.googleapis.com/css?family=Open+Sans' } ],
+        appearance: {
+            theme: 'stripe',
+            variables: {
+                colorPrimary: '#0570de',
+                colorBackground: '#ffffff',
+                colorText: '#30313d',
+                colorDanger: '#df1b41',
+                // colorSuccess:'#',
+                // colorWarning:'#',
+                fontFamily: 'Ideal Sans, system-ui, sans-serif',
+                fontSizeBase: '1em',
+                // spacingUnit: '2px',
+                borderRadius: '8px',
+
+                // See all possible variables below
+            },
+            rules: {
+                '.Tab': {
+                    border: '1px solid #E0E6EB',
+                    boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 6px rgba(18, 42, 66, 0.02)',
+                },
+
+                '.Tab:hover': {
+                    color: 'var(--colorText)',
+                },
+
+                '.Tab--selected': {
+                    borderColor: '#E0E6EB',
+                    boxShadow: '0px 1px 1px rgba(0, 0, 0, 0.03), 0px 3px 6px rgba(18, 42, 66, 0.02), 0 0 0 2px var(--colorPrimary)',
+                },
+
+                '.Input--invalid': {
+                    boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.07), 0 0 0 2px var(--colorDanger)',
+                },
+
+                // See all supported class names and selector syntax below
+            }
+        }
+    };
+
+    return (
+        <div className="BillingPayment">
+            <Card fluid={true}>
+                <div className="BillingPayment-status-card">
+                    <Icon name="checkmark circle" size="large" className="success" />
+                    <div className="BillingPayment-status-card__status">
+                        <CardHeader size="small">Status: <span className="success">booked</span></CardHeader>
+                        <CardSubHeader>The room has been booked</CardSubHeader>
+                        <CardContent>
+                            The dates have been reserved for the selected room.
+                            To validate the booking, you must proceed to the payment with any available method at your disposal.
+                        </CardContent>
+                    </div>
+                </div>
+            </Card>
+
+            {/* <p className="BillingPayment__description">
+                The dates have been reserved for the selected room. To validate the booking, you must proceed to the payment with any available method at your disposal.
+            </p> */}
+            <div className="BillingPayment__methods">
+                <Heading size="small">Payment methods</Heading>
+
+                <Elements stripe={stripe$} options={options}>
+                    <StripeCheckoutForm />
+                </Elements>
+            </div>
+        </div>
+    );
+};
+
+
 export type StepBookingProps = {
     onClose?: () => void;
 };
@@ -72,68 +159,92 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
 
     const [ isModalOpen, setIsModalOpen ] = useState(true);
 
-    const tabNames = [ 'booking', 'info', 'billing' ] as const;
+    const tabNames = [ 'booking', 'billing', 'confirmation', 'payment' ] as const;
     type TabNames = (typeof tabNames)[ number ];
 
     type TabsState = Record<TabNames, TabState>;
 
-    const defaultActiveIndex = tabNames.findIndex(name => name === 'info');
+    const defaultActiveIndex = tabNames.findIndex(name => name === 'billing');
     const [ activeIndex, setActiveIndex ] = useState(defaultActiveIndex);
 
+    const isValid = (name: TabNames) => {
+        if (name === 'booking')
+            return helpers.isReservationValid(reservation);
 
-    const [ tabStates, _setTabsState ] = useState<TabsState>(() => Object.fromEntries(
+        if (name === 'billing' || name === 'confirmation' || name === 'payment')
+            return helpers.isBillingInfoValid(billingInfo);
+
+        return false;
+    };
+
+    const isEnabled = (name: TabNames, tabsState: TabsState) => {
+        const index = tabNames.findIndex(tabName => tabName === name);
+
+        const isValidPreviouses = (i = 0) => {
+            if (i === index)
+                return true;
+
+            const tabState = tabsState[ tabNames[ i ] ];
+            return tabState.isValid ? isValidPreviouses(i + 1) : false;
+        };
+
+        return index === 0 || isValidPreviouses();
+    };
+
+    const [ tabsState, _setTabsState ] = useState<TabsState>(() => Object.fromEntries(
         tabNames.map((name, i) => [ name, {
             isActive: i === defaultActiveIndex,
-            isValid: name === 'booking',
-            isEnabled: name !== 'billing'
+            isValid: isValid(name),
+            isEnabled: isValid(name)
         } as TabState ])
     ) as TabsState);
 
-    const isBillingTabEnabled = (tabsState: TabsState) => {
-        return Object.entries(tabsState).filter(([ name ]) => (name as TabNames) !== 'billing').every(([ , { isValid } ]) => isValid);
-    };
 
-    const setTabsState = (name: TabNames, value: Partial<TabState>) => {
+    const setTabsState = (name: TabNames, value: Partial<TabState> | ((tabState: TabState, tabsState: TabsState) => Partial<TabState>)) => {
         _setTabsState(state => {
-            const newState = { ...state, [ name ]: { ...state[ name ], ...value } };
+            const newState = tabNames.reduce<TabsState>((newState, tabName) => {
+                const tabState = tabsState[ tabName ];
+                const partialTabState = tabName === name ? (typeof value === 'function' ? value(tabState, state) : value) : {};
+                // const isEnabled = Object.values(newState).every(s => s.isValid);
 
-            if (name !== 'billing')
-                newState.billing.isEnabled = isBillingTabEnabled(newState);
+                return {
+                    ...newState,
+                    [ tabName ]: {
+                        ...tabState,
+                        isValid: isValid(tabName),
+                        isEnabled: isEnabled(tabName, newState),
+                        ...partialTabState
+                    }
+                };
+            }, {} as TabsState);
 
             return newState;
         });
     };
-    /* const [ activeIndex, setActiveIndex ] = useState(0); */
-    // const onBookingDetailFormInputChange: BookingDetailsProps[ 'onInputChange' ] = useCallback((name, value) => {
-    //     onReservationDetailsChange({ [ name ]: value });
-    //     setDetails(state => ({ ...state, [ name ]: value }));
-    // }, [ setDetails, onReservationDetailsChange ]);
 
-    // const onBookingDetailsSubmit: BookingDetailsProps[ 'onSubmit' ] = useCallback(data => {
-    //     setIsBookingDetailsOpen(false);
-    //     onSubmit();
-    //     // onSubmit(propertyData as PropertySearchData[ 'data' ], data/* details */ as BookingDetailsData);
-    // }, [ setIsBookingDetailsOpen, onSubmit /*, propertyData , details */ ]);
 
-    // const onBookingDetailsSubmit: BookingDetailsProps[ 'onSubmit' ] = useCallback(data => { }, []);
+    useEffect(() => { console.log(billingInfo); setTabsState('confirmation', {}); }, [ billingInfo ]);
+    useEffect(() => { console.log(reservation); setTabsState('booking', {}); }, [ reservation ]);
 
     const { searchProps, summaryProps } = usePropertyBookingFormProps({ buttonText: 'Next' });
+
+    const booking = reservation.bookings?.find(b => b.startDate === reservation.startDate && b.endDate === reservation.endDate);
 
     const panes = tabNames.map(name => {
         const handleTabState = () => {
             setTabsState(name, { isValid: true });
 
-            if (tabNames[ tabNames.length - 1 ] !== name) {
-                const activeIndex = tabNames.findIndex(n => name !== n && !tabStates[ n ].isValid);
+            if (tabNames.at(-1) !== name) {
+                // next tab with isValid state = false
+                const activeIndex = tabNames.findIndex(n => name !== n && !tabsState[ n ].isValid);
                 setActiveIndex(activeIndex !== -1 ? activeIndex : tabNames.length - 1);
             }
+
+            if (name === 'confirmation')
+                setReservation({ type: 'create-booking', billingInfo });
+
         };
 
-        const onSubmit = () => {
-            handleTabState();
-
-            setReservation({ type: 'create-booking', billingInfo });
-        };
 
         if (name === 'booking') {
             const searchButton = <Button isFormSubmit isRounded>Next</Button>;
@@ -141,7 +252,7 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
             return {
                 name,
                 menuItem: (
-                    <StepBookingMenuItem name={name} iconName="further info" tabState={tabStates[ name ]} title="Booking" description="Choose the room(s)" />
+                    <StepBookingMenuItem name={name} iconName="further info" tabState={tabsState[ name ]} title="Booking" description="Choose the room(s)" />
                 ),
                 render: () => <Tab.Pane>
                     <TabContentHeader />
@@ -156,11 +267,11 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
             };
         }
 
-        if (name === 'info') {
+        if (name === 'billing') {
             return {
                 name,
                 menuItem: (
-                    <StepBookingMenuItem name={name} iconName="further info" tabState={tabStates[ name ]} title="Billing" description="Enter billing information" />
+                    <StepBookingMenuItem name={name} iconName="further info" tabState={tabsState[ name ]} title="Billing" description="Enter billing information" />
                 ),
                 render: () => <Tab.Pane>
                     <TabContentHeader />
@@ -172,15 +283,29 @@ export const StepBooking: React.FunctionComponent<StepBookingProps> = ({ onClose
             };
         }
 
-        if (name === 'billing') {
+        if (name === 'confirmation') {
             return {
                 name,
-                menuItem: <StepBookingMenuItem name={name} iconName="credit card" tabState={tabStates[ name ]} title="Confirm Order" description="Payment summary" />,
+                menuItem: <StepBookingMenuItem name={name} iconName="credit card" tabState={tabsState[ name ]} title="Confirm Order" description="Reservation summary" />,
                 render: () => <Tab.Pane>
                     <TabContentHeader />
 
                     <TabContent>
-                        <BookingSummary onSubmit={onSubmit} buttonText="Proceed to payment" />
+                        <BookingSummary onSubmit={handleTabState} buttonText="Proceed to payment" />
+                    </TabContent>
+                </Tab.Pane>
+            };
+        }
+
+        if (name === 'payment') {
+            return {
+                name,
+                menuItem: <StepBookingMenuItem name={name} iconName="credit card" tabState={tabsState[ name ]} title="Payment" description="Reservation payment" />,
+                render: () => <Tab.Pane>
+                    <TabContentHeader />
+
+                    <TabContent>
+                        <ReservationPayment />
                     </TabContent>
                 </Tab.Pane>
             };

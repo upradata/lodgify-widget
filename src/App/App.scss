@@ -18,9 +18,14 @@
     color: white;
 }
 
-.ui.modal > i.icon svg {
+/* .ui.modal > i.icon svg {
     width: 30px;
     height: 30px;
+} */
+.ui.modal > i.icon svg {
+    width: 40px;
+    height: 40px;
+    padding: 6px;
 }
 
 body .ui.inverted::-webkit-scrollbar-track {
@@ -52,8 +57,8 @@ body .ui.inverted::-webkit-scrollbar-thumb:hover {
 }
 
 .ui.fullscreen.modal > .content {
-    display: flex;
-    justify-content: center;
+    /*  display: flex;
+    justify-content: center; */
 }
 
 .ui.form .ui.input .PhoneInput .dropdown-container .ui.search.selection.dropdown input.search,

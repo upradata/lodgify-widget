@@ -251,7 +251,45 @@ export type PropsWithStyle<P = {}> = P & {
     }>;
     export const SearchFields: React.ComponentType<SearchFieldsProps>;
     export const SearchModal: React.ComponentType<{ [ K: string ]: any; }>;
-    export const Heading: React.ComponentType<{ [ K: string ]: any; }>;
+
+
+    export type HeaderProps = PropsWithStyle<{
+        activeNavigationItemIndex?: number;
+        isBackgroundFilled?: boolean;
+        logoHref?: string;
+        logoSize?: 'medium' | 'large' | 'huge';
+        logoSizes?: string;
+        logoSrc?: string;
+        logoSrcSet?: string;
+        logoSubText?: string;
+        logoText?: string;
+        navigationItems?: {
+            href: string;
+            subItems: {
+                href: string;
+                target?: string;
+                text: string;
+            }[];
+            target?: string;
+            text: string;
+        }[];
+        primaryCTA?: {
+            onClick: Function;
+            text: string;
+        };
+    }>;
+
+
+    export type HeadingProps = PropsWithStyle<{
+        // children: string;
+        className?: string;
+        hasMargin?: boolean;
+        isColorInverted?: boolean;
+        size?: 'huge' | 'large' | 'medium' | 'small';
+        textAlign?: 'left' | 'right' | 'justified' | 'center';
+    }>;
+
+    export const Heading: React.ComponentType<HeadingProps>;
 
     export type Validation = {
         getIsEmpty: (value: string) => boolean;
@@ -300,7 +338,7 @@ export type PropsWithStyle<P = {}> = P & {
     export type InputProps<V = unknown> = {
         name?: string;
         onBlur?: React.DOMAttributes<Element>[ 'onBlur' ]; // (event: FocusEvent) => void;
-        onChange?: (name: string, value: V) => void;
+        onChange?: (name: string, value: V, extra?: unknown) => void;
         width?: string;
         label?: string;
         value?: V;
@@ -425,7 +463,18 @@ export type PropsWithStyle<P = {}> = P & {
       }; */
 
     export const Modal: React.ComponentType<ModalProps>;
-    export const FlexContainer: React.ComponentType<{ [ K: string ]: any; }>;
+
+    export type FlexContainerProps = PropsWithStyle<{
+        alignContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'stretch';
+        alignItems?: 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch';
+        // children: PropTypes.node.isRequired|
+        className?: string;
+        flexDirection?: 'row' | 'row-reverse' | 'column' | 'column-reverse';
+        flexWrap?: 'nowrap' | 'wrap' | 'wrap-reverse';
+        justifyContent?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
+    }>;
+
+    export const FlexContainer: React.ComponentType<FlexContainerProps>;
     export const NumberInput: React.ComponentType<{ [ K: string ]: any; } & InputProps>;
     export const Paragraph: React.ComponentType<{ [ K: string ]: any; }>;
     export const Link: React.ComponentType<{ [ K: string ]: any; }>;

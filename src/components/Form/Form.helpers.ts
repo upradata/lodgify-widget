@@ -15,7 +15,7 @@ export const DEFAULT_IS_REQUIRED_MESSAGE = 'This field is required';
 export const DEFAULT_IS_INVALID_MESSAGE = 'Invalid';
 
 
-export const isRequiredError = (value: unknown, validation: Validation) => {
+export const isRequiredFieldEmpty = (value: unknown, validation: Validation) => {
     return validation.isRequired && validation.isEmpty(value);
 };
 
@@ -23,7 +23,7 @@ export const isRequiredError = (value: unknown, validation: Validation) => {
 
 export const getEmptyRequiredInputs = (inputsState: InputsState, getValidation: GetValidation): string[] => {
     return Object.entries(inputsState).reduce((list, [ inputName, { value } ]) => {
-        if (isRequiredError(value, getValidation(inputName)))
+        if (isRequiredFieldEmpty(value, getValidation(inputName)))
             return [ ...list, inputName ];
 
         return list;
@@ -47,18 +47,19 @@ export const useProcessInputValue = () => {
 
         const { validation, hasNewValue, inputValue, state } = options;
 
-        const getInputValue = (): Pick<InputState, 'isValid' | 'error' | 'transformedValue'> => {
+        const getInputValue = (): Pick<InputState, 'isValid' | 'error' | 'isEmpty' | 'transformedValue'> => {
             if (!hasNewValue)
                 return {};
 
             const newValue = inputValue.value;
 
-            const requiredError = isRequiredError(newValue, validation);
+            const requiredError = isRequiredFieldEmpty(newValue, validation);
+            const isEmpty = validation.isEmpty(newValue);
 
             if (requiredError)
-                return { isValid: false, error: validation.isRequiredMessage };
+                return { isValid: false, error: validation.isRequiredMessage, isEmpty };
 
-            const validatedValue = !validation.isEmpty(newValue) ?
+            const validatedValue = !isEmpty ?
                 { ...validation.validate(newValue, state), isValid: true } :
                 { error: false, isValid: false };
 
@@ -68,12 +69,12 @@ export const useProcessInputValue = () => {
                 const message = error === true ? validation.invalidMessage : error;
                 logError(message);
 
-                return { isValid: false, error: validation.invalidMessage };
+                return { isValid: false, isEmpty, error: validation.invalidMessage };
             }
 
             // both false => empty value
             // no transformedValue => by default, transformedValue = value (identity)
-            return { ...validatedValue, transformedValue: validatedValue.transformedValue || newValue, error: false };
+            return { ...validatedValue, isEmpty, transformedValue: validatedValue.transformedValue || newValue, error: false };
         };
 
 

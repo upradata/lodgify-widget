@@ -90,9 +90,9 @@ export const BookingBillingInfo: React.FunctionComponent<BookingDetailsProps> = 
         debouncedSetBillingInfo(billingState);
     }, [ billingState ]);
  */
-    const onInputChange: FormProps<FormInputValues>[ 'onInputChange' ] = useCallback((name, value) => {
+    const onInputChange: FormProps<FormInputValues>[ 'onInputChange' ] = useCallback((name, value, inputState) => {
         // setBillingState(state => ({ ...state, [ name ]: value }));
-        setBillingInfo({ [ name ]: value });
+        setBillingInfo({ [ name ]: inputState.isEmpty ? undefined : value });
     }, [ setBillingInfo, ]);
 
 

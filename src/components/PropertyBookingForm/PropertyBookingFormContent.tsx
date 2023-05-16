@@ -14,7 +14,7 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
 
     const dropdownProps: DropdownProps = {
         label: props.locationInputLabel,
-        onChange: props.onInputChange,
+        // onChange: props.onInputChange,
         options: props.locationOptions,
         value: props.locationInputValue,
         willOpenAbove: props.willLocationDropdownOpenAbove,
@@ -30,7 +30,7 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
         isCalendarIconDisplayed: props.isCalendarIconDisplayed,
         isLoading: props.isDateRangePickerLoading,
         localeCode: props.dateRangePickerLocaleCode,
-        onChange: props.onInputChange,
+       // onChange: props.onInputChange,
         onFocusChange: props.datesInputOnFocusChange,
         startDatePlaceholderText: props.datesCheckInLabel,
         value: props.datesInputValue,
@@ -49,7 +49,7 @@ export const PropertyBookingFormContent: React.FunctionComponent<PropertyBooking
     const numberInputProps: NumberInputProps = {
         // icon: ...;
         label: props.guestsInputLabel,
-        onChange: props.onInputChange,
+       // onChange: props.onInputChange,
         max: props.maximumGuestsInputValue,
         min: 1,
         value: props.guestsInputValue

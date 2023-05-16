@@ -410,3 +410,21 @@ export const hasProp = <T extends {}>(o: T, prop: keyof T): boolean => prop in o
 
 
 export const isNil = (v: unknown): v is undefined | null => typeof v === 'undefined' || v === null;
+
+
+export const joinToString = (options: { tostring?: (v: unknown) => string; filter?: (v: unknown) => boolean; } = {}) => {
+    const { tostring: valueToString = v => `${v}`, filter = _v => true } = options;
+
+    return (sep: string, ...parts: unknown[]) => {
+        const strings = parts.reduce<string[]>((strings, part) => {
+            if (!filter(part))
+                return strings;
+
+            return [ ...strings, valueToString(part) ];
+        }, []);
+
+        return strings.join(sep);
+    };
+};
+
+// console.log(joinToString({ filter: v => !!v })('/', '', false, 'caca', '', 'pipi', true, 11));

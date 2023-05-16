@@ -34,6 +34,7 @@ export class ReservationDebug {
     quote?: ReservationQuote = {
         totalGross: 1000,
         totalNet: null,
+        currencyCode: 'eur',
         vat: 20,
         isPricesIncludesVat: true,
         roomsPriceDetails: [
@@ -96,6 +97,7 @@ export type ReservationQuoteRoomPriceDetails = {
 export type ReservationQuote = {
     totalGross: number;
     totalNet: number;
+    currencyCode: string;
     vat: number;
     isPricesIncludesVat: boolean;
     roomsPriceDetails: ReservationQuoteRoomPriceDetails[];

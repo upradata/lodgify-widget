@@ -147,6 +147,7 @@ const reservationReducer: Reducer /* React.Reducer<Reservation, ReservationReduc
                     const reservationQuote: ReservationQuote = {
                         totalGross,
                         totalNet: quote.totalExcludingVat,
+                        currencyCode: quote.currencyCode,
                         vat: quote.totalVat,
                         isPricesIncludesVat,
                         roomsPriceDetails
@@ -191,8 +192,8 @@ const reservationReducer: Reducer /* React.Reducer<Reservation, ReservationReduc
                     // payment_address?: '',
                     currencyCode: 'eur',
                     bookability: 'InstantBooking',
-                    // origin?: '',
-                    // total: reservation.quote.totalGross,
+                    origin: `Website plugin: ${window.location.href}`,
+                    total: reservation.quote.totalGross,
                     paymentWebsiteId: context.property.websiteId
                 }).then(() => {
                     setReservation(prev => {

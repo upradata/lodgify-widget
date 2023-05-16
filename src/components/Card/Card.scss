@@ -1,4 +1,4 @@
-.ui.card.has-form > .content {
+.ui.Card.has-form > .content {
     & > .header {
         margin: 0;
     }
@@ -20,6 +20,11 @@
     }
 }
 
-.ui.card.has-form .content .ui.Form {
+.ui.Card.has-form .content .ui.Form {
     margin-top: 2em;
+}
+
+.Card > .content {
+    display: inline-flex;
+    width: auto;
 }

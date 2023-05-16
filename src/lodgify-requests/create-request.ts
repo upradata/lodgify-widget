@@ -1,4 +1,4 @@
-import { map, toCasedObject } from '../util';
+import { joinToString, map, toCasedObject } from '../util';
 import { RequestErrors } from './requests.error';
 
 import type { CamelObject, SelectType } from '../util.types';
@@ -65,8 +65,7 @@ export type Options = { propertyId?: number; roomTypeId?: number; } & (
 );
 
 
-const join = (sep: string, ...paths: Primitive[]) => paths.filter(s => !!s).join(sep);
-
+const join = joinToString({ filter: v => !!v });
 
 
 const lodgifyREST = (verb: string, options: Record<string, Primitive> = {}) => {

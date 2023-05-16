@@ -3,6 +3,7 @@ export class InputState<InputValue = unknown, TransformedValue = InputValue>  {
     value?: InputValue;
     transformedValue?: TransformedValue;
     isValid?: boolean;
+    isEmpty?: boolean;
     error?: boolean | string;
 };
 

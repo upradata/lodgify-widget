@@ -1,6 +1,12 @@
 .StepBooking {
     width: 100%;
     max-width: 950px;
+    margin: auto;
+
+    display: flex;
+    /* align-items: flex-start; */
+    justify-content: center;
+    flex-direction: column;
 
     .ui.segment {
         padding: 0;
@@ -135,6 +141,39 @@
 
     .small & .PropertyBookingForm {
         margin-top: 5px;
+    }
+
+    .success {
+        color: var(--lodgify-ui-action-color, #4b4b4b);
+    }
+
+    .BillingPayment .Card {
+        padding: 1.1em;
+        border-radius: 20px;
+    }
+
+    .BillingPayment-status-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9em;
+
+        .CardContent {
+            margin-top: 2em;
+        }
+    }
+
+    .BillingPayment__methods {
+        margin-top: 50px;
+    }
+
+    .StripeCheckoutForm {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .StripeCheckoutForm__submit-btn {
+        margin-top: 20px;
     }
 }
 

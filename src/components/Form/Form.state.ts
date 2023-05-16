@@ -55,7 +55,7 @@ export const useFormState = (props: UseFormStateProps) => {
                 };
 
                 if (inputState.type === 'update')
-                    scheduleActionsAfterRender.add(() => props.onInputChange?.(inputName, inputStateWithData.transformedValue));
+                    scheduleActionsAfterRender.add(() => props.onInputChange?.(inputName, inputStateWithData.transformedValue, inputStateWithData));
 
                 const isNowDisabled = props.isSubmitDisabled(newState, getValidation);
 
@@ -102,8 +102,11 @@ export const useFormState = (props: UseFormStateProps) => {
             case !hasProp(previousState, 'value') || previousState.value !== processedInputValue.value:
                 return processedInputValue;
 
+            case processedInputValue.error && processedInputValue.isEmpty:
+                return processedInputValue;
+                
             default:
-                return null;
+                return  null;
         }
     }, []);
 

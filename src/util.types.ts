@@ -119,7 +119,9 @@ export type AddValueToObject<T, O> = {
     [ K in keyof T ]: T[ K ] & O
 };
 
-export type GetPropsFromReactElement<E> = E extends React.ElementType<infer P> ? E extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[ E ] : never : never;
+export type GetPropsFromReactElement<E> =
+    E extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[ E ] :
+    E extends React.ElementType<infer P> ? P : never;
 
 
 export type Select<

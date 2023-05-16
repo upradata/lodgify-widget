@@ -3,14 +3,15 @@ import classnames from 'classnames';
 import React from 'react';
 import type { GetPropsFromReactElement } from './util.types';
 
-export const wrapWith = <E extends React.ElementType, A extends React.ElementType = 'div'>(
-    options: { as?: A; props?: GetPropsFromReactElement<A>; Component?: E; } = {}
-) => {
-    const { as: _as = 'div', props: wrapperProps, Component } = options;
+export const wrapWith = <Child extends React.ElementType, AS extends React.ElementType = 'div'>(
+    options: { as?: AS; props?: GetPropsFromReactElement<AS>; Component?: Child; componentProps?: Partial<GetPropsFromReactElement<Child>>; } = {}
+): React.FunctionComponent<GetPropsFromReactElement<Child>> => {
+
+    const { as: _as = 'div', props: wrapperProps, Component, componentProps } = options;
     const As = _as as React.ElementType;
 
-    const Wrapper: React.FunctionComponent<GetPropsFromReactElement<E>> = props => {
-        const child = Component ? <Component {...props as any} /> : <React.Fragment>{props.children}</React.Fragment>;
+    const Wrapper: React.FunctionComponent<GetPropsFromReactElement<Child>> = props => {
+        const child = Component ? <Component {...componentProps} {...props as any} /> : <React.Fragment>{props.children}</React.Fragment>;
         return <As {...wrapperProps}>{child}</As>;
     };
 
