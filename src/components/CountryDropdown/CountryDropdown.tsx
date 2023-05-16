@@ -1,7 +1,7 @@
 import './CountryDropdown.scss';
 
 import React, { memo, useCallback, useContext, useMemo } from 'react';
-import { AppContext } from '../../App/AppContext';
+import { AppContext } from '@root/App/contexts/AppContext';
 import { CountryIcon } from './CountryIcon';
 // import { getDiallingCode } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getDiallingCode.js';
 // import { getOptionsWithSearch } from '@lodgify/ui/lib/es/components/inputs/PhoneInput/utils/getOptionsWithSearch.js';
@@ -15,8 +15,8 @@ import { Dropdown, DropdownProps } from '../Dropdown';
 import type { CountrySelectOptions, CountrySelectWithIconProps } from 'react-phone-number-input';
 // import parsePhoneNumber from 'libphonenumber-js';
 import type { CountryCode } from '../../types';
-import type { Omit as MyOmit } from '../../util.types';
-import { getCityFromLocale } from '../../util';
+import type { Omit as MyOmit } from '@root/util.types';
+import { getCityFromLocale } from '@root/util';
 
 
 export type CountryDropdownItemOption<Country extends string = CountryCode> = {

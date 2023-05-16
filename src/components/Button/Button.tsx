@@ -1,8 +1,8 @@
 import { /* ButtonProps as LodgifyButtonProps, */ Icon, IconNames } from '@lodgify/ui';
-import { fragments } from '../../util';
+import { fragments } from '@root/util';
 import { Button as SemanticButton, StrictButtonProps as SemanticStrictButtonProps } from 'semantic-ui-react';
 import classnames from 'classnames';
-import { PropsWithStyleBase } from '../../util.types';
+import { PropsWithStyleBase } from '@root/util.types';
 
 class StrictButtonProps extends PropsWithStyleBase {
     // 

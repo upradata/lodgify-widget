@@ -5,7 +5,7 @@ import { HorizontalGutters, VerticalGutters } from '@lodgify/ui';
 import classnames from 'classnames';
 import { ContainerContext, ContainerContextType } from './ContainerContext';
 
-import type { PropsWithStyle } from '../../util.types';
+import type { PropsWithStyle } from '@root/util.types';
 
 
 export type Direction = 'row' | 'column';

@@ -14,7 +14,7 @@ import classnames from 'classnames';
 import { Dropdown as SemanticDropdown } from 'semantic-ui-react';
 import { DropdownProps, DropdownRef, DropdownSearchInput, LodgifyDropdownProps, SemanticDropdownProps } from './Dropdown.props';
 import { getOptionsWithSearch } from '../CountryDropdown/CountryDropdown';
-import { fragments, removeType, usePrevious, hasProp, isNil, useActionsAfterRender } from '../../util';
+import { fragments, removeType, usePrevious, hasProp, isNil, useActionsAfterRender } from '@root/util';
 import { InputController, InputControllerChildProps, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
 
 type OnChange = SemanticDropdownProps[ 'onChange' ];

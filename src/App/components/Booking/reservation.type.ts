@@ -1,4 +1,4 @@
-import { LodgifyDate, QuotePriceType } from '../../lodgify-requests';
+import { LodgifyDate, QuotePriceType } from '@root/lodgify-requests';
 
 
 export class Reservation {

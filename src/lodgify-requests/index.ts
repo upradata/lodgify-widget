@@ -1,6 +1,6 @@
 import * as _requests from './requests';
 
-import type { AppContextType } from '../App/AppContext';
+import type { AppContextType } from '../App/contexts/AppContext';
 import { map } from '../util';
 
 

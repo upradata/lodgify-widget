@@ -3,7 +3,7 @@ import './Price.scss';
 import React from 'react';
 import { TextPlaceholder } from '@lodgify/ui';
 import { Loader } from 'semantic-ui-react';
-import { localizedPrice } from '../../util';
+import { localizedPrice } from '@root/util';
 
 
 export class PriceProps {

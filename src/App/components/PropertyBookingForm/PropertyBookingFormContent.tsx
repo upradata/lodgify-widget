@@ -1,11 +1,18 @@
 import React, { useMemo } from 'react';
 import { Button, NumberInput, NumberInputProps } from '@lodgify/ui';
+import {
+    Calendar,
+    CalendarProps,
+    Dropdown,
+    DropdownProps,
+    Form,
+    FormProps,
+    InputField,
+    makeValidation,
+    PropsValidationOptions
+} from '@components';
 import { CHECK_IN, CHECK_OUT, GUESTS, LOCATION } from '@lodgify/ui/lib/es/utils/default-strings';
 import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon';
-import { Calendar, CalendarProps } from '../Calendar';
-import { Dropdown, DropdownProps } from '../Dropdown';
-import { Form, FormProps, InputField } from '../Form';
-import { makeValidation, PropsValidationOptions } from '../Form/Form.validation';
 
 import type { PropertyBookingFormContentProps } from './PropertyBookingForm.props';
 

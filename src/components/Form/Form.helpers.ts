@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import { AppContext } from '../../App/AppContext';
-import { map } from '../../util';
+import { AppContext } from '../../App/contexts/AppContext';
+import { map } from '@root/util';
 
 import type { InputsState, InputState } from './Form.state.type';
 import type { GetValidation, Validation } from './Form.validation';

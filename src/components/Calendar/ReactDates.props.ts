@@ -1,5 +1,5 @@
 import type { Moment } from 'moment';
-import type { DateRange } from '../../util.types';
+import type { DateRange } from '@root/util.types';
 
 
 export type ReactDatesDateRangePickerProps = {

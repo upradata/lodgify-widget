@@ -4,10 +4,10 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
+        "start": "craco start",
+        "build": "craco build",
+        "test": "craco test",
+        "eject": "craco eject",
         "generate-libphonenumber-metadata": "./metadata/countries-metadata.sh phone",
         "generate-timezone-metadata": "./metadata/countries-metadata.sh timezone"
     },
@@ -55,6 +55,7 @@
         "@babel/core": "^7.0.0-0",
         "@babel/plugin-syntax-flow": "^7.14.5",
         "@babel/plugin-transform-react-jsx": "^7.14.9",
+        "@craco/craco": "^7.1.0",
         "@testing-library/dom": "^8.20.0",
         "@testing-library/jest-dom": "^5.16.5",
         "@testing-library/react": "11.1.2",

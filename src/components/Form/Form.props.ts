@@ -2,7 +2,7 @@
 import type { StrictFormProps } from 'semantic-ui-react';
 import type { GetValidation, PropsValidationOptions } from './Form.validation';
 import type { InputsState, InputState } from './Form.state.type';
-import type { Omit, PropsWithStyle } from '../../util.types';
+import type { Omit, PropsWithStyle } from '@root/util.types';
 
 
 export type FormProps<InputValue = unknown, InputPropsValue extends Record<string, InputValue> = Record<string, InputValue>> = PropsWithStyle<{

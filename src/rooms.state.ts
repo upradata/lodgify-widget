@@ -1,6 +1,6 @@
 import { useCallback, useContext, useState } from 'react';
 import moment from 'moment';
-import { AppContext } from './App/AppContext';
+import { AppContext } from './App/contexts/AppContext';
 import { GetAvailibityOptions, GetPropertyInfoOptions, requests } from './lodgify-requests';
 import { getPeriodsNonAvailable, momentToLodgifyDate } from './lodgify-info/info';
 

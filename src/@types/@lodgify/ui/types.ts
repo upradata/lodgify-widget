@@ -1,4 +1,4 @@
-import { PropsWithStyleBase } from '../../../util.types';
+import { PropsWithStyleBase } from '@root/util.types';
 
 
 export class ModalProps extends PropsWithStyleBase {
@@ -83,7 +83,7 @@ export var ICON_NAMES = {
     MINUS: 'minus',
     NO_CHILDREN: 'no children',
     PARKING: 'parking',
-     PAW: 'paw',
+    PAW: 'paw',
     PHONE: 'phone',
     PINTEREST: 'pinterest',
     PLACEHOLDER: 'placeholder',
@@ -104,5 +104,5 @@ export var ICON_NAMES = {
     USERS: 'users',
     WHEELCHAIR: 'wheelchair',
     WIFI: 'wifi',
-    YOUTUBE: 'youtube' 
+    YOUTUBE: 'youtube'
 } as const;

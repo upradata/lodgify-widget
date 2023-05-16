@@ -4,12 +4,12 @@ import { InputGroup, InputProps } from '@lodgify/ui';
 // import { getInputWidth } from '@lodgify/ui/lib/es/components/collections/Form/utils/getInputWidth';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { Form as SemanticForm, SemanticWIDTHS, StrictFormFieldProps } from 'semantic-ui-react';
-import { AppContext } from '../../App/AppContext';
-import { errorToString, hasProp } from '../../util';
+import { AppContext } from '@root/App/contexts/AppContext';
+import { errorToString, hasProp } from '@root/util';
 
 import type { InputControllerProps } from '../InputController';
 import type { InputsState, InputState, SetInputState } from './Form.state.type';
-import type { Omit, PropsWithStyle } from '../../util.types';
+import type { Omit, PropsWithStyle } from '@root/util.types';
 import type { Validation } from './Form.validation';
 
 

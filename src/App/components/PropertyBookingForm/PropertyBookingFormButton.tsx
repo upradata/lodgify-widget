@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button, ButtonProps } from '@lodgify/ui';
-import { Price, PriceProps } from '../Price';
-import { fragments } from '../../util';
+import { fragments } from '@root/util';
+import { Price, PriceProps } from '@components';
+
 
 export type PropertyBookingFormButtonProps = PriceProps & ButtonProps;
 

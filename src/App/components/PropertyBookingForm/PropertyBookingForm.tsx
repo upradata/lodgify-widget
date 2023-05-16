@@ -1,12 +1,12 @@
 import './PropertyBookingForm.scss';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { ContainerContext } from '@components/Container/ContainerContext';
 import classnames from 'classnames';
 // import isEqual from 'fast-deep-equal';
 import { PropertyBookingFormContent } from './PropertyBookingFormContent';
 
 import type { PropertyBookingFormContentProps, PropertyBookingFormProps } from './PropertyBookingForm.props';
-import { ContainerContext } from '../Container/ContainerContext';
 
 
 export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormProps> = ({
@@ -30,7 +30,7 @@ export const PropertyBookingForm: React.FunctionComponent<PropertyBookingFormPro
         };
     }, []); */
 
-    
+
     const handleSubmit = useCallback(() => { onSubmit?.(/* state */); }, [ onSubmit/* , state */ ]);
 
 

@@ -6,7 +6,7 @@ import { returnFirstArgument } from '@lodgify/ui/lib/es/utils/return-first-argum
 import { some } from '@lodgify/ui/lib/es/utils/some';
 import classnames from 'classnames';
 import { Input } from 'semantic-ui-react';
-import { fragments, hasProp } from '../../util';
+import { fragments, hasProp } from '@root/util';
 import { InputState } from '../Form';
 import { InputControllerProps } from './InputController.props';
 

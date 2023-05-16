@@ -11,7 +11,7 @@ import {
     LOCATION,
     SEARCH
 } from '@lodgify/ui/lib/es/utils/default-strings';
-import { fragments, usePrevious } from '../../util';
+import { fragments, usePrevious } from '@root/util';
 import { BreakPoint } from '../MediaQuery/BreakPoint';
 import './SearchBar.scss';
 import { SearchBarContainer, SearchBarContentainerProps } from './SearchBarContentainer';

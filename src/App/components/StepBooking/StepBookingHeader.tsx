@@ -1,8 +1,8 @@
 import React from 'react';
+import { dateAsString } from '@root/lodgify-info/info';
 import { Icon } from '@lodgify/ui';
-import { dateAsString } from '../../lodgify-info/info';
 
-import type { LodgifyDate } from '../../lodgify-requests/types';
+import type { LodgifyDate } from '@root/lodgify-requests/types';
 
 
 export type StepBookingHeaderProps = { roomName: string; startDate: LodgifyDate; endDate: LodgifyDate; };

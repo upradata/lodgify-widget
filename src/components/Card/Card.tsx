@@ -5,8 +5,8 @@ import { Heading, Paragraph } from '@lodgify/ui';
 import classnames from 'classnames';
 // import Card from 'semantic-ui-react/dist/es/views/Card/Card.js';
 import { Card as SemanticCard, Image, StrictCardProps as SemanticStrictCardProps } from 'semantic-ui-react';
-import { fragments } from '../../util';
-import { PropsWithStyleBase } from '../../util.types';
+import { fragments } from '@root/util';
+import { PropsWithStyleBase } from '@root/util.types';
 import { wrapWith } from '../../react-util';
 
 

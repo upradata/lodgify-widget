@@ -4,8 +4,8 @@ import { DEFAULT_IS_INVALID_MESSAGE, DEFAULT_IS_REQUIRED_MESSAGE } from './Form.
 import type { DateRange } from '@lodgify/ui';
 import type { CountryCode } from '../../types';
 import type { InputsState } from './Form.state.type';
-import type { Omit, SelectType, TypeOf } from '../../util.types';
-import { errorToString } from '../../util';
+import type { Omit, SelectType, TypeOf } from '@root/util.types';
+import { errorToString } from '@root/util';
 
 
 type ValidatedValue<TransformedValue = unknown> = { transformedValue?: TransformedValue; error?: string | boolean; };

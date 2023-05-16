@@ -2,8 +2,8 @@ import { Button } from '@lodgify/ui';
 import { PaymentElement, PaymentElementProps, useElements, useStripe } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { useState, useContext } from 'react';
-import { AppContext } from '../../App/AppContext';
-import { joinToString } from '../../util';
+import { AppContext } from '../../contexts/AppContext';
+import { joinToString } from '@root/util';
 import { BookingContext } from '../Booking/BookingContext';
 import { usePaymentStatus } from './usePaymentStatus';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ResponsiveConainer, ResponsiveConainerProps } from '../Container';
-import type { Omit } from '../../util.types';
+import type { Omit } from '@root/util.types';
 
 export type FixedBarProps = Omit<ResponsiveConainerProps, 'isBarFixed'>;
 

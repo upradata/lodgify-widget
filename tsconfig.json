@@ -19,7 +19,19 @@
         "isolatedModules": true,
         "noEmit": true,
         "jsx": "react-jsx",
-        "noErrorTruncation": false
+        "noErrorTruncation": false,
+        "baseUrl": "./",
+        "paths": {
+            "@components": [
+                "src/components"
+            ],
+            "@components/*": [
+                "src/components/*"
+            ],
+            "@root/*": [
+                "src/*"
+            ]
+        }
     },
     "include": [
         "src"

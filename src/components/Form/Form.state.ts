@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import isEqual from 'fast-deep-equal';
 import { getEmptyState, useProcessInputValue } from './Form.helpers';
 import { getValidationWithDefaults, makeGetValidation } from './Form.validation';
-import { hasProp, map, useActionsAfterRender } from '../../util';
+import { hasProp, map, useActionsAfterRender } from '@root/util';
 
 import type { FormProps } from './Form.props';
 import { InputsState, InputState, InputStateAction, SetInputState } from './Form.state.type';
@@ -104,9 +104,9 @@ export const useFormState = (props: UseFormStateProps) => {
 
             case processedInputValue.error && processedInputValue.isEmpty:
                 return processedInputValue;
-                
+
             default:
-                return  null;
+                return null;
         }
     }, []);
 

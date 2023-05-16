@@ -3,8 +3,6 @@ import './BookingSummary.scss';
 
 import React, { useCallback, useContext, useState } from 'react';
 import {
-    /* BlockPlaceholder,
-    BlockPlaceholderProps, */
     Button,
     Checkbox,
     FlexContainer,
@@ -13,22 +11,22 @@ import {
     TextPlaceholder,
     TextPlaceholderProps
 } from '@lodgify/ui';
+import { Form, FormProps, InputField, RenderInputField } from '@components/Form';
+import { localizedPrice, plural } from '@root/util';
+import { QuotePriceType } from '@root/lodgify-requests';
 import {
     Accordion,
-    StrictAccordionTitleProps,
     Placeholder,
     PlaceholderLine,
-    StrictPlaceholderLineProps,
     PlaceholderParagraph,
-    StrictPlaceholderParagraphProps,
     PlaceholderProps,
+    StrictAccordionTitleProps,
+    StrictPlaceholderLineProps,
+    StrictPlaceholderParagraphProps,
     Table
 } from 'semantic-ui-react';
 import classnames from 'classnames';
 import { BookingContext } from '../Booking/BookingContext';
-import { Form, FormProps, InputField, RenderInputField } from '../Form';
-import { localizedPrice, plural } from '../../util';
-import { QuotePriceType } from '../../lodgify-requests';
 import { ReservationQuote, ReservationQuoteRoomCategoryPrices, ReservationQuoteRoomPriceDetails } from '../Booking/reservation.type';
 
 

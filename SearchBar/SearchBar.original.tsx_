@@ -14,8 +14,8 @@ import {
     LOCATION,
     SEARCH
 } from '@lodgify/ui/lib/es/utils/default-strings';
-import { usePrevious } from '../../util';
-import { PropsWithStyle } from '../../util.types';
+import { usePrevious } from '@root/util';
+import { PropsWithStyle } from '@root/util.types';
 // import { SearchModal } from '@lodgify/ui/lib/es/components/general-widgets/SearchBar/components/SearchModal';
 import { SearchModal } from './SearchModal';
 

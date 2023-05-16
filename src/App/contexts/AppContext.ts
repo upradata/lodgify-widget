@@ -1,5 +1,6 @@
 import { createContext } from 'react';
-import type { CountriesMetadata, PhonesMetadata, TimezonesMetadata } from '../types';
+
+import type { CountriesMetadata, PhonesMetadata, TimezonesMetadata } from '@root/types';
 
 
 export type AppContextType = {

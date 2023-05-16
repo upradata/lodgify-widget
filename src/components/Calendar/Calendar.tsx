@@ -21,9 +21,9 @@ import { v4 as uuid } from 'uuid';
 import { ComponentWithResponsiveProps, withResponsive } from '../../withResponsive';
 import { DateRangePickerProps } from './DateRangePicker.props';
 import { InputController, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
-import { isSame, fragments, usePreviousListener } from '../../util';
+import { isSame, fragments, usePreviousListener } from '@root/util';
 
-import type { Omit } from '../../util.types';
+import type { Omit } from '@root/util.types';
 import type { ReactDatesDateRangePickerProps } from './ReactDates.props';
 
 

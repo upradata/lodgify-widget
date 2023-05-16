@@ -3,7 +3,7 @@ import { InputProps } from '../../types';
 import type { IconNames } from '@lodgify/ui';
 import type { DropdownOnSearchChangeData, StrictDropdownItemProps, StrictDropdownProps } from 'semantic-ui-react';
 import type { InputControllerProps } from '../InputController';
-import type { Omit as MyOmit } from '../../util.types';
+import type { Omit as MyOmit } from '@root/util.types';
 
 
 type Value = boolean | number | string;

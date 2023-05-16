@@ -13,21 +13,21 @@ import React, { memo, useCallback, useContext, useMemo, useState } from 'react';
 import { getControlledInputValue } from '@lodgify/ui/lib/es/utils/get-controlled-input-value';
 import { getCountryCallingCode } from 'libphonenumber-js';
 import ReactPhoneNumberInputCore from 'react-phone-number-input/core';
-import { AppContext } from '../../App/AppContext';
+import { AppContext } from '@root/App/contexts/AppContext';
 import { CountryDropdownItemOption, CountryDropdownProps, createCountryDropdown, /* DEFAULT_COUNTRY, */ Flag } from '../CountryDropdown';
 import { InputController, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
 import labels from '../../../node_modules/react-phone-number-input/locale/en.json.js';
 
 // import { getIsInputValueReset } from '@lodgify/ui/lib/es/utils/get-is-input-value-reset';
 import type { InputProps } from '@lodgify/ui';
-// import { usePrevious, usePreviousListener } from '../../util';
+// import { usePrevious, usePreviousListener } from '@root/util';
 // import { createPhoneInput } from 'react-phone-number-input/modules/react-hook-form/PhoneInputWithCountry';
 // import _ReactPhoneNumberInput from 'react-phone-number-input/react-hook-form-core';
 import type { Labels, Metadata, Props as _ReactPhoneNumberProps } from 'react-phone-number-input';
 // import parsePhoneNumber from 'libphonenumber-js';
 import type { CountryCode, CountryCodeWithInternational } from '../../types';
-import type { Omit } from '../../util.types';
-import { getCityFromLocale, hasProp, fragments } from '../../util';
+import type { Omit } from '@root/util.types';
+import { getCityFromLocale, hasProp, fragments } from '@root/util';
 
 
 export const INITIAL_VALUE = '';

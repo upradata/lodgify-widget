@@ -1,12 +1,13 @@
 import { useCallback, useContext, useMemo } from 'react';
-import { isDateInRange, localizedPrice } from '../../util';
-import { lodgifyDateToMoment } from '../../lodgify-info/info';
+import { isDateInRange, localizedPrice } from '@root/util';
+import { lodgifyDateToMoment } from '@root/lodgify-info/info';
+import { BookingContext } from '../Booking/BookingContext';
 import { PropertyBookingFormButton } from './PropertyBookingFormButton';
+import { PropertyBookingFormProps } from './PropertyBookingForm.props';
 
 import type { LocationOptions, SummaryProps } from '@lodgify/ui';
 import type { Moment } from 'moment';
-import { BookingContext } from '../Booking/BookingContext';
-import { PropertyBookingFormProps } from './PropertyBookingForm.props';
+
 
 export type UsePropertyBookingFormProps = { buttonText?: string; };
 

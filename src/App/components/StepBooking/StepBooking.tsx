@@ -2,23 +2,21 @@ import './StepBooking.scss';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { Button, FlexContainer, Heading, Icon, IconProps, Summary } from '@lodgify/ui';
-import classnames from 'classnames';
+import { Card, CardContent, CardHeader, CardSubHeader, Container, Modal } from '@components';
+import { Elements } from '@stripe/react-stripe-js';
+import { StripeElementsOptions } from '@stripe/stripe-js';
+import { wrapWith } from '@root/react-util';
 import { CardDescription, Menu, StrictMenuItemProps as MenuItemProps, StrictTabProps as TabProps, Tab } from 'semantic-ui-react';
+import classnames from 'classnames';
 import { BookingBillingInfo } from '../BookingBillingInfo';
 import { BookingContext } from '../Booking/BookingContext';
 import { BookingReservation } from '../Booking/reservation.type';
 import { BookingSummary } from '../BookingSummary';
-import { Card, CardContent, CardHeader, CardSubHeader } from '../Card';
-import { Container } from '../Container';
-import { Modal } from '../Modal';
+import { helpers } from '../Booking/BookingReservation.action';
 import { PropertyBookingForm, usePropertyBookingFormProps } from '../PropertyBookingForm';
 import { StepBookingHeader } from './StepBookingHeader';
 import { StepBookingSubHeader } from './StepBookingSubHeader';
-import { wrapWith } from '../../react-util';
-import { Elements } from '@stripe/react-stripe-js';
 import { stripe$, StripeCheckoutForm } from './StripeCheckoutForm';
-import { StripeElementsOptions } from '@stripe/stripe-js';
-import { helpers } from '../Booking/BookingReservation.action';
 
 
 const TabHeader = wrapWith({ props: { className: 'TabHeader' } });

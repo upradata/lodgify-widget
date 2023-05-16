@@ -1,19 +1,17 @@
 import { useCallback, useContext, useState } from 'react';
-import { AppContext, AppContextType } from '../../App/AppContext';
-import { getNbOfNights } from '../../util';
-import { requests } from '../../lodgify-requests';
-import { lodgifyDateToMoment, momentToLodgifyDate } from '../../lodgify-info/info';
-import { PriceType, QuotePrice, QuotePriceType } from '../../lodgify-requests/quote.type';
-import { PropertyContext, PropertyContextType } from '../../App/PropertyContext';
+import { getNbOfNights } from '@root/util';
+import { lodgifyDateToMoment, momentToLodgifyDate } from '@root/lodgify-info/info';
+import { PriceType, QuotePrice, QuotePriceType } from '@root/lodgify-requests/quote.type';
+import { requests } from '@root/lodgify-requests';
+import { AppContext, AppContextType } from '../../contexts/AppContext';
+import { helpers, Payload, ReservationAction, ReservationReducerAction } from './BookingReservation.action';
+import { PropertyContext, PropertyContextType } from '../../contexts/PropertyContext';
 import { Reservation, ReservationDebug, ReservationQuote, ReservationQuoteRoomCategoryPrices, ReservationQuoteRoomPriceDetails } from './reservation.type';
 
+import type { RoomData } from '@root/rooms.data';
+import type { RoomsState } from '@root/rooms.state';
+import type { SelectType } from '@root/util.types';
 import type { BookingData, BookingDataValueOf } from './BookingComponent';
-import type { SelectType } from '../../util.types';
-import type { RoomData } from '../../rooms.data';
-import type { RoomsState } from '../../rooms.state';
-import { ReservationReducerAction, helpers, ReservationAction, Payload } from './BookingReservation.action';
-
-
 
 
 type Reducer = (prevState: Reservation, action: ReservationReducerAction, context: { app: AppContextType, property: PropertyContextType; }) => Reservation;

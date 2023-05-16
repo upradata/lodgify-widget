@@ -1,5 +1,5 @@
 import { TextInputProps as LodgifyTextInputProps } from '@lodgify/ui';
-import { fragments } from '../../util';
+import { fragments } from '@root/util';
 import { InputController, InputControllerProps, StrictInputControllerPropsWithInputState } from '../InputController';
 
 type TextInputProps = LodgifyTextInputProps & Partial<InputControllerProps>;
@@ -8,7 +8,7 @@ export const TextInput: React.FunctionComponent<TextInputProps> = props => {
     const inputProps: React.InputHTMLAttributes<HTMLInputElement> = {
         autoComplete: props.autoComplete,
         maxLength: props.maxCharacters,
-       // name: props.name,
+        // name: props.name,
         // onBlur: props.onBlur,
         placeholder: props.label,
         type: props.type
@@ -16,8 +16,8 @@ export const TextInput: React.FunctionComponent<TextInputProps> = props => {
 
     const [ inputControllerProps ] = fragments(props,
         StrictInputControllerPropsWithInputState
-         // [ 'autoComplete', 'maxCharacters', 'name', /* 'onBlur', */ 'label', 'type' ]
-         );
+        // [ 'autoComplete', 'maxCharacters', 'name', /* 'onBlur', */ 'label', 'type' ]
+    );
 
     return (
         <InputController showErrorMessage="blur" useValidCheckOnValid={false} {...inputControllerProps} name={props.name}>

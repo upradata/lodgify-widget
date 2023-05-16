@@ -1,7 +1,7 @@
 import { InputState } from '../Form';
 
 import type { StrictInputProps } from 'semantic-ui-react';
-import type { Omit } from '../../util.types';
+import type { Omit } from '@root/util.types';
 
 
 export class StrictInputControllerProps<V = unknown, Args extends unknown[] = unknown[]> {

@@ -1,16 +1,16 @@
 import './App.scss';
 
-import countriesMetadata from '../metadata/countries-metadata.json';
-import phonesMetadata from '../metadata/libphonenumber-metadata.custom.json';
-import timezonesMetadata from '../metadata/timezone-country-filtered.json';
+import countriesMetadata from '@root/metadata/countries-metadata.json';
+import phonesMetadata from '@root/metadata/libphonenumber-metadata.custom.json';
+import timezonesMetadata from '@root/metadata/timezone-country-filtered.json';
 
 import React from 'react';
 import { Viewport } from '@lodgify/ui';
-import { AppContext, AppContextType } from './AppContext';
-import { Booking } from '../components/Booking';
-import { filter } from '../util';
-import { PropertyContext, PropertyContextType } from './PropertyContext';
-import { roomsData } from '../rooms.data';
+import { AppContext, AppContextType } from './contexts/AppContext';
+import { Booking } from './components/Booking';
+import { filter } from '@root/util';
+import { PropertyContext, PropertyContextType } from './contexts/PropertyContext';
+import { roomsData } from '@root/rooms.data';
 
 import type { CountriesMetadata, PhonesMetadata, TimezonesMetadata } from '../types';
 

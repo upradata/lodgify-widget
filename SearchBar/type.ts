@@ -1,5 +1,5 @@
 import { DateRange, LocationOptions } from '@lodgify/ui';
-import { PropsWithStyleBase } from '../../util.types';
+import { PropsWithStyleBase } from '@root/util.types';
 
 export class SearchFieldsProps extends PropsWithStyleBase {
     dateRangePickerLocaleCode?: string;

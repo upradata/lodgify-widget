@@ -2,7 +2,7 @@ import './Modal.scss';
 
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { BreakPoint, MediaQuery } from '../MediaQuery/MediaQuery';
-import { fragments } from '../../util';
+import { fragments } from '@root/util';
 import { ModalView, ModalViewProps } from './ModalView';
 
 

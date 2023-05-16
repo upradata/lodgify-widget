@@ -1,13 +1,11 @@
 import React from 'react';
-import { GetQuoteOptions } from '../../lodgify-requests';
-import { lodgifyDateToMoment } from '../../lodgify-info/info';
+import { GetQuoteOptions } from '@root/lodgify-requests';
+import { lodgifyDateToMoment } from '@root/lodgify-info/info';
 import { Reservation } from './reservation.type';
 
+import type { Omit, SelectType, ValueOf } from '@root/util.types';
+import type { RoomData } from '@root/rooms.data';
 import type { BookingBillingInfo, BookingData } from './BookingComponent';
-import type { Omit, SelectType, ValueOf } from '../../util.types';
-import type { RoomData } from '../../rooms.data';
-
-
 
 
 type SetReservation = React.Dispatch<React.SetStateAction<Reservation>>;

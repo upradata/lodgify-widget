@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BookingContext, BookingContextType } from './BookingContext';
-import { BookingData, BookingBillingInfo, BookingProps } from './BookingComponent';
-import { useReservation } from './BookingReservation.state';
-import { useRoomState } from '../../rooms.state';
-
-import type { RoomData } from '../../rooms.data';
-import { momentToLodgifyDate } from '../../lodgify-info/info';
+import { momentToLodgifyDate } from '@root/lodgify-info/info';
+import { useRoomState } from '@root/rooms.state';
 import moment from 'moment';
+import { BookingBillingInfo, BookingData, BookingProps } from './BookingComponent';
+import { BookingContext, BookingContextType } from './BookingContext';
+import { useReservation } from './BookingReservation.state';
+
+import type { RoomData } from '@root/rooms.data';
 
 
 export const addBookingReservationStateManagement = (BookingComponent: React.ComponentType<BookingProps>) => {

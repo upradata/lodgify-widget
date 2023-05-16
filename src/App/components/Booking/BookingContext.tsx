@@ -1,9 +1,9 @@
 import { createContext } from 'react';
+import { RoomsState, RoomState } from '@root/rooms.state';
+import { ReservationAction } from './BookingReservation.action';
 
 import type { BookingBillingInfo } from './BookingComponent';
 import type { Reservation } from './reservation.type';
-import { RoomsState, RoomState } from '../../rooms.state';
-import { ReservationAction } from './BookingReservation.action';
 
 
 export type BookingContextType = {

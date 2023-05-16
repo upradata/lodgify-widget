@@ -4,7 +4,7 @@ import './PropertyBookingBar.scss';
 
 import React, { useCallback, useState } from 'react';
 import { Summary } from '@lodgify/ui';
-import { FixedBar } from '../FixedBar';
+import { FixedBar } from '../../../components/FixedBar';
 import { BookingProps } from '../Booking/BookingComponent';
 import { PropertyBookingForm, usePropertyBookingFormProps } from '../PropertyBookingForm';
 import { StepBooking } from '../StepBooking';

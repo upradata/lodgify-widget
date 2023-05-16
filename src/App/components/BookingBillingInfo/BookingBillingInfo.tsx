@@ -1,22 +1,27 @@
 import './BookingBillingInfo.scss';
 
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import {
+    CountryDropdown,
+    Form,
+    FormImperativeAPI,
+    FormProps,
+    makeValidation,
+    PhoneInput,
+    PropsValidationOptions,
+    TextInput
+} from '@components';
 import { InputGroup } from '@lodgify/ui';
 // import { getValidationWithDefaults } from '@lodgify/ui/lib/es/components/collections/Form/utils/getValidationWithDefaults';
 import { TextArea } from '@lodgify/ui/lib/es/components/inputs/TextArea';
 import { parsePhoneNumber } from 'libphonenumber-js';
-import { AppContext } from '../../App/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 // import debounce from 'debounce';
 // import { BookingBillingInfo as BookingBillingInfoType } from '../Booking/BookingComponent';
 import { BookingContext } from '../Booking/BookingContext';
-import { CountryDropdown } from '../CountryDropdown';
-import { Form, FormImperativeAPI, FormProps } from '../Form';
-import { makeValidation, PropsValidationOptions } from '../Form/Form.validation';
-import { PhoneInput } from '../PhoneInput';
-import { TextInput } from '../TextInput';
 
-import type { CountryCode } from '../../types';
-import type { PropsWithStyleBase } from '../../util.types';
+import type { CountryCode } from '@root/types';
+import type { PropsWithStyleBase } from '@root/util.types';
 
 
 // type DropdownOption = CountryDropdownProps[ 'options' ][ number ]; // DropdownProps<CountryCode>[ 'options' ][ number ] & { key?: string; };

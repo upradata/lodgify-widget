@@ -7,7 +7,7 @@ type PropsWithStyle<P = {}> = P & {
 declare module '@lodgify/ui' {
     import type React from 'react';
     import type { Moment } from 'moment';
-    // import type { PropsWithStyle } from '../../../util.types';
+    // import type { PropsWithStyle } from '../@root/util.types';
     // import { ModalProps as ModalPropsClass } from './types';
     /* import { type } from '../../../App/PropertyContext';
 export type PropsWithStyle<P = {}> = P & {

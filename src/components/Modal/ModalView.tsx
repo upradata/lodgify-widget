@@ -4,7 +4,7 @@ import { ICON_NAMES } from '@lodgify/ui/lib/es/components/elements/Icon/constant
 import classnames from 'classnames';
 import { Modal as SemanticModal, StrictModalProps as SemanticModalProps } from 'semantic-ui-react';
 
-import type { Omit } from '../../util.types';
+import type { Omit } from '@root/util.types';
 
 
 export type ModalViewProps = SemanticModalProps & Omit<ModalProps, 'hasCloseIcon' | 'size'>;

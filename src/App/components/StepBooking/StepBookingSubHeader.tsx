@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from '@lodgify/ui';
-import { plural } from '../../util';
-import { Price, PriceProps } from '../Price';
+import { plural } from '@root/util';
+import { Price, PriceProps } from '@components';
 
 
 export type StepBookingSubHeaderProps = { nbGuest: number; nbNights: number; } & PriceProps;

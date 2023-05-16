@@ -4,7 +4,7 @@ import { Flag, FlagProps } from './Flag';
 import InternationalIcon from '../../../node_modules/react-phone-number-input/modules/InternationalIcon';
 
 import type { CountryCodeWithInternational } from '../../types';
-import type { Omit } from '../../util.types';
+import type { Omit } from '@root/util.types';
 
 export type CountryIconProps = Omit<FlagProps, 'country'> & {
     country?: CountryCodeWithInternational;
